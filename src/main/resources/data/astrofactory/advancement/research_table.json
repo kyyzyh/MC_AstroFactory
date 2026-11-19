@@ -1,0 +1,31 @@
+{
+  "parent": "astrofactory:circuit_board",
+  "criteria": {
+    "place_research_table": {
+      "conditions": {
+        "location": {
+          "type": "minecraft:match_block",
+          "blocks": "astrofactory:research_table"
+        }
+      },
+      "trigger": "minecraft:placed_block"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.astrofactory.research_table.description"
+    },
+    "icon": {
+      "id": "astrofactory:research_table"
+    },
+    "title": {
+      "translate": "advancements.astrofactory.research_table.title"
+    }
+  },
+  "requirements": [
+    [
+      "place_research_table"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

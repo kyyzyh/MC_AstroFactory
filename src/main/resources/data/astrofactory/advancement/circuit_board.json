@@ -1,0 +1,32 @@
+{
+  "parent": "astrofactory:assembler",
+  "criteria": {
+    "got_circuit_board": {
+      "conditions": {
+        "items": [
+          {
+            "items": "astrofactory:circuit_board"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.astrofactory.circuit_board.description"
+    },
+    "icon": {
+      "id": "astrofactory:circuit_board"
+    },
+    "title": {
+      "translate": "advancements.astrofactory.circuit_board.title"
+    }
+  },
+  "requirements": [
+    [
+      "got_circuit_board"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

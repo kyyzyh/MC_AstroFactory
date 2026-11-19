@@ -1,0 +1,31 @@
+{
+  "parent": "astrofactory:research_table",
+  "criteria": {
+    "place_fast_conveyor": {
+      "conditions": {
+        "location": {
+          "type": "minecraft:match_block",
+          "blocks": "astrofactory:fast_conveyor"
+        }
+      },
+      "trigger": "minecraft:placed_block"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.astrofactory.fast_conveyor.description"
+    },
+    "icon": {
+      "id": "astrofactory:fast_conveyor"
+    },
+    "title": {
+      "translate": "advancements.astrofactory.fast_conveyor.title"
+    }
+  },
+  "requirements": [
+    [
+      "place_fast_conveyor"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

@@ -1,0 +1,31 @@
+{
+  "parent": "astrofactory:smelter",
+  "criteria": {
+    "place_crafter": {
+      "conditions": {
+        "location": {
+          "type": "minecraft:match_block",
+          "blocks": "astrofactory:crafter"
+        }
+      },
+      "trigger": "minecraft:placed_block"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.astrofactory.crafter.description"
+    },
+    "icon": {
+      "id": "astrofactory:crafter"
+    },
+    "title": {
+      "translate": "advancements.astrofactory.crafter.title"
+    }
+  },
+  "requirements": [
+    [
+      "place_crafter"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

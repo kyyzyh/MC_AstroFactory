@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": "minecraft:copper_ingot",
+    "G": "astrofactory:iron_gear"
+  },
+  "pattern": [
+    " C ",
+    "CGC"
+  ],
+  "result": {
+    "count": 1,
+    "id": "astrofactory:copper_coil"
+  }
+}

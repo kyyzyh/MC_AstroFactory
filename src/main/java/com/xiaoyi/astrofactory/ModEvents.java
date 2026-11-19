@@ -26,7 +26,7 @@ public final class ModEvents {
                 new MachineRecipeLoader());
     }
 
-    /** /astrofactory recipes —— 打印当前生效的配方数量。 */
+    /** /astrofactory —— 子命令：recipes（配方统计）、guide（新手流程）。 */
     @SubscribeEvent
     public static void registerCommands(RegisterCommandsEvent event) {
         event.getDispatcher().register(
@@ -43,6 +43,23 @@ public final class ModEvents {
                             src.sendSuccess(() -> Component.literal(
                                     "[AstroFactory] 配方总数 " + RecipeRegistry.all().size() + "（" + sb + "）"), false);
                             return 1;
+                        }))
+                        .then(Commands.literal("guide").executes(ctx -> {
+                            var src = ctx.getSource();
+                            // 逐条发送，避免单条消息过长被截断
+                            sendLine(src, "msg.astrofactory.guide.header");
+                            for (int i = 1; i <= GUIDE_STEPS; i++) {
+                                sendLine(src, "msg.astrofactory.guide.step" + i);
+                            }
+                            sendLine(src, "msg.astrofactory.guide.footer");
+                            return 1;
                         })));
+    }
+
+    /** 新手流程步骤数（与语言文件 step1..stepN 对应）。 */
+    private static final int GUIDE_STEPS = 10;
+
+    private static void sendLine(net.minecraft.commands.CommandSourceStack src, String key) {
+        src.sendSuccess(() -> Component.translatable(key), false);
     }
 }

@@ -1,0 +1,31 @@
+{
+  "parent": "astrofactory:crafter",
+  "criteria": {
+    "place_assembler": {
+      "conditions": {
+        "location": {
+          "type": "minecraft:match_block",
+          "blocks": "astrofactory:assembler"
+        }
+      },
+      "trigger": "minecraft:placed_block"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.astrofactory.assembler.description"
+    },
+    "icon": {
+      "id": "astrofactory:assembler"
+    },
+    "title": {
+      "translate": "advancements.astrofactory.assembler.title"
+    }
+  },
+  "requirements": [
+    [
+      "place_assembler"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

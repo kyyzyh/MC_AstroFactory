@@ -1,0 +1,31 @@
+{
+  "parent": "astrofactory:stone_furnace",
+  "criteria": {
+    "place_burner_inserter": {
+      "conditions": {
+        "location": {
+          "type": "minecraft:match_block",
+          "blocks": "astrofactory:burner_inserter"
+        }
+      },
+      "trigger": "minecraft:placed_block"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.astrofactory.burner_inserter.description"
+    },
+    "icon": {
+      "id": "astrofactory:burner_inserter"
+    },
+    "title": {
+      "translate": "advancements.astrofactory.burner_inserter.title"
+    }
+  },
+  "requirements": [
+    [
+      "place_burner_inserter"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

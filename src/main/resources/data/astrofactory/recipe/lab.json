@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "P": "#minecraft:planks",
+    "B": "minecraft:book",
+    "G": "astrofactory:iron_gear",
+    "L": "minecraft:lapis_lazuli"
+  },
+  "pattern": [
+    "PBP",
+    "GLG",
+    "PPP"
+  ],
+  "result": {
+    "count": 1,
+    "id": "astrofactory:lab"
+  }
+}

@@ -1,0 +1,147 @@
+{
+  "parent": "minecraft:block/block",
+  "ambientocclusion": false,
+  "textures": {
+    "particle": "astrofactory:block/burner_inserter_side",
+    "top": "astrofactory:block/burner_inserter_top",
+    "side": "astrofactory:block/burner_inserter_side"
+  },
+  "elements": [
+    {
+      "from": [
+        4,
+        0,
+        4
+      ],
+      "to": [
+        12,
+        4,
+        12
+      ],
+      "faces": {
+        "up": {
+          "texture": "#top",
+          "uv": [
+            4,
+            4,
+            12,
+            12
+          ]
+        },
+        "down": {
+          "texture": "#side",
+          "uv": [
+            4,
+            4,
+            12,
+            12
+          ]
+        },
+        "north": {
+          "texture": "#side",
+          "uv": [
+            4,
+            12,
+            12,
+            16
+          ]
+        },
+        "south": {
+          "texture": "#side",
+          "uv": [
+            4,
+            12,
+            12,
+            16
+          ]
+        },
+        "east": {
+          "texture": "#side",
+          "uv": [
+            4,
+            12,
+            12,
+            16
+          ]
+        },
+        "west": {
+          "texture": "#side",
+          "uv": [
+            4,
+            12,
+            12,
+            16
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        6,
+        4,
+        6
+      ],
+      "to": [
+        10,
+        14,
+        10
+      ],
+      "faces": {
+        "up": {
+          "texture": "#top",
+          "uv": [
+            6,
+            6,
+            10,
+            10
+          ]
+        },
+        "down": {
+          "texture": "#side",
+          "uv": [
+            6,
+            6,
+            10,
+            10
+          ]
+        },
+        "north": {
+          "texture": "#side",
+          "uv": [
+            6,
+            2,
+            10,
+            12
+          ]
+        },
+        "south": {
+          "texture": "#side",
+          "uv": [
+            6,
+            2,
+            10,
+            12
+          ]
+        },
+        "east": {
+          "texture": "#side",
+          "uv": [
+            6,
+            2,
+            10,
+            12
+          ]
+        },
+        "west": {
+          "texture": "#side",
+          "uv": [
+            6,
+            2,
+            10,
+            12
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -18,15 +18,14 @@ public final class ClientEvents {
 
     @SubscribeEvent
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
-        event.registerBlockEntityRenderer(ModRegistry.CONVEYOR_BE.get(), ConveyorRenderer::new);
-        event.registerBlockEntityRenderer(ModRegistry.FAST_CONVEYOR_BE.get(), ConveyorRenderer::new);
+        event.registerBlockEntityRenderer(ModRegistry.TRANSPORT_BELT_BE.get(), TransportBeltRenderer::new);
+        event.registerBlockEntityRenderer(ModRegistry.FAST_TRANSPORT_BELT_BE.get(), TransportBeltRenderer::new);
     }
 
     @SubscribeEvent
     public static void registerScreens(RegisterMenuScreensEvent event) {
         event.register(ModRegistry.ASSEMBLER_MENU.get(), AssemblerScreen::new);
-        event.register(ModRegistry.SMELTER_MENU.get(), SmelterScreen::new);
-        event.register(ModRegistry.CRAFTER_MENU.get(), CrafterScreen::new);
-        event.register(ModRegistry.RESEARCH_MENU.get(), ResearchScreen::new);
+        event.register(ModRegistry.STONE_FURNACE_MENU.get(), StoneFurnaceScreen::new);
+        event.register(ModRegistry.LAB_MENU.get(), LabScreen::new);
     }
 }

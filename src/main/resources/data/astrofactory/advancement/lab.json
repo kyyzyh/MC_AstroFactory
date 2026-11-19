@@ -1,0 +1,31 @@
+{
+  "parent": "astrofactory:burner_inserter",
+  "criteria": {
+    "place_lab": {
+      "conditions": {
+        "location": {
+          "type": "minecraft:match_block",
+          "blocks": "astrofactory:lab"
+        }
+      },
+      "trigger": "minecraft:placed_block"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.astrofactory.lab.description"
+    },
+    "icon": {
+      "id": "astrofactory:lab"
+    },
+    "title": {
+      "translate": "advancements.astrofactory.lab.title"
+    }
+  },
+  "requirements": [
+    [
+      "place_lab"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

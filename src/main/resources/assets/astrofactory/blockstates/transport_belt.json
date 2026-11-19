@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "astrofactory:block/transport_belt"
+    },
+    "facing=east": {
+      "model": "astrofactory:block/transport_belt",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "astrofactory:block/transport_belt",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "astrofactory:block/transport_belt",
+      "y": 270
+    }
+  }
+}

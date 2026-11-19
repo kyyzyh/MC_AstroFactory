@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "astrofactory:block/lab"
+    },
+    "facing=east": {
+      "model": "astrofactory:block/lab",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "astrofactory:block/lab",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "astrofactory:block/lab",
+      "y": 270
+    }
+  }
+}

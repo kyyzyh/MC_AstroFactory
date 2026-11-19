@@ -1,0 +1,30 @@
+{
+  "variants": {
+    "facing=down": {
+      "model": "astrofactory:block/burner_inserter",
+      "x": 180
+    },
+    "facing=up": {
+      "model": "astrofactory:block/burner_inserter"
+    },
+    "facing=north": {
+      "model": "astrofactory:block/burner_inserter",
+      "x": 90
+    },
+    "facing=south": {
+      "model": "astrofactory:block/burner_inserter",
+      "x": 90,
+      "y": 180
+    },
+    "facing=west": {
+      "model": "astrofactory:block/burner_inserter",
+      "x": 90,
+      "y": 270
+    },
+    "facing=east": {
+      "model": "astrofactory:block/burner_inserter",
+      "x": 90,
+      "y": 90
+    }
+  }
+}

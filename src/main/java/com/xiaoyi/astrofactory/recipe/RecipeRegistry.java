@@ -71,7 +71,7 @@ public final class RecipeRegistry {
 
         // ---- 制作台：锭 -> 零件
         craft(list, "iron_ingot_to_iron_gear", Items.IRON_INGOT, 2, ModRegistry.IRON_GEAR.get(), 1);
-        craft(list, "copper_ingot_to_copper_coil", Items.COPPER_INGOT, 3, ModRegistry.COPPER_COIL.get(), 1);
+        craft(list, "copper_ingot_to_copper_coil", Items.COPPER_INGOT, 3, ModRegistry.COPPER_CABLE.get(), 1);
 
         // ---- 组装机：零件 -> 成品（3x3 网格，行优先）
         //  g c g
@@ -79,8 +79,8 @@ public final class RecipeRegistry {
         //  . . .
         assemble(list, "circuit_board", new String[]{"gcg", ".c.", "..."},
                 Map.of('g', ModRegistry.IRON_GEAR.get(),
-                        'c', ModRegistry.COPPER_COIL.get()),
-                ModRegistry.CIRCUIT_BOARD.get(), 1);
+                        'c', ModRegistry.COPPER_CABLE.get()),
+                ModRegistry.ELECTRONIC_CIRCUIT.get(), 1);
 
         builtin = List.copyOf(list);
         return builtin;

@@ -12,9 +12,10 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 
 import com.xiaoyi.astrofactory.block.StoneFurnaceBlockEntity;
+import com.xiaoyi.astrofactory.power.PowerSource;
 
 /**
- * 熔炼炉界面：1 输入 + 1 输出 + 玩家背包。
+ * 熔炼炉界面：1 输入 + 1 输出 + 1 燃料 + 玩家背包。
  * 同步数据：0 = 熔炼进度百分比。
  */
 public class StoneFurnaceMenu extends AbstractContainerMenu {
@@ -25,7 +26,8 @@ public class StoneFurnaceMenu extends AbstractContainerMenu {
 
     private static final int INPUT_SLOT = 0;
     private static final int OUTPUT_SLOT = 1;
-    private static final int PLAYER_INV_START = 2;
+    private static final int FUEL_SLOT = 2;
+    private static final int PLAYER_INV_START = 3;
 
     private final Container container;
     private final ContainerData data;
@@ -63,6 +65,13 @@ public class StoneFurnaceMenu extends AbstractContainerMenu {
                 return false;
             }
         });
+        // 燃料槽（只接受燃料）
+        this.addSlot(new Slot(container, FUEL_SLOT, 86, 62) {
+            @Override
+            public boolean mayPlace(ItemStack stack) {
+                return PowerSource.fuelTicks(stack) > 0;
+            }
+        });
 
         // 玩家背包
         for (int row = 0; row < 3; row++) {
@@ -93,13 +102,22 @@ public class StoneFurnaceMenu extends AbstractContainerMenu {
                 if (!this.moveItemStackTo(stack, PLAYER_INV_START, this.slots.size(), true)) {
                     return ItemStack.EMPTY;
                 }
-            } else if (index == INPUT_SLOT) {
+            } else if (index == INPUT_SLOT || index == FUEL_SLOT) {
                 if (!this.moveItemStackTo(stack, PLAYER_INV_START, this.slots.size(), true)) {
                     return ItemStack.EMPTY;
                 }
             } else {
-                if (!this.moveItemStackTo(stack, INPUT_SLOT, INPUT_SLOT + 1, false)) {
-                    return ItemStack.EMPTY;
+                // 从玩家背包移入机器：先试燃料槽，再试输入槽
+                if (PowerSource.fuelTicks(stack) > 0) {
+                    if (!this.moveItemStackTo(stack, FUEL_SLOT, FUEL_SLOT + 1, false)) {
+                        if (!this.moveItemStackTo(stack, INPUT_SLOT, INPUT_SLOT + 1, false)) {
+                            return ItemStack.EMPTY;
+                        }
+                    }
+                } else {
+                    if (!this.moveItemStackTo(stack, INPUT_SLOT, INPUT_SLOT + 1, false)) {
+                        return ItemStack.EMPTY;
+                    }
                 }
             }
 

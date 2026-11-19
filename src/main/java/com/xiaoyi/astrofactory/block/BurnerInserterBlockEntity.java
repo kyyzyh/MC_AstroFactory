@@ -3,6 +3,7 @@ package com.xiaoyi.astrofactory.block;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.Container;
+import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -11,6 +12,8 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 
 import com.xiaoyi.astrofactory.ModRegistry;
+import com.xiaoyi.astrofactory.power.FuelPowerSource;
+import com.xiaoyi.astrofactory.power.PowerSource;
 
 /**
  * 机械臂方块实体。
@@ -25,12 +28,17 @@ import com.xiaoyi.astrofactory.ModRegistry;
  * 3. 若输出失败，物品退回输入侧（不丢失）
  */
 public class BurnerInserterBlockEntity extends BlockEntity {
-    /** 每 10 tick（0.5 秒）执行一次搬运。 */
-    public static final int ACTION_INTERVAL = 10;
+    /** 每 26 tick（1.3 秒）执行一次搬运（规格 §5.2：燃烧臂 26 tick）。 */
+    public static final int ACTION_INTERVAL = 26;
 
     private int cooldown = 0;
     /** 手上持有的物品（搬运中），用于渲染与容错。 */
     private ItemStack held = ItemStack.EMPTY;
+    /** 燃料槽 1 格：燃烧臂自己吃煤（规格红线：燃烧臂自己吃煤）。 */
+    private static final int FUEL_SLOT = 0;
+    private static final int FUEL_CONTAINER_SIZE = 1;
+    private final SimpleContainer fuelContainer = new SimpleContainer(FUEL_CONTAINER_SIZE);
+    private final FuelPowerSource power = new FuelPowerSource(fuelContainer, FUEL_SLOT);
 
     public BurnerInserterBlockEntity(BlockPos pos, BlockState state) {
         super(ModRegistry.BURNER_INSERTER_BE.get(), pos, state);
@@ -46,6 +54,11 @@ public class BurnerInserterBlockEntity extends BlockEntity {
             return;
         }
         be.cooldown = ACTION_INTERVAL;
+        // a) 先自己烧煤（规格红线：燃烧臂自己吃煤）
+        if (!be.power.consume(true)) {
+            return; // 没燃料就停机，不搬东西
+        }
+        be.power.consume(false);
         be.doWork(level, pos, state);
     }
 
@@ -58,6 +71,12 @@ public class BurnerInserterBlockEntity extends BlockEntity {
         if (held.isEmpty()) {
             held = takeFrom(level, inputPos, facing);
             if (held.isEmpty()) {
+                return;
+            }
+            // 偷燃料（规格红线）：如果搬的物品本身是燃料，优先烧掉，不送出去
+            if (power.stealFromCarried(held)) {
+                held = ItemStack.EMPTY;
+                setChanged();
                 return;
             }
             setChanged();
@@ -135,6 +154,14 @@ public class BurnerInserterBlockEntity extends BlockEntity {
         super.saveAdditional(output);
         output.store("Held", ItemStack.CODEC, held);
         output.putInt("Cooldown", cooldown);
+        output.putInt("BurnBudget", power.getBurnBudgetForSave());
+        var flist = output.childrenList("Fuel");
+        for (ItemStack stack : fuelContainer) {
+            if (!stack.isEmpty()) {
+                var child = flist.addChild();
+                child.store("Stack", ItemStack.CODEC, stack);
+            }
+        }
     }
 
     @Override
@@ -142,5 +169,17 @@ public class BurnerInserterBlockEntity extends BlockEntity {
         super.loadAdditional(input);
         held = input.read("Held", ItemStack.CODEC).orElse(ItemStack.EMPTY);
         cooldown = input.getIntOr("Cooldown", 0);
+        power.setBurnBudgetForLoad(input.getIntOr("BurnBudget", 0));
+        fuelContainer.clearContent();
+        int fi = 0;
+        for (ValueInput child : input.childrenListOrEmpty("Fuel")) {
+            if (fi >= FUEL_CONTAINER_SIZE) {
+                break;
+            }
+            ItemStack stack = child.read("Stack", ItemStack.CODEC).orElse(ItemStack.EMPTY);
+            if (!stack.isEmpty()) {
+                fuelContainer.setItem(fi++, stack);
+            }
+        }
     }
 }

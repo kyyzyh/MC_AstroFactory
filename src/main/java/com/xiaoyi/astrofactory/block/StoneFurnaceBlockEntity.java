@@ -18,6 +18,8 @@ import net.minecraft.world.level.storage.ValueOutput;
 
 import com.xiaoyi.astrofactory.ModRegistry;
 import com.xiaoyi.astrofactory.menu.StoneFurnaceMenu;
+import com.xiaoyi.astrofactory.power.FuelPowerSource;
+import com.xiaoyi.astrofactory.power.PowerSource;
 import com.xiaoyi.astrofactory.recipe.MachineRecipe;
 import com.xiaoyi.astrofactory.recipe.MachineType;
 import com.xiaoyi.astrofactory.recipe.RecipeRegistry;
@@ -25,19 +27,21 @@ import com.xiaoyi.astrofactory.recipe.RecipeRegistry;
 /**
  * 熔炼炉方块实体：把原矿熔成锭。
  *
- * 槽位：0 = 输入（原矿），1 = 输出（锭）。
+ * 槽位：0 = 输入（原矿），1 = 输出（锭），2 = 燃料。
  * 产线位置：采矿机 -> 传送带 -> 【熔炼炉】 -> 制作台 -> 组装机
  */
 public class StoneFurnaceBlockEntity extends BlockEntity implements Container, MenuProvider {
     public static final int INPUT_SLOT = 0;
     public static final int OUTPUT_SLOT = 1;
-    public static final int TOTAL_SLOTS = 2;
+    public static final int FUEL_SLOT = 2;
+    public static final int TOTAL_SLOTS = 3;
 
     /** 默认熔炼耗时；实际耗时取配方里的 time 字段。 */
     public static final int SMELT_INTERVAL = MachineType.SMELTING.defaultTicks();
 
     private final NonNullList<ItemStack> items = NonNullList.withSize(TOTAL_SLOTS, ItemStack.EMPTY);
     private int progress = 0;
+    private final FuelPowerSource power = new FuelPowerSource(this, FUEL_SLOT);
 
     public StoneFurnaceBlockEntity(BlockPos pos, BlockState state) {
         super(ModRegistry.STONE_FURNACE_BE.get(), pos, state);
@@ -69,7 +73,11 @@ public class StoneFurnaceBlockEntity extends BlockEntity implements Container, M
         boolean canWork = recipe != null && recipe.fitsInto(items.get(OUTPUT_SLOT));
         int interval = recipe == null ? SMELT_INTERVAL : recipe.ticks();
 
-        if (canWork) {
+        // 燃料检查：没有燃料则停机（规格红线：燃烧期吃煤）
+        boolean hasFuel = power.consume(true);
+
+        if (canWork && hasFuel) {
+            power.consume(false); // 实际消费 1 tick
             progress++;
             if (progress >= interval) {
                 progress = 0;
@@ -167,11 +175,14 @@ public class StoneFurnaceBlockEntity extends BlockEntity implements Container, M
         return Container.stillValidBlockEntity(this, player);
     }
 
-    /** 输出槽禁止外部插入；输入槽只接受可熔炼的物品。 */
+    /** 输出槽禁止外部插入；输入槽只接受可熔炼的物品；燃料槽只接受燃料。 */
     @Override
     public boolean canPlaceItem(int slot, ItemStack stack) {
         if (slot == OUTPUT_SLOT) {
             return false;
+        }
+        if (slot == FUEL_SLOT) {
+            return PowerSource.fuelTicks(stack) > 0;
         }
         return slot == INPUT_SLOT && RecipeRegistry.isSingleInput(MachineType.SMELTING, stack);
     }
@@ -204,6 +215,7 @@ public class StoneFurnaceBlockEntity extends BlockEntity implements Container, M
             list.add(stack);
         }
         output.putInt("Progress", progress);
+        output.putInt("BurnBudget", power.getBurnBudgetForSave());
     }
 
     @Override
@@ -219,5 +231,16 @@ public class StoneFurnaceBlockEntity extends BlockEntity implements Container, M
             items.set(i++, stack);
         }
         progress = input.getIntOr("Progress", 0);
+        power.setBurnBudgetForLoad(input.getIntOr("BurnBudget", 0));
+    }
+
+    /** 燃料状态文本（供 GUI 显示）。 */
+    public String getFuelStatus() {
+        return power.statusText();
+    }
+
+    /** 是否还有燃料（供 GUI 判断显示"无电力"）。 */
+    public boolean hasFuel() {
+        return power.isPowered();
     }
 }

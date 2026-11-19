@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/cube_bottom_top",
-  "textures": {
-    "top": "astrofactory:block/stone_furnace_top",
-    "bottom": "astrofactory:block/stone_furnace_top",
-    "side": "astrofactory:block/stone_furnace_side"
-  }
-}

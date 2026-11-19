@@ -1,0 +1,52 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "astrofactory:block/lab_side_0_west",
+    "down": "astrofactory:block/lab_side_0_west",
+    "up": "astrofactory:block/lab_top_0_west",
+    "north": "astrofactory:block/lab_side_0_west",
+    "south": "astrofactory:block/lab_side_0_west",
+    "east": "astrofactory:block/lab_side_0_west",
+    "west": "astrofactory:block/lab_side_0_west"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "down": {
+          "texture": "#down",
+          "cullface": "down"
+        },
+        "up": {
+          "texture": "#up",
+          "cullface": "up"
+        },
+        "north": {
+          "texture": "#north",
+          "cullface": "north"
+        },
+        "south": {
+          "texture": "#south",
+          "cullface": "south"
+        },
+        "east": {
+          "texture": "#east",
+          "cullface": "east"
+        },
+        "west": {
+          "texture": "#west",
+          "cullface": "west"
+        }
+      }
+    }
+  ]
+}

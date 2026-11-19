@@ -47,6 +47,22 @@ public class StoneFurnaceBlockEntity extends BlockEntity implements Container, M
         be.tickServer(level, pos, state);
     }
 
+    /**
+     * 区块加载时自修复多方块结构（规格 §5.1）。
+     */
+    @Override
+    public void onLoad() {
+        super.onLoad();
+        Level level = this.getLevel();
+        if (level == null || level.isClientSide()) {
+            return;
+        }
+        BlockState state = this.getBlockState();
+        if (state.getBlock() instanceof StoneFurnaceBlock blk && state.getValue(StoneFurnaceBlock.PART) == 0) {
+            blk.repair(level, this.getBlockPos(), state);
+        }
+    }
+
     private void tickServer(Level level, BlockPos pos, BlockState state) {
         ItemStack input = items.get(INPUT_SLOT);
         MachineRecipe recipe = RecipeRegistry.findSingle(MachineType.SMELTING, input);
@@ -65,7 +81,15 @@ public class StoneFurnaceBlockEntity extends BlockEntity implements Container, M
 
         boolean active = canWork && progress > 0;
         if (state.getValue(StoneFurnaceBlock.ACTIVE) != active) {
-            level.setBlock(pos, state.setValue(StoneFurnaceBlock.ACTIVE, active), 3);
+            // ACTIVE 必须整机 4 格一起切，保证外观一致
+            for (BlockPos cell : com.xiaoyi.astrofactory.multiblock.MultiBlockHelper
+                    .allCells(pos, state.getValue(StoneFurnaceBlock.FACING), 2)) {
+                BlockState cellState = level.getBlockState(cell);
+                if (cellState.getBlock() instanceof StoneFurnaceBlock
+                        && cellState.getValue(StoneFurnaceBlock.ACTIVE) != active) {
+                    level.setBlock(cell, cellState.setValue(StoneFurnaceBlock.ACTIVE, active), 3);
+                }
+            }
         }
     }
 
@@ -162,7 +186,7 @@ public class StoneFurnaceBlockEntity extends BlockEntity implements Container, M
 
     @Override
     public Component getDisplayName() {
-        return Component.translatable("block.astrofactory.smelter");
+        return Component.translatable("block.astrofactory.stone_furnace");
     }
 
     @Override

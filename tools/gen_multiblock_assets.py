@@ -181,6 +181,9 @@ def build(name, size, has_active=True):
 
 def main():
     build("burner_miner", 2, has_active=True)
+    build("stone_furnace", 2, has_active=True)
+    build("assembler", 3, has_active=True)
+    build("lab", 3, has_active=False)
 
 
 if __name__ == "__main__":

@@ -10,6 +10,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
@@ -34,6 +35,22 @@ public class LabBlockEntity extends BlockEntity implements Container, MenuProvid
 
     public LabBlockEntity(BlockPos pos, BlockState state) {
         super(ModRegistry.LAB_BE.get(), pos, state);
+    }
+
+    /**
+     * 区块加载时自修复多方块结构（规格 §5.1）。
+     */
+    @Override
+    public void onLoad() {
+        super.onLoad();
+        Level level = this.getLevel();
+        if (level == null || level.isClientSide()) {
+            return;
+        }
+        BlockState state = this.getBlockState();
+        if (state.getBlock() instanceof LabBlock blk && state.getValue(LabBlock.PART) == 0) {
+            blk.repair(level, this.getBlockPos(), state);
+        }
     }
 
     // ------------------------------------------------------------ Container
@@ -91,7 +108,7 @@ public class LabBlockEntity extends BlockEntity implements Container, MenuProvid
 
     @Override
     public Component getDisplayName() {
-        return Component.translatable("block.astrofactory.research_table");
+        return Component.translatable("block.astrofactory.lab");
     }
 
     @Override

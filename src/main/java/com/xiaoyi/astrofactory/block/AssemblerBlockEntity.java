@@ -47,6 +47,22 @@ public class AssemblerBlockEntity extends BlockEntity implements Container, Menu
         be.tickServer(level, pos, state);
     }
 
+    /**
+     * 区块加载时自修复多方块结构（规格 §5.1）。
+     */
+    @Override
+    public void onLoad() {
+        super.onLoad();
+        Level level = this.getLevel();
+        if (level == null || level.isClientSide()) {
+            return;
+        }
+        BlockState state = this.getBlockState();
+        if (state.getBlock() instanceof AssemblerBlock blk && state.getValue(AssemblerBlock.PART) == 0) {
+            blk.repair(level, this.getBlockPos(), state);
+        }
+    }
+
     private void tickServer(Level level, BlockPos pos, BlockState state) {
         // 输入全空时无需匹配配方（也避免无谓的配方表初始化）
         MachineRecipe match = hasAnyInput() ? RecipeRegistry.findGrid(items) : null;
@@ -67,7 +83,15 @@ public class AssemblerBlockEntity extends BlockEntity implements Container, Menu
         }
 
         if (state.getValue(AssemblerBlock.ACTIVE) != active) {
-            level.setBlock(pos, state.setValue(AssemblerBlock.ACTIVE, active), 3);
+            // ACTIVE 必须整机 9 格一起切，保证外观一致
+            for (BlockPos cell : com.xiaoyi.astrofactory.multiblock.MultiBlockHelper
+                    .allCells(pos, state.getValue(AssemblerBlock.FACING), 3)) {
+                BlockState cellState = level.getBlockState(cell);
+                if (cellState.getBlock() instanceof AssemblerBlock
+                        && cellState.getValue(AssemblerBlock.ACTIVE) != active) {
+                    level.setBlock(cell, cellState.setValue(AssemblerBlock.ACTIVE, active), 3);
+                }
+            }
         }
     }
 

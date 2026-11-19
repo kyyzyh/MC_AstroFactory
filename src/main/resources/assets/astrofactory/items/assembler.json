@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "astrofactory:block/assembler"
+    "model": "astrofactory:block/assembler_0_north"
   }
 }

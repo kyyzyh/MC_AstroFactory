@@ -2,65 +2,58 @@ package com.xiaoyi.astrofactory.block;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.BaseEntityBlock;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.EnumProperty;
-import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
+
+import com.xiaoyi.astrofactory.multiblock.MultiBlockMachineBlock;
 
 /**
- * 科研台：右键打开界面，投入科研包推进科技树。
+ * 科研台：3×3 多方块（规格 §5.1 / §5.4）。
  *
- * 玩法（异星工厂式简化）：
- * - 界面里把物品放进输入槽，点「投入」按钮消耗 1 个物品作为科研包
- * - 集满 cost 后自动解锁，并广播提示
- * - 前置未满足的科技不会被推进
+ * <p>电力驱动，投入科研包推进科技树。进度挂在玩家身上（ResearchProgress）。</p>
+ *
+ * <p>无 ACTIVE 状态（不发光），所以 blockstate 只有 facing × part。</p>
  */
-public class LabBlock extends BaseEntityBlock {
-    public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
+public class LabBlock extends MultiBlockMachineBlock {
+    /** 3×3 机器的格索引：0 = master，1..8 = dummy。 */
+    public static final IntegerProperty PART = IntegerProperty.create("part", 0, 8);
 
     public LabBlock(Properties properties) {
         super(properties);
-        registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH));
+        registerDefaultState(defaultBlockState()
+                .setValue(FACING, Direction.NORTH)
+                .setValue(PART, 0));
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(FACING);
+    protected IntegerProperty partProperty() {
+        return PART;
     }
 
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext context) {
-        return defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());
+    public int size() {
+        return 3;
     }
 
     @Override
-    protected RenderShape getRenderShape(BlockState state) {
-        return RenderShape.MODEL;
-    }
-
-    @Override
-    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+    protected BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
         return new LabBlockEntity(pos, state);
     }
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos,
-                                               Player player, BlockHitResult hit) {
+    protected net.minecraft.world.InteractionResult useWithoutItem(BlockState state, Level level,
+                                                                   BlockPos pos, Player player,
+                                                                   net.minecraft.world.phys.BlockHitResult hit) {
         if (level.isClientSide()) {
-            return InteractionResult.SUCCESS;
+            return net.minecraft.world.InteractionResult.SUCCESS;
         }
         if (level.getBlockEntity(pos) instanceof LabBlockEntity be) {
             player.openMenu(be);
         }
-        return InteractionResult.SUCCESS;
+        return net.minecraft.world.InteractionResult.SUCCESS;
     }
 }

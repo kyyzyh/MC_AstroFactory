@@ -1,0 +1,52 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "astrofactory:block/burner_miner_side_1_east",
+    "down": "astrofactory:block/burner_miner_side_1_east",
+    "up": "astrofactory:block/burner_miner_top_1_east",
+    "north": "astrofactory:block/burner_miner_side_1_east",
+    "south": "astrofactory:block/burner_miner_side_1_east",
+    "east": "astrofactory:block/burner_miner_side_1_east",
+    "west": "astrofactory:block/burner_miner_side_1_east"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "down": {
+          "texture": "#down",
+          "cullface": "down"
+        },
+        "up": {
+          "texture": "#up",
+          "cullface": "up"
+        },
+        "north": {
+          "texture": "#north",
+          "cullface": "north"
+        },
+        "south": {
+          "texture": "#south",
+          "cullface": "south"
+        },
+        "east": {
+          "texture": "#east",
+          "cullface": "east"
+        },
+        "west": {
+          "texture": "#west",
+          "cullface": "west"
+        }
+      }
+    }
+  ]
+}

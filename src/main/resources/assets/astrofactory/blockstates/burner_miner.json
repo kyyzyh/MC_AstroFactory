@@ -1,34 +1,100 @@
 {
   "variants": {
-    "facing=north,active=false": {
-      "model": "astrofactory:block/burner_miner"
+    "facing=north,part=0,active=false": {
+      "model": "astrofactory:block/burner_miner_0_north"
     },
-    "facing=east,active=false": {
-      "model": "astrofactory:block/burner_miner",
-      "y": 90
+    "facing=north,part=1,active=false": {
+      "model": "astrofactory:block/burner_miner_1_north"
     },
-    "facing=south,active=false": {
-      "model": "astrofactory:block/burner_miner",
-      "y": 180
+    "facing=north,part=2,active=false": {
+      "model": "astrofactory:block/burner_miner_2_north"
     },
-    "facing=west,active=false": {
-      "model": "astrofactory:block/burner_miner",
-      "y": 270
+    "facing=north,part=3,active=false": {
+      "model": "astrofactory:block/burner_miner_3_north"
     },
-    "facing=north,active=true": {
-      "model": "astrofactory:block/burner_miner_active"
+    "facing=east,part=0,active=false": {
+      "model": "astrofactory:block/burner_miner_0_east"
     },
-    "facing=east,active=true": {
-      "model": "astrofactory:block/burner_miner_active",
-      "y": 90
+    "facing=east,part=1,active=false": {
+      "model": "astrofactory:block/burner_miner_1_east"
     },
-    "facing=south,active=true": {
-      "model": "astrofactory:block/burner_miner_active",
-      "y": 180
+    "facing=east,part=2,active=false": {
+      "model": "astrofactory:block/burner_miner_2_east"
     },
-    "facing=west,active=true": {
-      "model": "astrofactory:block/burner_miner_active",
-      "y": 270
+    "facing=east,part=3,active=false": {
+      "model": "astrofactory:block/burner_miner_3_east"
+    },
+    "facing=south,part=0,active=false": {
+      "model": "astrofactory:block/burner_miner_0_south"
+    },
+    "facing=south,part=1,active=false": {
+      "model": "astrofactory:block/burner_miner_1_south"
+    },
+    "facing=south,part=2,active=false": {
+      "model": "astrofactory:block/burner_miner_2_south"
+    },
+    "facing=south,part=3,active=false": {
+      "model": "astrofactory:block/burner_miner_3_south"
+    },
+    "facing=west,part=0,active=false": {
+      "model": "astrofactory:block/burner_miner_0_west"
+    },
+    "facing=west,part=1,active=false": {
+      "model": "astrofactory:block/burner_miner_1_west"
+    },
+    "facing=west,part=2,active=false": {
+      "model": "astrofactory:block/burner_miner_2_west"
+    },
+    "facing=west,part=3,active=false": {
+      "model": "astrofactory:block/burner_miner_3_west"
+    },
+    "facing=north,part=0,active=true": {
+      "model": "astrofactory:block/burner_miner_active_0_north"
+    },
+    "facing=north,part=1,active=true": {
+      "model": "astrofactory:block/burner_miner_active_1_north"
+    },
+    "facing=north,part=2,active=true": {
+      "model": "astrofactory:block/burner_miner_active_2_north"
+    },
+    "facing=north,part=3,active=true": {
+      "model": "astrofactory:block/burner_miner_active_3_north"
+    },
+    "facing=east,part=0,active=true": {
+      "model": "astrofactory:block/burner_miner_active_0_east"
+    },
+    "facing=east,part=1,active=true": {
+      "model": "astrofactory:block/burner_miner_active_1_east"
+    },
+    "facing=east,part=2,active=true": {
+      "model": "astrofactory:block/burner_miner_active_2_east"
+    },
+    "facing=east,part=3,active=true": {
+      "model": "astrofactory:block/burner_miner_active_3_east"
+    },
+    "facing=south,part=0,active=true": {
+      "model": "astrofactory:block/burner_miner_active_0_south"
+    },
+    "facing=south,part=1,active=true": {
+      "model": "astrofactory:block/burner_miner_active_1_south"
+    },
+    "facing=south,part=2,active=true": {
+      "model": "astrofactory:block/burner_miner_active_2_south"
+    },
+    "facing=south,part=3,active=true": {
+      "model": "astrofactory:block/burner_miner_active_3_south"
+    },
+    "facing=west,part=0,active=true": {
+      "model": "astrofactory:block/burner_miner_active_0_west"
+    },
+    "facing=west,part=1,active=true": {
+      "model": "astrofactory:block/burner_miner_active_1_west"
+    },
+    "facing=west,part=2,active=true": {
+      "model": "astrofactory:block/burner_miner_active_2_west"
+    },
+    "facing=west,part=3,active=true": {
+      "model": "astrofactory:block/burner_miner_active_3_west"
     }
   }
 }

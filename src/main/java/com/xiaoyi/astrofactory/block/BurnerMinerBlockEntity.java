@@ -53,6 +53,23 @@ public class BurnerMinerBlockEntity extends BlockEntity {
         be.tickServer(level, pos, state);
     }
 
+    /**
+     * 区块加载时自修复多方块结构（规格 §5.1「区块重载自修复」）。
+     * master 在但 dummy 缺 → 补；位置被占 → 整机清掉，不留幽灵。
+     */
+    @Override
+    public void onLoad() {
+        super.onLoad();
+        Level level = this.getLevel();
+        if (level == null || level.isClientSide()) {
+            return;
+        }
+        BlockState state = this.getBlockState();
+        if (state.getBlock() instanceof BurnerMinerBlock miner && state.getValue(BurnerMinerBlock.PART) == 0) {
+            miner.repair(level, this.getBlockPos(), state);
+        }
+    }
+
     private void tickServer(Level level, BlockPos pos, BlockState state) {
         // 1. 推进生产进度
         if (progress < PRODUCE_INTERVAL) {
@@ -66,10 +83,18 @@ public class BurnerMinerBlockEntity extends BlockEntity {
         // 2. 尝试把缓存推出去
         boolean pushed = flushOutput(level, pos, state);
 
-        // 3. 更新 ACTIVE 状态（有产出 = 亮）
+        // 3. 更新 ACTIVE 状态（有产出 = 亮）；整机 4 格一起切，保证外观一致
         boolean active = hasBufferItems();
         if (state.getValue(BurnerMinerBlock.ACTIVE) != active) {
-            level.setBlock(pos, state.setValue(BurnerMinerBlock.ACTIVE, active), Block.UPDATE_CLIENTS);
+            for (BlockPos cell : com.xiaoyi.astrofactory.multiblock.MultiBlockHelper
+                    .allCells(pos, state.getValue(BurnerMinerBlock.FACING), 2)) {
+                BlockState cellState = level.getBlockState(cell);
+                if (cellState.getBlock() instanceof BurnerMinerBlock
+                        && cellState.getValue(BurnerMinerBlock.ACTIVE) != active) {
+                    level.setBlock(cell, cellState.setValue(BurnerMinerBlock.ACTIVE, active),
+                            Block.UPDATE_CLIENTS);
+                }
+            }
         }
 
         if (pushed) {
@@ -122,33 +147,45 @@ public class BurnerMinerBlockEntity extends BlockEntity {
         }
     }
 
-    /** 把缓存推入输出侧。返回是否有变化。 */
+    /**
+     * 把缓存推入输出侧。返回是否有变化。
+     *
+     * <p>2×2 机器的出矿口是 FACING 面上的整条 2 格边；Q3 决定"输出 1 格宽"，
+     * 因此按 dx = 0、1 顺序尝试，先试 dx=0（master 那一侧），满了再试 dx=1。</p>
+     */
     private boolean flushOutput(Level level, BlockPos pos, BlockState state) {
         Direction facing = state.getValue(BurnerMinerBlock.FACING);
-        BlockPos outPos = pos.relative(facing);
-        if (!level.isLoaded(outPos)) {
-            return false;
-        }
-        BlockEntity target = level.getBlockEntity(outPos);
         boolean changed = false;
 
-        for (int i = 0; i < buffer.length; i++) {
-            if (buffer[i].isEmpty()) {
+        for (int dx = 0; dx < 2; dx++) {
+            // dz = 1 是机器的正面那一排，再沿 FACING 往外一格就是出矿口
+            BlockPos outPos = com.xiaoyi.astrofactory.multiblock.MultiBlockHelper
+                    .cellPos(pos, facing, dx, 1).relative(facing);
+            if (!level.isLoaded(outPos)) {
                 continue;
             }
-            ItemStack one = buffer[i].copyWithCount(1);
-            boolean ok = false;
-            if (target instanceof TransportBeltBlockEntity conveyor) {
-                ok = conveyor.insertAtStart(one);
-            } else if (target instanceof Container container) {
-                ok = insertIntoContainer(container, one);
+            BlockEntity target = level.getBlockEntity(outPos);
+            if (target == null) {
+                continue;
             }
-            if (ok) {
-                buffer[i].shrink(1);
+            for (int i = 0; i < buffer.length; i++) {
                 if (buffer[i].isEmpty()) {
-                    buffer[i] = ItemStack.EMPTY;
+                    continue;
                 }
-                changed = true;
+                ItemStack one = buffer[i].copyWithCount(1);
+                boolean ok = false;
+                if (target instanceof TransportBeltBlockEntity belt) {
+                    ok = belt.insertAtStart(one);
+                } else if (target instanceof Container container) {
+                    ok = insertIntoContainer(container, one);
+                }
+                if (ok) {
+                    buffer[i].shrink(1);
+                    if (buffer[i].isEmpty()) {
+                        buffer[i] = ItemStack.EMPTY;
+                    }
+                    changed = true;
+                }
             }
         }
         return changed;

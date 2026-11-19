@@ -21,6 +21,8 @@ import com.xiaoyi.astrofactory.world.OreVeinData;
 @Mod(Astrofactory.MODID)
 public class Astrofactory {
     public static final String MODID = "astrofactory";
+    public static final org.slf4j.Logger LOGGER =
+            com.mojang.logging.LogUtils.getLogger();
 
     public Astrofactory(IEventBus modEventBus) {
         ModRegistry.register(modEventBus);

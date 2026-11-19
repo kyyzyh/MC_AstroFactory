@@ -15,6 +15,8 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 
 import com.xiaoyi.astrofactory.block.AssemblerBlock;
 import com.xiaoyi.astrofactory.block.AssemblerBlockEntity;
+import com.xiaoyi.astrofactory.block.BoilerBlock;
+import com.xiaoyi.astrofactory.block.BoilerBlockEntity;
 import com.xiaoyi.astrofactory.block.BurnerInserterBlock;
 import com.xiaoyi.astrofactory.block.BurnerInserterBlockEntity;
 import com.xiaoyi.astrofactory.block.BurnerMinerBlock;
@@ -23,13 +25,22 @@ import com.xiaoyi.astrofactory.block.FastTransportBeltBlock;
 import com.xiaoyi.astrofactory.block.FastTransportBeltBlockEntity;
 import com.xiaoyi.astrofactory.block.LabBlock;
 import com.xiaoyi.astrofactory.block.LabBlockEntity;
+import com.xiaoyi.astrofactory.block.OffshorePumpBlock;
+import com.xiaoyi.astrofactory.block.OffshorePumpBlockEntity;
 import com.xiaoyi.astrofactory.block.OreVeinBlock;
 import com.xiaoyi.astrofactory.block.OreVeinBlockEntity;
+import com.xiaoyi.astrofactory.block.PowerPoleBlock;
+import com.xiaoyi.astrofactory.block.PowerPoleBlockEntity;
+import com.xiaoyi.astrofactory.block.SteamEngineBlock;
+import com.xiaoyi.astrofactory.block.SteamEngineBlockEntity;
+import com.xiaoyi.astrofactory.block.SteamPipeBlock;
+import com.xiaoyi.astrofactory.block.SteamPipeBlockEntity;
 import com.xiaoyi.astrofactory.block.StoneFurnaceBlock;
 import com.xiaoyi.astrofactory.block.StoneFurnaceBlockEntity;
 import com.xiaoyi.astrofactory.block.TransportBeltBlock;
 import com.xiaoyi.astrofactory.block.TransportBeltBlockEntity;
 import com.xiaoyi.astrofactory.menu.AssemblerMenu;
+import com.xiaoyi.astrofactory.menu.BoilerMenu;
 import com.xiaoyi.astrofactory.menu.LabMenu;
 import com.xiaoyi.astrofactory.menu.StoneFurnaceMenu;
 
@@ -134,6 +145,51 @@ public final class ModRegistry {
                     .strength(3.0f, 8.0f)
                     .noOcclusion());
 
+    /** 锅炉：2×3 多方块，烧煤产蒸汽（规格 §5.5）。 */
+    public static final DeferredBlock<BoilerBlock> BOILER = BLOCKS.registerBlock(
+            "boiler",
+            BoilerBlock::new,
+            () -> BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.METAL)
+                    .strength(3.5f, 8.0f)
+                    .noOcclusion());
+
+    /** 蒸汽机：3×5 多方块，消耗蒸汽发电（规格 §5.5）。 */
+    public static final DeferredBlock<SteamEngineBlock> STEAM_ENGINE = BLOCKS.registerBlock(
+            "steam_engine",
+            SteamEngineBlock::new,
+            () -> BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.METAL)
+                    .strength(3.5f, 8.0f)
+                    .noOcclusion());
+
+    /** 离岸泵：1×2 多方块，贴水时持续产蒸汽（规格 §5.5）。 */
+    public static final DeferredBlock<OffshorePumpBlock> OFFSHORE_PUMP = BLOCKS.registerBlock(
+            "offshore_pump",
+            OffshorePumpBlock::new,
+            () -> BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.METAL)
+                    .strength(3.0f, 8.0f)
+                    .noOcclusion());
+
+    /** 蒸汽管道：单格蒸汽节点（规格 §5.5）。 */
+    public static final DeferredBlock<SteamPipeBlock> STEAM_PIPE = BLOCKS.registerBlock(
+            "steam_pipe",
+            SteamPipeBlock::new,
+            () -> BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.METAL)
+                    .strength(2.0f, 6.0f)
+                    .noOcclusion());
+
+    /** 电线杆：单格能量节点，5 格范围供电（规格 §5.5）。 */
+    public static final DeferredBlock<PowerPoleBlock> POWER_POLE = BLOCKS.registerBlock(
+            "power_pole",
+            PowerPoleBlock::new,
+            () -> BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.WOOD)
+                    .strength(2.0f, 4.0f)
+                    .noOcclusion());
+
     // ---------------------------------------------------------------- 方块物品
 
     public static final DeferredItem<net.minecraft.world.item.BlockItem> TRANSPORT_BELT_ITEM =
@@ -154,6 +210,17 @@ public final class ModRegistry {
     /** 矿脉方块物品（创造栏用，实际由世界生成放置）。 */
     public static final DeferredItem<net.minecraft.world.item.BlockItem> ORE_VEIN_ITEM =
             ITEMS.registerSimpleBlockItem(ORE_VEIN);
+
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> BOILER_ITEM =
+            ITEMS.registerSimpleBlockItem(BOILER);
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> STEAM_ENGINE_ITEM =
+            ITEMS.registerSimpleBlockItem(STEAM_ENGINE);
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> OFFSHORE_PUMP_ITEM =
+            ITEMS.registerSimpleBlockItem(OFFSHORE_PUMP);
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> STEAM_PIPE_ITEM =
+            ITEMS.registerSimpleBlockItem(STEAM_PIPE);
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> POWER_POLE_ITEM =
+            ITEMS.registerSimpleBlockItem(POWER_POLE);
 
     // ---------------------------------------------------------------- 中间物品
 
@@ -216,6 +283,26 @@ public final class ModRegistry {
                             OreVeinBlockEntity::new,
                             Set.of(ORE_VEIN.get())));
 
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<BoilerBlockEntity>> BOILER_BE =
+            BLOCK_ENTITY_TYPES.register("boiler",
+                    () -> new BlockEntityType<>(BoilerBlockEntity::new, Set.of(BOILER.get())));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<SteamEngineBlockEntity>> STEAM_ENGINE_BE =
+            BLOCK_ENTITY_TYPES.register("steam_engine",
+                    () -> new BlockEntityType<>(SteamEngineBlockEntity::new, Set.of(STEAM_ENGINE.get())));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<OffshorePumpBlockEntity>> OFFSHORE_PUMP_BE =
+            BLOCK_ENTITY_TYPES.register("offshore_pump",
+                    () -> new BlockEntityType<>(OffshorePumpBlockEntity::new, Set.of(OFFSHORE_PUMP.get())));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<SteamPipeBlockEntity>> STEAM_PIPE_BE =
+            BLOCK_ENTITY_TYPES.register("steam_pipe",
+                    () -> new BlockEntityType<>(SteamPipeBlockEntity::new, Set.of(STEAM_PIPE.get())));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<PowerPoleBlockEntity>> POWER_POLE_BE =
+            BLOCK_ENTITY_TYPES.register("power_pole",
+                    () -> new BlockEntityType<>(PowerPoleBlockEntity::new, Set.of(POWER_POLE.get())));
+
     // ---------------------------------------------------------------- 菜单
 
     public static final DeferredHolder<net.minecraft.world.inventory.MenuType<?>,
@@ -229,6 +316,10 @@ public final class ModRegistry {
     public static final DeferredHolder<net.minecraft.world.inventory.MenuType<?>,
             net.minecraft.world.inventory.MenuType<StoneFurnaceMenu>> STONE_FURNACE_MENU =
             MENUS.register("stone_furnace", () -> StoneFurnaceMenu.TYPE);
+
+    public static final DeferredHolder<net.minecraft.world.inventory.MenuType<?>,
+            net.minecraft.world.inventory.MenuType<BoilerMenu>> BOILER_MENU =
+            MENUS.register("boiler", () -> BoilerMenu.TYPE);
 
     // ---------------------------------------------------------------- 创造模式标签页
 
@@ -245,6 +336,11 @@ public final class ModRegistry {
                         output.accept(ASSEMBLER_ITEM.get());
                         output.accept(LAB_ITEM.get());
                         output.accept(ORE_VEIN_ITEM.get());
+                        output.accept(BOILER_ITEM.get());
+                        output.accept(STEAM_ENGINE_ITEM.get());
+                        output.accept(OFFSHORE_PUMP_ITEM.get());
+                        output.accept(STEAM_PIPE_ITEM.get());
+                        output.accept(POWER_POLE_ITEM.get());
                         output.accept(IRON_GEAR.get());
                         output.accept(COPPER_CABLE.get());
                         output.accept(ELECTRONIC_CIRCUIT.get());

@@ -18,6 +18,7 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 
 import com.xiaoyi.astrofactory.ModRegistry;
+import com.xiaoyi.astrofactory.power.ElectricPowerSource;
 import com.xiaoyi.astrofactory.recipe.MachineRecipe;
 import com.xiaoyi.astrofactory.recipe.MachineType;
 import com.xiaoyi.astrofactory.recipe.RecipeRegistry;
@@ -38,6 +39,8 @@ public class AssemblerBlockEntity extends BlockEntity implements Container, Menu
 
     private final NonNullList<ItemStack> items = NonNullList.withSize(TOTAL_SLOTS, ItemStack.EMPTY);
     private int craftProgress = 0;
+    /** 电力驱动（规格 §5.4：组装机是电动的，断电停机）。 */
+    private final ElectricPowerSource power = new ElectricPowerSource(this);
 
     public AssemblerBlockEntity(BlockPos pos, BlockState state) {
         super(ModRegistry.ASSEMBLER_BE.get(), pos, state);
@@ -66,9 +69,12 @@ public class AssemblerBlockEntity extends BlockEntity implements Container, Menu
     private void tickServer(Level level, BlockPos pos, BlockState state) {
         // 输入全空时无需匹配配方（也避免无谓的配方表初始化）
         MachineRecipe match = hasAnyInput() ? RecipeRegistry.findGrid(items) : null;
-        boolean active = match != null;
+        // 断电停机（规格 §5.4）：没有电力则无法合成
+        boolean powered = power.consume(true);
+        boolean active = match != null && powered;
 
         if (active) {
+            power.consume(false);
             int interval = match.ticks();
             craftProgress++;
             if (craftProgress >= interval) {
@@ -163,6 +169,16 @@ public class AssemblerBlockEntity extends BlockEntity implements Container, Menu
         MachineRecipe recipe = hasAnyInput() ? RecipeRegistry.findGrid(items) : null;
         int interval = recipe == null ? CRAFT_INTERVAL : recipe.ticks();
         return Math.min(100, craftProgress * 100 / Math.max(1, interval));
+    }
+
+    /** 是否通电（供界面显示"无电力"）。 */
+    public boolean isPowered() {
+        return power.isPowered();
+    }
+
+    /** 电力状态文本。 */
+    public String getPowerStatus() {
+        return power.statusText();
     }
 
     public ItemStack extractResult() {

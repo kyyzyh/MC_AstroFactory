@@ -123,6 +123,10 @@ public class LabMenu extends AbstractContainerMenu {
         if (stack.isEmpty() || stack.getItem() != ModRegistry.ELECTRONIC_CIRCUIT.get()) {
             return false;
         }
+        // 断电停机（规格 §5.4）：科研台没电不能投入科研包
+        if (container instanceof LabBlockEntity lab && !lab.tryConsumePower()) {
+            return false;
+        }
         ResearchProgress.Data progress = ResearchProgress.of(player);
         Technology target = firstResearchable(progress);
         if (target == null) {

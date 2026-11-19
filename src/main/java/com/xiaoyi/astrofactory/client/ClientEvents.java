@@ -27,5 +27,6 @@ public final class ClientEvents {
         event.register(ModRegistry.ASSEMBLER_MENU.get(), AssemblerScreen::new);
         event.register(ModRegistry.STONE_FURNACE_MENU.get(), StoneFurnaceScreen::new);
         event.register(ModRegistry.LAB_MENU.get(), LabScreen::new);
+        event.register(ModRegistry.BOILER_MENU.get(), BoilerScreen::new);
     }
 }

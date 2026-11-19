@@ -1,0 +1,364 @@
+{
+  "variants": {
+    "facing=north,part=0,active=false": {
+      "model": "astrofactory:block/steam_engine_0_north"
+    },
+    "facing=north,part=1,active=false": {
+      "model": "astrofactory:block/steam_engine_1_north"
+    },
+    "facing=north,part=2,active=false": {
+      "model": "astrofactory:block/steam_engine_2_north"
+    },
+    "facing=north,part=3,active=false": {
+      "model": "astrofactory:block/steam_engine_3_north"
+    },
+    "facing=north,part=4,active=false": {
+      "model": "astrofactory:block/steam_engine_4_north"
+    },
+    "facing=north,part=5,active=false": {
+      "model": "astrofactory:block/steam_engine_5_north"
+    },
+    "facing=north,part=6,active=false": {
+      "model": "astrofactory:block/steam_engine_6_north"
+    },
+    "facing=north,part=7,active=false": {
+      "model": "astrofactory:block/steam_engine_7_north"
+    },
+    "facing=north,part=8,active=false": {
+      "model": "astrofactory:block/steam_engine_8_north"
+    },
+    "facing=north,part=9,active=false": {
+      "model": "astrofactory:block/steam_engine_9_north"
+    },
+    "facing=north,part=10,active=false": {
+      "model": "astrofactory:block/steam_engine_10_north"
+    },
+    "facing=north,part=11,active=false": {
+      "model": "astrofactory:block/steam_engine_11_north"
+    },
+    "facing=north,part=12,active=false": {
+      "model": "astrofactory:block/steam_engine_12_north"
+    },
+    "facing=north,part=13,active=false": {
+      "model": "astrofactory:block/steam_engine_13_north"
+    },
+    "facing=north,part=14,active=false": {
+      "model": "astrofactory:block/steam_engine_14_north"
+    },
+    "facing=east,part=0,active=false": {
+      "model": "astrofactory:block/steam_engine_0_east"
+    },
+    "facing=east,part=1,active=false": {
+      "model": "astrofactory:block/steam_engine_1_east"
+    },
+    "facing=east,part=2,active=false": {
+      "model": "astrofactory:block/steam_engine_2_east"
+    },
+    "facing=east,part=3,active=false": {
+      "model": "astrofactory:block/steam_engine_3_east"
+    },
+    "facing=east,part=4,active=false": {
+      "model": "astrofactory:block/steam_engine_4_east"
+    },
+    "facing=east,part=5,active=false": {
+      "model": "astrofactory:block/steam_engine_5_east"
+    },
+    "facing=east,part=6,active=false": {
+      "model": "astrofactory:block/steam_engine_6_east"
+    },
+    "facing=east,part=7,active=false": {
+      "model": "astrofactory:block/steam_engine_7_east"
+    },
+    "facing=east,part=8,active=false": {
+      "model": "astrofactory:block/steam_engine_8_east"
+    },
+    "facing=east,part=9,active=false": {
+      "model": "astrofactory:block/steam_engine_9_east"
+    },
+    "facing=east,part=10,active=false": {
+      "model": "astrofactory:block/steam_engine_10_east"
+    },
+    "facing=east,part=11,active=false": {
+      "model": "astrofactory:block/steam_engine_11_east"
+    },
+    "facing=east,part=12,active=false": {
+      "model": "astrofactory:block/steam_engine_12_east"
+    },
+    "facing=east,part=13,active=false": {
+      "model": "astrofactory:block/steam_engine_13_east"
+    },
+    "facing=east,part=14,active=false": {
+      "model": "astrofactory:block/steam_engine_14_east"
+    },
+    "facing=south,part=0,active=false": {
+      "model": "astrofactory:block/steam_engine_0_south"
+    },
+    "facing=south,part=1,active=false": {
+      "model": "astrofactory:block/steam_engine_1_south"
+    },
+    "facing=south,part=2,active=false": {
+      "model": "astrofactory:block/steam_engine_2_south"
+    },
+    "facing=south,part=3,active=false": {
+      "model": "astrofactory:block/steam_engine_3_south"
+    },
+    "facing=south,part=4,active=false": {
+      "model": "astrofactory:block/steam_engine_4_south"
+    },
+    "facing=south,part=5,active=false": {
+      "model": "astrofactory:block/steam_engine_5_south"
+    },
+    "facing=south,part=6,active=false": {
+      "model": "astrofactory:block/steam_engine_6_south"
+    },
+    "facing=south,part=7,active=false": {
+      "model": "astrofactory:block/steam_engine_7_south"
+    },
+    "facing=south,part=8,active=false": {
+      "model": "astrofactory:block/steam_engine_8_south"
+    },
+    "facing=south,part=9,active=false": {
+      "model": "astrofactory:block/steam_engine_9_south"
+    },
+    "facing=south,part=10,active=false": {
+      "model": "astrofactory:block/steam_engine_10_south"
+    },
+    "facing=south,part=11,active=false": {
+      "model": "astrofactory:block/steam_engine_11_south"
+    },
+    "facing=south,part=12,active=false": {
+      "model": "astrofactory:block/steam_engine_12_south"
+    },
+    "facing=south,part=13,active=false": {
+      "model": "astrofactory:block/steam_engine_13_south"
+    },
+    "facing=south,part=14,active=false": {
+      "model": "astrofactory:block/steam_engine_14_south"
+    },
+    "facing=west,part=0,active=false": {
+      "model": "astrofactory:block/steam_engine_0_west"
+    },
+    "facing=west,part=1,active=false": {
+      "model": "astrofactory:block/steam_engine_1_west"
+    },
+    "facing=west,part=2,active=false": {
+      "model": "astrofactory:block/steam_engine_2_west"
+    },
+    "facing=west,part=3,active=false": {
+      "model": "astrofactory:block/steam_engine_3_west"
+    },
+    "facing=west,part=4,active=false": {
+      "model": "astrofactory:block/steam_engine_4_west"
+    },
+    "facing=west,part=5,active=false": {
+      "model": "astrofactory:block/steam_engine_5_west"
+    },
+    "facing=west,part=6,active=false": {
+      "model": "astrofactory:block/steam_engine_6_west"
+    },
+    "facing=west,part=7,active=false": {
+      "model": "astrofactory:block/steam_engine_7_west"
+    },
+    "facing=west,part=8,active=false": {
+      "model": "astrofactory:block/steam_engine_8_west"
+    },
+    "facing=west,part=9,active=false": {
+      "model": "astrofactory:block/steam_engine_9_west"
+    },
+    "facing=west,part=10,active=false": {
+      "model": "astrofactory:block/steam_engine_10_west"
+    },
+    "facing=west,part=11,active=false": {
+      "model": "astrofactory:block/steam_engine_11_west"
+    },
+    "facing=west,part=12,active=false": {
+      "model": "astrofactory:block/steam_engine_12_west"
+    },
+    "facing=west,part=13,active=false": {
+      "model": "astrofactory:block/steam_engine_13_west"
+    },
+    "facing=west,part=14,active=false": {
+      "model": "astrofactory:block/steam_engine_14_west"
+    },
+    "facing=north,part=0,active=true": {
+      "model": "astrofactory:block/steam_engine_active_0_north"
+    },
+    "facing=north,part=1,active=true": {
+      "model": "astrofactory:block/steam_engine_active_1_north"
+    },
+    "facing=north,part=2,active=true": {
+      "model": "astrofactory:block/steam_engine_active_2_north"
+    },
+    "facing=north,part=3,active=true": {
+      "model": "astrofactory:block/steam_engine_active_3_north"
+    },
+    "facing=north,part=4,active=true": {
+      "model": "astrofactory:block/steam_engine_active_4_north"
+    },
+    "facing=north,part=5,active=true": {
+      "model": "astrofactory:block/steam_engine_active_5_north"
+    },
+    "facing=north,part=6,active=true": {
+      "model": "astrofactory:block/steam_engine_active_6_north"
+    },
+    "facing=north,part=7,active=true": {
+      "model": "astrofactory:block/steam_engine_active_7_north"
+    },
+    "facing=north,part=8,active=true": {
+      "model": "astrofactory:block/steam_engine_active_8_north"
+    },
+    "facing=north,part=9,active=true": {
+      "model": "astrofactory:block/steam_engine_active_9_north"
+    },
+    "facing=north,part=10,active=true": {
+      "model": "astrofactory:block/steam_engine_active_10_north"
+    },
+    "facing=north,part=11,active=true": {
+      "model": "astrofactory:block/steam_engine_active_11_north"
+    },
+    "facing=north,part=12,active=true": {
+      "model": "astrofactory:block/steam_engine_active_12_north"
+    },
+    "facing=north,part=13,active=true": {
+      "model": "astrofactory:block/steam_engine_active_13_north"
+    },
+    "facing=north,part=14,active=true": {
+      "model": "astrofactory:block/steam_engine_active_14_north"
+    },
+    "facing=east,part=0,active=true": {
+      "model": "astrofactory:block/steam_engine_active_0_east"
+    },
+    "facing=east,part=1,active=true": {
+      "model": "astrofactory:block/steam_engine_active_1_east"
+    },
+    "facing=east,part=2,active=true": {
+      "model": "astrofactory:block/steam_engine_active_2_east"
+    },
+    "facing=east,part=3,active=true": {
+      "model": "astrofactory:block/steam_engine_active_3_east"
+    },
+    "facing=east,part=4,active=true": {
+      "model": "astrofactory:block/steam_engine_active_4_east"
+    },
+    "facing=east,part=5,active=true": {
+      "model": "astrofactory:block/steam_engine_active_5_east"
+    },
+    "facing=east,part=6,active=true": {
+      "model": "astrofactory:block/steam_engine_active_6_east"
+    },
+    "facing=east,part=7,active=true": {
+      "model": "astrofactory:block/steam_engine_active_7_east"
+    },
+    "facing=east,part=8,active=true": {
+      "model": "astrofactory:block/steam_engine_active_8_east"
+    },
+    "facing=east,part=9,active=true": {
+      "model": "astrofactory:block/steam_engine_active_9_east"
+    },
+    "facing=east,part=10,active=true": {
+      "model": "astrofactory:block/steam_engine_active_10_east"
+    },
+    "facing=east,part=11,active=true": {
+      "model": "astrofactory:block/steam_engine_active_11_east"
+    },
+    "facing=east,part=12,active=true": {
+      "model": "astrofactory:block/steam_engine_active_12_east"
+    },
+    "facing=east,part=13,active=true": {
+      "model": "astrofactory:block/steam_engine_active_13_east"
+    },
+    "facing=east,part=14,active=true": {
+      "model": "astrofactory:block/steam_engine_active_14_east"
+    },
+    "facing=south,part=0,active=true": {
+      "model": "astrofactory:block/steam_engine_active_0_south"
+    },
+    "facing=south,part=1,active=true": {
+      "model": "astrofactory:block/steam_engine_active_1_south"
+    },
+    "facing=south,part=2,active=true": {
+      "model": "astrofactory:block/steam_engine_active_2_south"
+    },
+    "facing=south,part=3,active=true": {
+      "model": "astrofactory:block/steam_engine_active_3_south"
+    },
+    "facing=south,part=4,active=true": {
+      "model": "astrofactory:block/steam_engine_active_4_south"
+    },
+    "facing=south,part=5,active=true": {
+      "model": "astrofactory:block/steam_engine_active_5_south"
+    },
+    "facing=south,part=6,active=true": {
+      "model": "astrofactory:block/steam_engine_active_6_south"
+    },
+    "facing=south,part=7,active=true": {
+      "model": "astrofactory:block/steam_engine_active_7_south"
+    },
+    "facing=south,part=8,active=true": {
+      "model": "astrofactory:block/steam_engine_active_8_south"
+    },
+    "facing=south,part=9,active=true": {
+      "model": "astrofactory:block/steam_engine_active_9_south"
+    },
+    "facing=south,part=10,active=true": {
+      "model": "astrofactory:block/steam_engine_active_10_south"
+    },
+    "facing=south,part=11,active=true": {
+      "model": "astrofactory:block/steam_engine_active_11_south"
+    },
+    "facing=south,part=12,active=true": {
+      "model": "astrofactory:block/steam_engine_active_12_south"
+    },
+    "facing=south,part=13,active=true": {
+      "model": "astrofactory:block/steam_engine_active_13_south"
+    },
+    "facing=south,part=14,active=true": {
+      "model": "astrofactory:block/steam_engine_active_14_south"
+    },
+    "facing=west,part=0,active=true": {
+      "model": "astrofactory:block/steam_engine_active_0_west"
+    },
+    "facing=west,part=1,active=true": {
+      "model": "astrofactory:block/steam_engine_active_1_west"
+    },
+    "facing=west,part=2,active=true": {
+      "model": "astrofactory:block/steam_engine_active_2_west"
+    },
+    "facing=west,part=3,active=true": {
+      "model": "astrofactory:block/steam_engine_active_3_west"
+    },
+    "facing=west,part=4,active=true": {
+      "model": "astrofactory:block/steam_engine_active_4_west"
+    },
+    "facing=west,part=5,active=true": {
+      "model": "astrofactory:block/steam_engine_active_5_west"
+    },
+    "facing=west,part=6,active=true": {
+      "model": "astrofactory:block/steam_engine_active_6_west"
+    },
+    "facing=west,part=7,active=true": {
+      "model": "astrofactory:block/steam_engine_active_7_west"
+    },
+    "facing=west,part=8,active=true": {
+      "model": "astrofactory:block/steam_engine_active_8_west"
+    },
+    "facing=west,part=9,active=true": {
+      "model": "astrofactory:block/steam_engine_active_9_west"
+    },
+    "facing=west,part=10,active=true": {
+      "model": "astrofactory:block/steam_engine_active_10_west"
+    },
+    "facing=west,part=11,active=true": {
+      "model": "astrofactory:block/steam_engine_active_11_west"
+    },
+    "facing=west,part=12,active=true": {
+      "model": "astrofactory:block/steam_engine_active_12_west"
+    },
+    "facing=west,part=13,active=true": {
+      "model": "astrofactory:block/steam_engine_active_13_west"
+    },
+    "facing=west,part=14,active=true": {
+      "model": "astrofactory:block/steam_engine_active_14_west"
+    }
+  }
+}

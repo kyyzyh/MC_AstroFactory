@@ -24,6 +24,7 @@ public class AssemblerMenu extends AbstractContainerMenu {
     private static final int PLAYER_INV_START = 10;
 
     private final Container container;
+    private final net.minecraft.world.inventory.ContainerData powerData;
 
     /** 客户端构造：仅用于界面，容器为空壳。 */
     public AssemblerMenu(int windowId, Inventory playerInventory) {
@@ -60,6 +61,29 @@ public class AssemblerMenu extends AbstractContainerMenu {
         for (int col = 0; col < 9; col++) {
             this.addSlot(new Slot(playerInventory, col, 8 + col * 18, 142));
         }
+
+        // 电力状态同步（规格 §5.4：断电 GUI 显示「无电力」）
+        this.powerData = new net.minecraft.world.inventory.ContainerData() {
+            @Override
+            public int get(int index) {
+                return container instanceof AssemblerBlockEntity be && be.isPowered() ? 1 : 0;
+            }
+
+            @Override
+            public void set(int index, int value) {
+            }
+
+            @Override
+            public int getCount() {
+                return 1;
+            }
+        };
+        this.addDataSlots(this.powerData);
+    }
+
+    /** 是否通电（客户端读同步值）。 */
+    public boolean isPowered() {
+        return this.powerData.get(0) != 0;
     }
 
     @Override

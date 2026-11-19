@@ -36,10 +36,14 @@ import org.jspecify.annotations.Nullable;
  * 不额外注册 dummy 方块：</p>
  * <ul>
  *   <li>{@code PART = 0} 是 master，带 BlockEntity，负责全部逻辑；</li>
- *   <li>{@code PART = 1..N*N-1} 是 dummy，{@link #newBlockEntity} 返回 null，不存数据；</li>
+ *   <li>{@code PART = 1..sizeX*sizeZ-1} 是 dummy，{@link #newBlockEntity} 返回 null，不存数据；</li>
  *   <li>每格记录同一个 {@code FACING}，dummy 由 {@link MultiBlockHelper#masterOf} 反推 master；</li>
  *   <li>blockstate 按 {@code part} 给每格自己的模型片段（Q4 决定），拼出"一体机"观感。</li>
  * </ul>
+ *
+ * <p><b>尺寸</b>：默认正方形（{@link #size()}）；矩形机器覆写 {@link #sizeX()}/{@link #sizeZ()}
+ * （锅炉 2×3、蒸汽机 3×5）。{@code sizeX} 是沿 FACING 右手方向的格数，
+ * {@code sizeZ} 是沿 FACING 正面的格数。</p>
  *
  * <p><b>行为</b>：放置前整体预检（任一格不可替换就整体拒绝）；破坏任意一格整体拆除、
  * 只掉 1 个物品；右键任意一格都开 master 的 GUI；master 加载时自修复缺失的 dummy。</p>
@@ -48,9 +52,9 @@ public abstract class MultiBlockMachineBlock extends BaseEntityBlock {
     /** 朝向，决定 N×N 的展开方向。 */
     public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
     /**
-     * 该格在机器内的索引：0 = master，1..N*N-1 = dummy。
+     * 该格在机器内的索引：0 = master，1..sizeX*sizeZ-1 = dummy。
      *
-     * <p>每种机器自己声明属性范围（2×2 用 0..3，3×3 用 0..8），
+     * <p>每种机器自己声明属性范围（2×2 用 0..3，3×3 用 0..8，2×3 用 0..5），
      * 这样 blockstate 只需覆盖真实存在的状态，不会出现缺失模型的警告。</p>
      */
     protected abstract IntegerProperty partProperty();
@@ -62,8 +66,18 @@ public abstract class MultiBlockMachineBlock extends BaseEntityBlock {
                 .setValue(partProperty(), 0));
     }
 
-    /** 机器边长：2 = 2×2，3 = 3×3。 */
+    /** 机器边长（正方形机器）：2 = 2×2，3 = 3×3。 */
     public abstract int size();
+
+    /** 沿 FACING 右手方向的格数；默认与 {@link #size()} 相同。 */
+    public int sizeX() {
+        return size();
+    }
+
+    /** 沿 FACING 正面的格数；默认与 {@link #size()} 相同。 */
+    public int sizeZ() {
+        return size();
+    }
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
@@ -81,9 +95,10 @@ public abstract class MultiBlockMachineBlock extends BaseEntityBlock {
         Level level = context.getLevel();
         BlockPos masterPos = context.getClickedPos();
         Direction facing = context.getHorizontalDirection().getOpposite();
-        int size = size();
+        int sx = sizeX();
+        int sz = sizeZ();
 
-        for (BlockPos cell : MultiBlockHelper.allCells(masterPos, facing, size)) {
+        for (BlockPos cell : MultiBlockHelper.allCells(masterPos, facing, sx, sz)) {
             if (cell.getY() < level.getMinY() || cell.getY() > level.getMaxY()) {
                 return null;
             }
@@ -104,10 +119,11 @@ public abstract class MultiBlockMachineBlock extends BaseEntityBlock {
             return;
         }
         Direction facing = state.getValue(FACING);
-        int size = size();
-        for (int dz = 0; dz < size; dz++) {
-            for (int dx = 0; dx < size; dx++) {
-                int part = MultiBlockHelper.partOf(dx, dz, size);
+        int sx = sizeX();
+        int sz = sizeZ();
+        for (int dz = 0; dz < sz; dz++) {
+            for (int dx = 0; dx < sx; dx++) {
+                int part = MultiBlockHelper.partOf(dx, dz, sx);
                 if (part == 0) {
                     continue;
                 }
@@ -139,7 +155,7 @@ public abstract class MultiBlockMachineBlock extends BaseEntityBlock {
         if (!player.isCreative()) {
             Block.popResource(level, masterPos, new ItemStack(this.asItem()));
         }
-        clearWhole(level, masterPos, state.getValue(FACING), size());
+        clearWhole(level, masterPos, state.getValue(FACING), sizeX(), sizeZ());
         return result;
     }
 
@@ -156,18 +172,18 @@ public abstract class MultiBlockMachineBlock extends BaseEntityBlock {
     protected void affectNeighborsAfterRemoval(BlockState state, ServerLevel level, BlockPos pos,
                                                boolean movedByPiston) {
         super.affectNeighborsAfterRemoval(state, level, pos, movedByPiston);
-        clearWhole(level, masterPosOf(pos, state), state.getValue(FACING), size());
+        clearWhole(level, masterPosOf(pos, state), state.getValue(FACING), sizeX(), sizeZ());
     }
 
     protected BlockPos masterPosOf(BlockPos pos, BlockState state) {
         int part = state.getValue(partProperty());
         return part == 0 ? pos
-                : MultiBlockHelper.masterOf(pos, state.getValue(FACING), size(), part);
+                : MultiBlockHelper.masterOf(pos, state.getValue(FACING), sizeX(), sizeZ(), part);
     }
 
     /** 清空整台机器（不发掉落、不连锁）。 */
-    protected void clearWhole(Level level, BlockPos masterPos, Direction facing, int size) {
-        for (BlockPos cell : MultiBlockHelper.allCells(masterPos, facing, size)) {
+    protected void clearWhole(Level level, BlockPos masterPos, Direction facing, int sizeX, int sizeZ) {
+        for (BlockPos cell : MultiBlockHelper.allCells(masterPos, facing, sizeX, sizeZ)) {
             if (!level.isLoaded(cell)) {
                 continue;
             }
@@ -176,6 +192,11 @@ public abstract class MultiBlockMachineBlock extends BaseEntityBlock {
                 level.setBlock(cell, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
             }
         }
+    }
+
+    /** 正方形便捷重载。 */
+    protected void clearWhole(Level level, BlockPos masterPos, Direction facing, int size) {
+        clearWhole(level, masterPos, facing, size, size);
     }
 
     // ------------------------------------------------------------ 交互
@@ -234,12 +255,13 @@ public abstract class MultiBlockMachineBlock extends BaseEntityBlock {
             return;
         }
         Direction facing = masterState.getValue(FACING);
-        int size = size();
+        int sx = sizeX();
+        int sz = sizeZ();
         boolean broken = false;
 
-        for (int dz = 0; dz < size && !broken; dz++) {
-            for (int dx = 0; dx < size && !broken; dx++) {
-                int part = MultiBlockHelper.partOf(dx, dz, size);
+        for (int dz = 0; dz < sz && !broken; dz++) {
+            for (int dx = 0; dx < sx && !broken; dx++) {
+                int part = MultiBlockHelper.partOf(dx, dz, sx);
                 if (part == 0) {
                     continue;
                 }
@@ -260,7 +282,7 @@ public abstract class MultiBlockMachineBlock extends BaseEntityBlock {
         }
 
         if (broken) {
-            clearWhole(level, masterPos, facing, size);
+            clearWhole(level, masterPos, facing, sx, sz);
         }
     }
 }

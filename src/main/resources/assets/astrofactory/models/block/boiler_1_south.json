@@ -1,0 +1,52 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "astrofactory:block/boiler_side_1_south",
+    "down": "astrofactory:block/boiler_side_1_south",
+    "up": "astrofactory:block/boiler_top_1_south",
+    "north": "astrofactory:block/boiler_side_1_south",
+    "south": "astrofactory:block/boiler_side_1_south",
+    "east": "astrofactory:block/boiler_side_1_south",
+    "west": "astrofactory:block/boiler_side_1_south"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "down": {
+          "texture": "#down",
+          "cullface": "down"
+        },
+        "up": {
+          "texture": "#up",
+          "cullface": "up"
+        },
+        "north": {
+          "texture": "#north",
+          "cullface": "north"
+        },
+        "south": {
+          "texture": "#south",
+          "cullface": "south"
+        },
+        "east": {
+          "texture": "#east",
+          "cullface": "east"
+        },
+        "west": {
+          "texture": "#west",
+          "cullface": "west"
+        }
+      }
+    }
+  ]
+}

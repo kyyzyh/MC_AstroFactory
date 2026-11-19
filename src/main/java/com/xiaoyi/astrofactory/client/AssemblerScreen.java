@@ -26,5 +26,14 @@ public class AssemblerScreen extends AbstractContainerScreen<AssemblerMenu> {
         extractor.blit(TEXTURE, this.leftPos, this.topPos, 0, 0,
                 (float) this.imageWidth, (float) this.imageHeight, 256.0f, 256.0f);
         super.extractContents(extractor, mouseX, mouseY, partialTick);
+
+        // 断电提示（规格 §5.4：组装机断电 GUI 显示「无电力」）
+        if (!this.menu.isPowered()) {
+            Component text = Component.translatable("gui.astrofactory.no_power");
+            int x = this.leftPos + 8;
+            int y = this.topPos + 72;
+            extractor.fill(x - 1, y - 1, x + this.font.width(text) + 1, y + 9, 0xC0000000);
+            extractor.text(this.font, text, x, y, 0xFFFF5555);
+        }
     }
 }

@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "I": "minecraft:iron_ingot",
+    "F": "minecraft:furnace",
+    "G": "astrofactory:iron_gear"
+  },
+  "pattern": [
+    "III",
+    "IFI",
+    "IGI"
+  ],
+  "result": {
+    "count": 1,
+    "id": "astrofactory:boiler"
+  }
+}

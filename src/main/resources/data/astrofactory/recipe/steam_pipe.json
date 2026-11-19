@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "I": "minecraft:iron_ingot",
+    "C": "astrofactory:copper_cable"
+  },
+  "pattern": [
+    "CIC"
+  ],
+  "result": {
+    "count": 4,
+    "id": "astrofactory:steam_pipe"
+  }
+}

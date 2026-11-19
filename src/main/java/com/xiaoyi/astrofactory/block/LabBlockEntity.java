@@ -18,6 +18,7 @@ import net.minecraft.world.level.storage.ValueOutput;
 
 import com.xiaoyi.astrofactory.ModRegistry;
 import com.xiaoyi.astrofactory.menu.LabMenu;
+import com.xiaoyi.astrofactory.power.ElectricPowerSource;
 
 /**
  * 科研台方块实体。
@@ -32,9 +33,21 @@ public class LabBlockEntity extends BlockEntity implements Container, MenuProvid
     public static final int TOTAL_SLOTS = 1;
 
     private final NonNullList<ItemStack> items = NonNullList.withSize(TOTAL_SLOTS, ItemStack.EMPTY);
+    /** 电力驱动（规格 §5.4：科研台是电动的，断电停机）。 */
+    private final ElectricPowerSource power = new ElectricPowerSource(this);
 
     public LabBlockEntity(BlockPos pos, BlockState state) {
         super(ModRegistry.LAB_BE.get(), pos, state);
+    }
+
+    /** 是否通电（供 GUI 与投入校验）。 */
+    public boolean isPowered() {
+        return power.isPowered();
+    }
+
+    /** 尝试消费一次电（投入科研包时调用）。 */
+    public boolean tryConsumePower() {
+        return power.consume(false);
     }
 
     /**

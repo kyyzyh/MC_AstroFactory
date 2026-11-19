@@ -52,5 +52,7 @@
   "msg.astrofactory.guide.step9": "9. 做科研台（木板+书+齿轮+青金石），投入电路板解锁科技",
   "msg.astrofactory.guide.step10": "10. 解锁「物流 I」后做高速传送带（传送带x2+齿轮），带速 2 倍",
   "msg.astrofactory.guide.footer": "完整指引：按 L 打开进度界面，查看「AstroFactory：自动化之路」标签页",
-  "item.astrofactory.automation_pack": "红瓶（自动化科技包）"
+  "item.astrofactory.automation_pack": "红瓶（自动化科技包）",
+  "block.astrofactory.ore_vein": "矿脉",
+  "item.astrofactory.ore_vein": "矿脉"
 }

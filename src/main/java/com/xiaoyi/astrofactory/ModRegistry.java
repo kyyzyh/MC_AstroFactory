@@ -23,6 +23,8 @@ import com.xiaoyi.astrofactory.block.FastTransportBeltBlock;
 import com.xiaoyi.astrofactory.block.FastTransportBeltBlockEntity;
 import com.xiaoyi.astrofactory.block.LabBlock;
 import com.xiaoyi.astrofactory.block.LabBlockEntity;
+import com.xiaoyi.astrofactory.block.OreVeinBlock;
+import com.xiaoyi.astrofactory.block.OreVeinBlockEntity;
 import com.xiaoyi.astrofactory.block.StoneFurnaceBlock;
 import com.xiaoyi.astrofactory.block.StoneFurnaceBlockEntity;
 import com.xiaoyi.astrofactory.block.TransportBeltBlock;
@@ -123,6 +125,15 @@ public final class ModRegistry {
                     .strength(2.0f, 4.0f)
                     .noOcclusion());
 
+    /** 矿脉方块：真实带储量的可枯竭矿点（规格 §5.6）。单格 + BE。 */
+    public static final DeferredBlock<OreVeinBlock> ORE_VEIN = BLOCKS.registerBlock(
+            "ore_vein",
+            OreVeinBlock::new,
+            () -> BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.STONE)
+                    .strength(3.0f, 8.0f)
+                    .noOcclusion());
+
     // ---------------------------------------------------------------- 方块物品
 
     public static final DeferredItem<net.minecraft.world.item.BlockItem> TRANSPORT_BELT_ITEM =
@@ -139,6 +150,10 @@ public final class ModRegistry {
             ITEMS.registerSimpleBlockItem(STONE_FURNACE);
     public static final DeferredItem<net.minecraft.world.item.BlockItem> LAB_ITEM =
             ITEMS.registerSimpleBlockItem(LAB);
+
+    /** 矿脉方块物品（创造栏用，实际由世界生成放置）。 */
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> ORE_VEIN_ITEM =
+            ITEMS.registerSimpleBlockItem(ORE_VEIN);
 
     // ---------------------------------------------------------------- 中间物品
 
@@ -194,6 +209,13 @@ public final class ModRegistry {
                             LabBlockEntity::new,
                             Set.of(LAB.get())));
 
+    /** 矿脉方块实体类型。 */
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<OreVeinBlockEntity>> ORE_VEIN_BE =
+            BLOCK_ENTITY_TYPES.register("ore_vein",
+                    () -> new BlockEntityType<>(
+                            OreVeinBlockEntity::new,
+                            Set.of(ORE_VEIN.get())));
+
     // ---------------------------------------------------------------- 菜单
 
     public static final DeferredHolder<net.minecraft.world.inventory.MenuType<?>,
@@ -222,6 +244,7 @@ public final class ModRegistry {
                         output.accept(STONE_FURNACE_ITEM.get());
                         output.accept(ASSEMBLER_ITEM.get());
                         output.accept(LAB_ITEM.get());
+                        output.accept(ORE_VEIN_ITEM.get());
                         output.accept(IRON_GEAR.get());
                         output.accept(COPPER_CABLE.get());
                         output.accept(ELECTRONIC_CIRCUIT.get());

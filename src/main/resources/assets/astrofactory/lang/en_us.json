@@ -52,5 +52,7 @@
   "msg.astrofactory.guide.step9": "9. Craft a research table (planks + book + gears + lapis); contribute boards to unlock tech",
   "msg.astrofactory.guide.step10": "10. After Logistics I, craft fast transport_belts (transport_belt x2 + gear) for double belt speed",
   "msg.astrofactory.guide.footer": "Full guide: press L and open the 'AstroFactory: The Automation Path' tab",
-  "item.astrofactory.automation_pack": "Automation Science Pack"
+  "item.astrofactory.automation_pack": "Automation Science Pack",
+  "block.astrofactory.ore_vein": "Ore Vein",
+  "item.astrofactory.ore_vein": "Ore Vein"
 }

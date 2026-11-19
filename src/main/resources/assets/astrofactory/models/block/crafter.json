@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "top": "astrofactory:block/crafter_top",
+    "bottom": "astrofactory:block/crafter_side",
+    "side": "astrofactory:block/crafter_side"
+  }
+}

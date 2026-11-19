@@ -1,0 +1,12 @@
+{
+  "variants": {
+    "facing=north,active=false": { "model": "astrofactory:block/smelter" },
+    "facing=east,active=false": { "model": "astrofactory:block/smelter", "y": 90 },
+    "facing=south,active=false": { "model": "astrofactory:block/smelter", "y": 180 },
+    "facing=west,active=false": { "model": "astrofactory:block/smelter", "y": 270 },
+    "facing=north,active=true": { "model": "astrofactory:block/smelter_active" },
+    "facing=east,active=true": { "model": "astrofactory:block/smelter_active", "y": 90 },
+    "facing=south,active=true": { "model": "astrofactory:block/smelter_active", "y": 180 },
+    "facing=west,active=true": { "model": "astrofactory:block/smelter_active", "y": 270 }
+  }
+}

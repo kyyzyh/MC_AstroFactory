@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "top": "astrofactory:block/smelter_top",
+    "bottom": "astrofactory:block/smelter_top",
+    "side": "astrofactory:block/smelter_side"
+  }
+}

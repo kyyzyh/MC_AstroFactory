@@ -57,6 +57,60 @@ repositories {
     maven { url = uri("${rootDir}/local-maven") }
     mavenCentral()
     maven { url = 'https://maven.neoforged.net/releases' }
+
+    // ------------------------------------------------------------------
+    // 第三方模组库仓库（均已在 26.3 上实测可拉取，见 docs/third-party-26.3.md）
+    // ------------------------------------------------------------------
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = 'Modrinth'
+                url = 'https://api.modrinth.com/maven'
+            }
+        }
+        filter {
+            includeGroup 'maven.modrinth'
+        }
+    }
+    maven { url = 'https://maven.shedaniel.me/' }        // Cloth Config / REI
+    maven { url = 'https://maven.blamejared.com/' }      // JEI
+    maven { url = 'https://maven.theillusivec4.top/' }   // Curios
+}
+
+// ---------------------------------------------------------------------------
+// 第三方库版本（全部为 26.3 / NeoForge 官方发布版，勿在未验证的情况下升级）
+// ---------------------------------------------------------------------------
+ext {
+    clothConfigVersion  = '26.3.159'
+    yaclVersion         = '3.9.7+26.3-neoforge'
+    jadeVersion         = '26.3.5+neoforge'
+    jeiVersion          = '31.18.0.118'
+    reiVersion          = '26.3.824'
+    curiosVersion       = '17.0.1+26.3'
+    geckolibVersionId   = '2s1O42FX'   // Modrinth version id（对应 26.3-5.5.7）
+}
+
+dependencies {
+    // 说明：目前这些库只完成「依赖坐标打通 + 构建验证」，尚未有功能代码调用它们。
+    // 因此统一用 compileOnly —— 不打包、不强制运行时安装，玩家没装也不会崩。
+    // 等真正接入某个功能时，再按需把对应库改成 implementation。
+
+    // 配置界面（Cloth Config；YACL 为已查证可用的备选，见 ext.yaclVersion）
+    compileOnly "me.shedaniel.cloth:cloth-config-neoforge:${clothConfigVersion}"
+
+    // 准星信息 HUD（Jade）
+    compileOnly "maven.modrinth:jade:${jadeVersion}"
+
+    // 配方查看器（JEI / REI）—— 只引 API 包，运行时由玩家自行安装本体
+    compileOnly "mezz.jei:jei-26.3-neoforge-api:${jeiVersion}"
+    compileOnly "me.shedaniel:RoughlyEnoughItems-api-neoforge:${reiVersion}"
+
+    // 饰品槽（Curios）
+    compileOnly "top.theillusivec4.curios:curios-neoforge:${curiosVersion}"
+
+    // 带动画实体（GeckoLib）—— 26.3-5.5.7 已确认存在，但当前无动画实体，
+    // 且 Modrinth Maven 的坐标版本是 version id 而非版本号，接入时再启用：
+    // compileOnly "maven.modrinth:geckolib:${geckolibVersionId}"
 }
 
 // 把 gradle.properties 里的 ${...} 展开进 neoforge.mods.toml

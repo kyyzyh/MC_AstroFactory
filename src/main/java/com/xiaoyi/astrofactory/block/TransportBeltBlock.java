@@ -72,7 +72,9 @@ public class TransportBeltBlock extends BaseEntityBlock {
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(
             net.minecraft.world.level.Level level, BlockState state, BlockEntityType<T> type) {
         if (level.isClientSide()) {
-            return null;
+            // 客户端也要 tick：本地推进 progress，保证物品连续滑动
+            return createTickerHelper(type, getBlockEntityType(),
+                    TransportBeltBlockEntity::clientTick);
         }
         return createTickerHelper(type, getBlockEntityType(),
                 TransportBeltBlockEntity::serverTick);

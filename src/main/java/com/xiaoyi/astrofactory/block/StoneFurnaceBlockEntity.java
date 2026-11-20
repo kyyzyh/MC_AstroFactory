@@ -212,7 +212,11 @@ public class StoneFurnaceBlockEntity extends BlockEntity implements Container, M
         super.saveAdditional(output);
         var list = output.list("Items", ItemStack.CODEC);
         for (ItemStack stack : items) {
-            list.add(stack);
+            // 空槽不能写进 ItemStack.CODEC（count 必须 1..99 且不能是 air），
+            // 否则每次存档都会刷 "Failed to append value '0 minecraft:air'" 警告。
+            if (!stack.isEmpty()) {
+                list.add(stack);
+            }
         }
         output.putInt("Progress", progress);
         output.putInt("BurnBudget", power.getBurnBudgetForSave());

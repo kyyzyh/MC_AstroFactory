@@ -4,6 +4,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
@@ -81,6 +82,10 @@ public class TransportBeltBlockEntity extends BlockEntity {
 
     private void tickServer(Level level, BlockPos pos, BlockState state) {
         if (items.isEmpty()) {
+            if (syncDirty) {
+                syncDirty = false;
+                level.sendBlockUpdated(pos, state, state, net.minecraft.world.level.block.Block.UPDATE_CLIENTS);
+            }
             return;
         }
         Direction facing = state.getValue(TransportBeltBlock.FACING);
@@ -115,6 +120,7 @@ public class TransportBeltBlockEntity extends BlockEntity {
                 }
                 if (handedOver) {
                     items.remove(slot);
+                    markSyncDirty();
                 } else {
                     // 下游阻塞：停在末端等待（不越过 1.0，避免视觉穿模）
                     slot.progress = 1.0f - speed;
@@ -127,6 +133,11 @@ public class TransportBeltBlockEntity extends BlockEntity {
 
         if (changed) {
             setChanged();
+        }
+        // 4. 物品集合变了才发包（每 tick 推进不发包，客户端自己推进）
+        if (syncDirty) {
+            syncDirty = false;
+            level.sendBlockUpdated(pos, state, state, Block.UPDATE_CLIENTS);
         }
     }
 
@@ -144,6 +155,7 @@ public class TransportBeltBlockEntity extends BlockEntity {
         }
         items.add(new ItemSlot(stack.copy(), 0.0f, lane));
         setChanged();
+        markSyncDirty();
         return true;
     }
 
@@ -180,6 +192,7 @@ public class TransportBeltBlockEntity extends BlockEntity {
         }
         items.remove(best);
         setChanged();
+        markSyncDirty();
         return best.stack;
     }
 
@@ -196,6 +209,7 @@ public class TransportBeltBlockEntity extends BlockEntity {
         }
         items.remove(best);
         setChanged();
+        markSyncDirty();
         return best.stack;
     }
 
@@ -221,6 +235,44 @@ public class TransportBeltBlockEntity extends BlockEntity {
                 }
             }
         }
+    }
+
+    // ------------------------------------------------------------ 客户端同步
+
+    /**
+     * 客户端每 tick 本地推进（不搬移、不交接）。
+     *
+     * <p>服务端只在"物品集合发生变化"（放入 / 取出 / 交接 / 被堵）时发一次快照，
+     * 客户端据此重建列表，再自己按同样速度推进 progress —— 这样既平滑，
+     * 也不会每 tick 发包。</p>
+     */
+    public static void clientTick(Level level, BlockPos pos, BlockState state, TransportBeltBlockEntity be) {
+        if (be.items.isEmpty()) {
+            return;
+        }
+        float speed = be.getSpeed();
+        for (ItemSlot slot : be.items) {
+            slot.progress = Math.min(1.0f, slot.progress + speed);
+        }
+    }
+
+    /** 物品集合变化后置位，由 {@link #tickServer} 统一发包。 */
+    private boolean syncDirty = false;
+
+    /** 结构变化（放入/取出）时调用：下一次服务端 tick 广播一次快照。 */
+    private void markSyncDirty() {
+        syncDirty = true;
+    }
+
+    /** 全量快照（走 chunk 加载与 getUpdatePacket 两条路）。 */
+    @Override
+    public net.minecraft.nbt.CompoundTag getUpdateTag(net.minecraft.core.HolderLookup.Provider registries) {
+        return this.saveCustomOnly(registries);
+    }
+
+    @Override
+    public net.minecraft.network.protocol.Packet<net.minecraft.network.protocol.game.ClientGamePacketListener> getUpdatePacket() {
+        return net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket.create(this);
     }
 
     // ------------------------------------------------------------ 存档

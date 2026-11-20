@@ -48,6 +48,11 @@ public class BurnerInserterBlockEntity extends BlockEntity {
         return held;
     }
 
+    /** 燃料槽容器（供 GUI / 调试 / 自动化测试读取与投放燃料）。 */
+    public SimpleContainer getFuelContainer() {
+        return fuelContainer;
+    }
+
     public static void serverTick(Level level, BlockPos pos, BlockState state, BurnerInserterBlockEntity be) {
         if (be.cooldown > 0) {
             be.cooldown--;
@@ -152,7 +157,10 @@ public class BurnerInserterBlockEntity extends BlockEntity {
     @Override
     protected void saveAdditional(ValueOutput output) {
         super.saveAdditional(output);
-        output.store("Held", ItemStack.CODEC, held);
+        // 空手不能写进 ItemStack.CODEC（count 必须 1..99 且不能是 air）
+        if (!held.isEmpty()) {
+            output.store("Held", ItemStack.CODEC, held);
+        }
         output.putInt("Cooldown", cooldown);
         output.putInt("BurnBudget", power.getBurnBudgetForSave());
         var flist = output.childrenList("Fuel");

@@ -4,7 +4,8 @@
   "textures": {
     "particle": "astrofactory:block/transport_belt_top",
     "top": "astrofactory:block/transport_belt_top",
-    "side": "astrofactory:block/transport_belt_side"
+    "side": "astrofactory:block/transport_belt_side",
+    "rail": "astrofactory:block/transport_belt_rail"
   },
   "elements": [
     {
@@ -73,6 +74,124 @@
             13,
             16,
             16
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        0,
+        3,
+        0
+      ],
+      "to": [
+        1,
+        4,
+        16
+      ],
+      "faces": {
+        "up": {
+          "texture": "#rail",
+          "uv": [
+            0,
+            0,
+            1,
+            16
+          ]
+        },
+        "north": {
+          "texture": "#rail",
+          "uv": [
+            0,
+            12,
+            1,
+            13
+          ]
+        },
+        "south": {
+          "texture": "#rail",
+          "uv": [
+            0,
+            12,
+            1,
+            13
+          ]
+        },
+        "east": {
+          "texture": "#rail",
+          "uv": [
+            0,
+            12,
+            16,
+            13
+          ]
+        },
+        "west": {
+          "texture": "#rail",
+          "uv": [
+            0,
+            12,
+            16,
+            13
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        15,
+        3,
+        0
+      ],
+      "to": [
+        16,
+        4,
+        16
+      ],
+      "faces": {
+        "up": {
+          "texture": "#rail",
+          "uv": [
+            0,
+            0,
+            1,
+            16
+          ]
+        },
+        "north": {
+          "texture": "#rail",
+          "uv": [
+            0,
+            12,
+            1,
+            13
+          ]
+        },
+        "south": {
+          "texture": "#rail",
+          "uv": [
+            0,
+            12,
+            1,
+            13
+          ]
+        },
+        "east": {
+          "texture": "#rail",
+          "uv": [
+            0,
+            12,
+            16,
+            13
+          ]
+        },
+        "west": {
+          "texture": "#rail",
+          "uv": [
+            0,
+            12,
+            16,
+            13
           ]
         }
       }

@@ -10,81 +10,25 @@
 关键：blockstate **不做 y 旋转**，旋转已在贴图里烘焙好，
 否则每个方块绕自身中心旋转，拼缝会错位。
 
+贴图画法统一走 tools/tex_common.py（工业风 / 参考《异星工厂》）。
+
 用法：python tools/gen_multiblock_assets.py
 """
 import json
 import os
 
-from PIL import Image, ImageDraw
+from PIL import Image
+
+import tex_common as T
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ASSETS = os.path.join(ROOT, "src", "main", "resources", "assets", "astrofactory")
 TEX_BLOCK = os.path.join(ASSETS, "textures", "block")
 MODELS_BLOCK = os.path.join(ASSETS, "models", "block")
 BLOCKSTATES = os.path.join(ASSETS, "blockstates")
-
-IRON_DARK = (66, 70, 76)
-IRON = (104, 109, 116)
-IRON_LIGHT = (146, 152, 160)
-COAL = (34, 32, 32)
-GLOW = (248, 196, 72)
-GLOW_DEEP = (226, 128, 40)
-STEEL = (168, 176, 186)
+ITEMS = os.path.join(ASSETS, "items")
 
 FACINGS = ["north", "east", "south", "west"]
-
-
-def _noise(img, amount=6):
-    px = img.load()
-    w, h = img.size
-    for y in range(h):
-        for x in range(w):
-            r, g, b, a = px[x, y]
-            if a == 0:
-                continue
-            d = ((x * 7 + y * 13) % (amount * 2 + 1)) - amount
-            px[x, y] = (max(0, min(255, r + d)), max(0, min(255, g + d)),
-                        max(0, min(255, b + d)), a)
-    return img
-
-
-def machine_side(size, active=False):
-    """整机侧面（本地坐标：列 = dx 机器右手方向，行 = dz 机器正面方向）。"""
-    px = size * 16
-    img = _noise(Image.new("RGBA", (px, px), IRON + (255,)), 6)
-    d = ImageDraw.Draw(img)
-    d.rectangle([0, 0, px - 1, px - 1], outline=IRON_DARK + (255,), width=2)
-    d.rectangle([4, 4, px - 5, px - 5], outline=IRON_LIGHT + (255,), width=1)
-    cx0, cy0 = px // 2 - px // 5, px // 2 - px // 5
-    cx1, cy1 = px // 2 + px // 5, px // 2 + px // 5
-    d.rectangle([cx0, cy0, cx1, cy1], fill=IRON_DARK + (255,), outline=STEEL + (255,))
-    if active:
-        d.rectangle([cx0 + 2, cy0 + 2, cx1 - 2, cy1 - 2], fill=GLOW_DEEP + (255,))
-        d.rectangle([cx0 + 4, cy0 + 4, cx1 - 4, cy1 - 4], fill=GLOW + (255,))
-    else:
-        for y in range(cy0 + 2, cy1 - 1, 3):
-            d.line([cx0 + 2, y, cx1 - 2, y], fill=COAL + (255,))
-    for (rx, ry) in ((6, 6), (px - 9, 6), (6, px - 9), (px - 9, px - 9)):
-        d.point((rx, ry), fill=STEEL + (255,))
-        d.point((rx + 1, ry), fill=IRON_LIGHT + (255,))
-    return img
-
-
-def machine_top(size, active=False):
-    """整机顶面。"""
-    px = size * 16
-    img = _noise(Image.new("RGBA", (px, px), IRON_DARK + (255,)), 6)
-    d = ImageDraw.Draw(img)
-    d.rectangle([0, 0, px - 1, px - 1], outline=(48, 51, 56, 255), width=2)
-    inset = px // 4
-    d.rectangle([inset, inset, px - 1 - inset, px - 1 - inset],
-                fill=IRON + (255,), outline=STEEL + (255,))
-    hole = px // 8
-    d.rectangle([px // 2 - hole, px // 2 - hole, px // 2 + hole, px // 2 + hole],
-                fill=(GLOW if active else COAL) + (255,))
-    d.line([px // 2, 3, px // 2, px - 4], fill=IRON_LIGHT + (255,))
-    d.line([3, px // 2, px - 4, px // 2], fill=IRON_LIGHT + (255,))
-    return img
 
 
 def oriented(img, facing):
@@ -150,15 +94,15 @@ def write_model(prefix, part, facing, side_file, top_file, active_suffix=""):
               ensure_ascii=False, indent=2)
 
 
-def build(name, size, has_active=True):
+def build(name, size, theme_key, has_active=True):
     """生成全部资源。name 同时用作方块 ID 与模型前缀。"""
     variants = {}
     active_values = [False, True] if has_active else [None]
 
     for active in active_values:
         suffix = "_active" if active else ""
-        base_side = machine_side(size, active)
-        base_top = machine_top(size, active)
+        base_side = T.machine_side(size, size, theme_key, bool(active))
+        base_top = T.machine_top(size, size, theme_key, bool(active))
         for facing in FACINGS:
             side_files = split_save(oriented(base_side, facing), size,
                                     f"{name}_side{suffix}", facing)
@@ -176,14 +120,20 @@ def build(name, size, has_active=True):
               open(os.path.join(BLOCKSTATES, name + ".json"), "w",
                    encoding="utf-8", newline="\n"),
               ensure_ascii=False, indent=2)
+    # 方块物品定义（part=0 / facing=north 的模型做图标）
+    json.dump({"model": {"type": "minecraft:model",
+                         "model": f"astrofactory:block/{name}_0_north"}},
+              open(os.path.join(ITEMS, name + ".json"), "w",
+                   encoding="utf-8", newline="\n"),
+              ensure_ascii=False, indent=2)
     print(f"built {name}: {size}x{size}, {size * size} parts, {len(variants)} variants")
 
 
 def main():
-    build("burner_miner", 2, has_active=True)
-    build("stone_furnace", 2, has_active=True)
-    build("assembler", 3, has_active=True)
-    build("lab", 3, has_active=False)
+    build("burner_miner", 2, "miner", has_active=True)
+    build("stone_furnace", 2, "furnace", has_active=True)
+    build("assembler", 3, "assembler", has_active=True)
+    build("lab", 3, "lab", has_active=False)
 
 
 if __name__ == "__main__":

@@ -1,10 +1,27 @@
 {
   "variants": {
-    "facing=north": { "model": "astrofactory:block/burner_inserter" },
-    "facing=east":  { "model": "astrofactory:block/burner_inserter", "y": 90 },
-    "facing=south": { "model": "astrofactory:block/burner_inserter", "y": 180 },
-    "facing=west":  { "model": "astrofactory:block/burner_inserter", "y": 270 },
-    "facing=up":    { "model": "astrofactory:block/burner_inserter", "x": 90 },
-    "facing=down":  { "model": "astrofactory:block/burner_inserter", "x": 270 }
+    "facing=north": {
+      "model": "astrofactory:block/burner_inserter"
+    },
+    "facing=east": {
+      "model": "astrofactory:block/burner_inserter",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "astrofactory:block/burner_inserter",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "astrofactory:block/burner_inserter",
+      "y": 270
+    },
+    "facing=up": {
+      "model": "astrofactory:block/burner_inserter",
+      "x": 90
+    },
+    "facing=down": {
+      "model": "astrofactory:block/burner_inserter",
+      "x": 270
+    }
   }
 }

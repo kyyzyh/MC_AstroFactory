@@ -414,6 +414,8 @@ public final class AutoDemo {
         SHOTS.add(shot("astrofactory_4_assembler", ox + 11.0, y0 + 2.4, oz + 4.5, ox + 7, y0 + 0.7, oz + 1));
         SHOTS.add(shot("astrofactory_5_fast_belt", ox - 10.5, y0 + 1.8, oz + 12.0, ox - 11, y0 + 0.3, oz + 8));
         SHOTS.add(shot("astrofactory_6_ore_veins", ox - 12.5, y0 + 1.6, oz + 9.5, ox - 12.5, y0 + 0.3, oz + 6));
+        // 机械臂特写：机械臂在 (ox-6, y0, oz-1)，朝南（臂朝 +Z，背面接传送带）
+        SHOTS.add(shot("astrofactory_7_inserter", ox - 3.4, y0 + 1.6, oz - 2.8, ox - 6.0, y0 + 0.55, oz - 1.0));
     }
 
     private static Shot shot(String name, double px, double py, double pz,

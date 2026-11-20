@@ -120,19 +120,30 @@ gradlew.bat build --offline
 
 ## 科技树
 
+共 9 个节点，全部已接入 `Technologies.java` 与科研台界面。
+
 | 科技 | 消耗 | 前置 | 解锁 |
 |---|---|---|---|
 | automation_1 自动化 I | 10 | — | 传送带、机械臂 |
+| electronics 电子学 | 10 | automation_1 | 电路板、电动臂、铁箱、科研台 |
 | mining_1 采矿 I | 20 | automation_1 | 采矿机 |
 | assembly_1 组装 I | 20 | automation_1 | 组装机 |
+| steam_power 蒸汽动力 | 50 | electronics | 锅炉、蒸汽机、离岸泵、管道、电线杆 |
 | logistics_1 物流 I | 50 | mining_1 + assembly_1 | 高速传送带 |
 | research_1 科研 I | 50 | assembly_1 | 科研台 |
+| automation_2 自动化 II | 40 | assembly_1 | 组装机 2 |
+| steel_processing 钢铁加工 | 50 | steam_power | 钢熔炉、钢箱 |
 
-> 规格 v3.2 还要求 `steam_power`（50 铁板）、`electronics`（10 铜板）、
-> `automation_2`（40 红瓶）、`steel_processing`（50 红瓶）等科技，
-> 当前 `Technologies.java` 尚未接入，见「待办」。
+> **消耗单位 = 科研包个数**（1 个包 = 1 点）。科研包有两种：**电路板** 与 **红瓶**（`automation_pack`），
+> 都能在科研台投入。数值取规格 §4 的门槛量级，属灰区。
+>
+> **同时可研究多项时**：科研台界面用 `<` / `>` 按钮在可研究列表里切换目标，
+> 顶部显示「第 n / m 项」。列表顺序 = `Technologies.all()` 的定义顺序。
+>
+> **解锁项只做展示**，不做硬门禁 —— 方块全部已注册可直接合成，避免破坏既有存档与产线。
 
 科研进度存在玩家 attachment（`ResearchProgress`），换机器不丢，死亡保留。
+`/astrofactory tech` 可在聊天框打印整棵树（`[OK]` 已解锁 / `[  ]` 可研究 / `[--]` 前置未满足）。
 
 ## 目录
 
@@ -151,7 +162,7 @@ src/main/java/com/xiaoyi/astrofactory/
 ├── client/                    传送带渲染器 + 4 个 Screen
 ├── menu/                      Assembler / Lab / Boiler / StoneFurnace 四个菜单
 ├── recipe/                    机器配方数据化（内置 + 数据包 machine_recipes）
-├── research/                  科技树定义与玩家进度
+├── research/                  科技树定义（9 节点）与玩家进度
 └── world/                     OreVeinData 矿田幂等生成
 ```
 
@@ -176,9 +187,9 @@ tools/                                   贴图生成脚本（PIL 程序化绘�
 
 - 阶段④「制作台」已删，零件走熔炼炉 crafting 通道；README 与部分历史文案仍写「制作台」
 - `copper_cable` 注册名与中文显示「铜线」不一致，配方/成就/指南文案统一写「铜线圈」（历史遗留，待统一）
-- 科技树仅实现 5 个基础科技，规格要求的 `steam_power` / `electronics` / `automation_2` / `steel_processing` 未接入 `Technologies` 与 `LabMenu`
+- 科技树 9 个节点已全部接入，但 `unlocks` 里的 `assembler_2` / `steel_furnace` / `steel_chest` 等**尚无对应方块**（0.1.0 范围外，仅作展示）
 - 斜坡传送带（SLOPE 属性 + 线性插值 + 上下交接）未实现（规格新增待办）
 - 出生点包（1 采矿机 + 1 石熔炉 + 20 传送带 + 1 手册）未实现
-- 配方表内置部分是硬编码 Java，数据包 `machine_recipes` 已支持但只有 2 条示例
+- 配方表内置部分是硬编码 Java，数据包 `machine_recipes` 已有 3 条示例（含红瓶）
 - 机械臂的抓取/投放逻辑较简单，未做多方块结构与朝向寻址（`canPlaceItem` 已遵守）
 - 已用 git 版本控制并推送（`https://github.com/kyyzyh/MC_AstroFactory.git`）

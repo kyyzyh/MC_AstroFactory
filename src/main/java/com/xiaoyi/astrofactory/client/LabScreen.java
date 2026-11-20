@@ -11,18 +11,32 @@ import com.xiaoyi.astrofactory.menu.LabMenu;
 import com.xiaoyi.astrofactory.research.Technology;
 
 /**
- * 科研台界面：显示当前研究目标、进度条、解锁计数，并提供「投入」按钮。
+ * 科研台界面：显示当前研究目标、进度条、解锁计数，并提供「上一个 / 投入 / 下一个」按钮。
  *
- * 26.3 渲染管线是 extract 式（GuiGraphicsExtractor），背景沿用原版发射器贴图。
+ * <p>26.3 渲染管线是 extract 式（{@link GuiGraphicsExtractor}），背景沿用原版发射器贴图。</p>
+ *
+ * <p>布局（相对 leftPos / topPos，界面 176×166）：</p>
+ * <pre>
+ *   y= 6  标题
+ *   y=14  已解锁 x / y
+ *   y=24  科技名（右侧显示 第 n / m 个可研究项）
+ *   y=34  进度条 68..158
+ *   y=44  进度数值
+ *   y=54  [&lt;] [ 投入 ] [&gt;]
+ *   y=84  玩家背包
+ * </pre>
  */
 public class LabScreen extends AbstractContainerScreen<LabMenu> {
     private static final Identifier TEXTURE =
             Identifier.withDefaultNamespace("textures/gui/container/dispenser.png");
 
-    private static final int BAR_X = 66;
-    private static final int BAR_Y = 40;
-    private static final int BAR_W = 80;
+    private static final int BAR_X = 68;
+    private static final int BAR_Y = 34;
+    private static final int BAR_W = 90;
     private static final int BAR_H = 8;
+
+    private static final int BTN_Y = 54;
+    private static final int BTN_H = 16;
 
     public LabScreen(LabMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title, 176, 166);
@@ -35,18 +49,32 @@ public class LabScreen extends AbstractContainerScreen<LabMenu> {
     @Override
     protected void init() {
         super.init();
-        // 「投入」按钮：位于进度条右侧
+
+        // 上一个目标
+        this.addRenderableWidget(Button.builder(
+                        Component.translatable("gui.astrofactory.research.prev"),
+                        b -> this.sendButton(LabMenu.BUTTON_PREV))
+                .bounds(this.leftPos + 68, this.topPos + BTN_Y, 20, BTN_H)
+                .build());
+
+        // 投入
         this.addRenderableWidget(Button.builder(
                         Component.translatable("gui.astrofactory.research.contribute"),
-                        b -> this.sendContribute())
-                .bounds(this.leftPos + BAR_X, this.topPos + 54, 80, 18)
+                        b -> this.sendButton(LabMenu.BUTTON_CONTRIBUTE))
+                .bounds(this.leftPos + 90, this.topPos + BTN_Y, 46, BTN_H)
+                .build());
+
+        // 下一个目标
+        this.addRenderableWidget(Button.builder(
+                        Component.translatable("gui.astrofactory.research.next"),
+                        b -> this.sendButton(LabMenu.BUTTON_NEXT))
+                .bounds(this.leftPos + 138, this.topPos + BTN_Y, 20, BTN_H)
                 .build());
     }
 
-    private void sendContribute() {
+    private void sendButton(int id) {
         if (this.minecraft != null && this.minecraft.gameMode != null) {
-            this.minecraft.gameMode.handleInventoryButtonClick(
-                    this.menu.containerId, LabMenu.BUTTON_CONTRIBUTE);
+            this.minecraft.gameMode.handleInventoryButtonClick(this.menu.containerId, id);
         }
     }
 
@@ -56,14 +84,20 @@ public class LabScreen extends AbstractContainerScreen<LabMenu> {
                 (float) this.imageWidth, (float) this.imageHeight, 256.0f, 256.0f);
         super.extractContents(extractor, mouseX, mouseY, partialTick);
 
-        Technology tech = this.menu.currentTech();
         int x = this.leftPos + BAR_X;
         int y = this.topPos + BAR_Y;
 
+        // 解锁计数
+        extractor.text(this.font,
+                Component.translatable("gui.astrofactory.research.unlocked_count",
+                        this.menu.unlockedCount(), this.menu.totalTechs()),
+                this.leftPos + 8, this.topPos + 14, 0xFF404040, false);
+
+        Technology tech = this.menu.currentTech();
         if (tech == null) {
             extractor.text(this.font,
                     Component.translatable("gui.astrofactory.research.none"),
-                    x, y, 0xFF555555, false);
+                    x, this.topPos + 24, 0xFF555555, false);
             return;
         }
 
@@ -73,7 +107,17 @@ public class LabScreen extends AbstractContainerScreen<LabMenu> {
 
         // 科技名
         extractor.text(this.font, Component.translatable(tech.displayKey()),
-                x, y - 11, 0xFF404040, false);
+                x, this.topPos + 24, 0xFF404040, false);
+
+        // 第 n / m 个可研究项（多于 1 个时才显示，提示可以切换）
+        int count = this.menu.researchableCount();
+        if (count > 1) {
+            extractor.text(this.font,
+                    Component.translatable("gui.astrofactory.research.target_index",
+                            this.menu.selectedOrdinal() + 1, count),
+                    this.leftPos + 148, this.topPos + 24, 0xFF808080, false);
+        }
+
         // 进度条底
         extractor.fill(x, y, x + BAR_W, y + BAR_H, 0xFF3A3A3A);
         // 进度条填充
@@ -81,11 +125,6 @@ public class LabScreen extends AbstractContainerScreen<LabMenu> {
                 0xFF4FC3F7);
         // 数值
         extractor.text(this.font, Component.literal(points + " / " + cost),
-                x, y + BAR_H + 2, 0xFF404040, false);
-        // 解锁计数
-        extractor.text(this.font,
-                Component.translatable("gui.astrofactory.research.unlocked_count",
-                        this.menu.unlockedCount(), this.menu.totalTechs()),
-                this.leftPos + 8, this.topPos + 30, 0xFF404040, false);
+                x, this.topPos + 44, 0xFF404040, false);
     }
 }

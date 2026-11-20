@@ -85,6 +85,28 @@ public final class ModEvents {
                                     prog[0], prog[1]), false);
                             return 1;
                         }))
+                        .then(Commands.literal("tech").executes(ctx -> {
+                            var src = ctx.getSource();
+                            if (!(src.getEntity() instanceof ServerPlayer sp)) {
+                                src.sendFailure(Component.translatable("quest.astrofactory.needs_player"));
+                                return 0;
+                            }
+                            var progress = com.xiaoyi.astrofactory.research.ResearchProgress.of(sp);
+                            src.sendSuccess(() -> Component.translatable("tech.astrofactory.header"), false);
+                            for (var tech : com.xiaoyi.astrofactory.research.Technologies.all()) {
+                                boolean unlocked = progress.isUnlocked(tech.id());
+                                boolean ready = com.xiaoyi.astrofactory.research.Technologies
+                                        .prerequisitesMet(tech, progress.unlocked);
+                                String mark = unlocked ? "[OK]" : (ready ? "[  ]" : "[--]");
+                                int pts = progress.getPoints(tech.id());
+                                src.sendSuccess(() -> Component.literal("  " + mark + " ")
+                                        .append(Component.translatable(tech.displayKey()))
+                                        .append(Component.literal("  " + pts + "/" + tech.cost()
+                                                + (tech.prerequisites().isEmpty() ? ""
+                                                : "  <- " + String.join(" + ", tech.prerequisites())))), false);
+                            }
+                            return 1;
+                        }))
                         .then(Commands.literal("level").executes(ctx -> {
                             var src = ctx.getSource();
                             if (!(src.getEntity() instanceof ServerPlayer sp)) {

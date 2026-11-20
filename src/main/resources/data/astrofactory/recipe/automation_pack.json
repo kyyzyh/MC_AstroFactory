@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:copper_ingot",
+    "astrofactory:iron_gear"
+  ],
+  "result": {
+    "count": 1,
+    "id": "astrofactory:automation_pack"
+  }
+}

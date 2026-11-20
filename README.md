@@ -139,7 +139,12 @@ gradlew.bat build --offline
 ```
 src/main/java/com/xiaoyi/astrofactory/
 ├── Astrofactory.java          @Mod 主类
-├── ModRegistry.java           全部注册入口（方块/物品/BE/菜单/创造页）
+├── ModRegistry.java           注册总入口（转发别名，保持旧代码 ModRegistry.XXX 可用）
+├── registry/                  按职责拆分的注册类：ModBlocks / ModItems /
+│                              ModBlockEntities / ModMenus / ModCreativeTab
+├── machine/                   机器公共骨架：AbstractMachineEntity（容器+多方块）、
+│                              MachineStorage（新旧存档兼容）、MachineOutput、
+│                              MultiBlockOps、OreVeinProspector（矿脉查找）
 ├── block/                     13 方块 + 12 方块实体
 ├── power/                     PowerSource / FuelPowerSource / Steam / Electric 网络
 ├── multiblock/                MultiBlockMachineBlock + MultiBlockHelper
@@ -148,7 +153,9 @@ src/main/java/com/xiaoyi/astrofactory/
 ├── recipe/                    机器配方数据化（内置 + 数据包 machine_recipes）
 ├── research/                  科技树定义与玩家进度
 └── world/                     OreVeinData 矿田幂等生成
+```
 
+```
 src/main/resources/assets/astrofactory/   模型/贴图/语言（中英双语）
 docs/api-26.3-notes.md                    26.3 API 实测笔记（javap 反编译得出）
 tools/                                   贴图生成脚本（PIL 程序化绘制）

@@ -21,6 +21,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.BlockHitResult;
@@ -57,7 +58,17 @@ public abstract class MultiBlockMachineBlock extends BaseEntityBlock {
      * <p>每种机器自己声明属性范围（2×2 用 0..3，3×3 用 0..8，2×3 用 0..5），
      * 这样 blockstate 只需覆盖真实存在的状态，不会出现缺失模型的警告。</p>
      */
-    protected abstract IntegerProperty partProperty();
+    public abstract IntegerProperty partProperty();
+
+    /**
+     * 该机器的「运行中」外观属性；没有发光状态的机器（如科研台）返回 {@code null}。
+     *
+     * <p>供 {@link com.xiaoyi.astrofactory.machine.AbstractMachineEntity#setActive}
+     * 统一做整机同步，避免每个 BE 各写一遍循环。</p>
+     */
+    public @Nullable BooleanProperty activeProperty() {
+        return null;
+    }
 
     protected MultiBlockMachineBlock(Properties properties) {
         super(properties);

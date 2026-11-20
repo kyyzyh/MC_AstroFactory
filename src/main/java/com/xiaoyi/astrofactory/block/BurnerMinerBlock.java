@@ -38,8 +38,13 @@ public class BurnerMinerBlock extends MultiBlockMachineBlock {
     }
 
     @Override
-    protected IntegerProperty partProperty() {
+    public IntegerProperty partProperty() {
         return PART;
+    }
+
+    @Override
+    public BooleanProperty activeProperty() {
+        return ACTIVE;
     }
 
     @Override

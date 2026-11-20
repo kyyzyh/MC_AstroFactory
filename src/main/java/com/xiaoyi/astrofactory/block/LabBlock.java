@@ -30,7 +30,7 @@ public class LabBlock extends MultiBlockMachineBlock {
     }
 
     @Override
-    protected IntegerProperty partProperty() {
+    public IntegerProperty partProperty() {
         return PART;
     }
 

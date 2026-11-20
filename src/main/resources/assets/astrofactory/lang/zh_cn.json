@@ -65,7 +65,7 @@
   "item.astrofactory.guide_book": "新手手册",
   "msg.astrofactory.starter.given": "[AstroFactory] 已发放出生点包：1 采矿机 + 1 石熔炉 + 20 传送带 + 1 手册。右键手册查看 10 步教程。",
   "block.astrofactory.ore_vein": "矿脉",
-  "item.astrofactory.ore_vein": "矿脉"
+  "item.astrofactory.ore_vein": "矿脉",
 
   "story.astrofactory.header": "【赫斯珀里亚 · 背景】",
   "story.astrofactory.line1": "你是母船「回声号」的自动化工程师。降落舱在赫斯珀里亚星的大气层里烧穿了导航阵列，母船失联。",

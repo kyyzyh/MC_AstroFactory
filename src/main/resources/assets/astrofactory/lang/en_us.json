@@ -65,7 +65,7 @@
   "item.astrofactory.guide_book": "Beginner's Handbook",
   "msg.astrofactory.starter.given": "[AstroFactory] Starter kit given: 1 miner + 1 stone furnace + 20 belts + 1 handbook. Right-click the handbook for the 10-step guide.",
   "block.astrofactory.ore_vein": "Ore Vein",
-  "item.astrofactory.ore_vein": "Ore Vein"
+  "item.astrofactory.ore_vein": "Ore Vein",
 
   "story.astrofactory.header": "[Hesperia · Background]",
   "story.astrofactory.line1": "You are the automation engineer aboard the mothership Echo. Your descent pod burned through the navigation array in Hesperia's atmosphere. The mothership is gone.",

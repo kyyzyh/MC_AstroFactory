@@ -4,20 +4,20 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 
 import com.xiaoyi.astrofactory.ModRegistry;
+import com.xiaoyi.astrofactory.machine.MultiBlockOps;
 import com.xiaoyi.astrofactory.power.ISteamNode;
 import com.xiaoyi.astrofactory.power.SteamNetwork;
 
 /**
  * 离岸泵方块实体（规格 §5.5）：贴水时持续产蒸汽。
  *
- * <p>最小实现：检测周围是否有水方块；有就每 {@link #PUMP_INTERVAL} tick 产 1 蒸汽注入相邻管道。
+ * <p>检测周围是否有水方块；有就每 {@link #PUMP_INTERVAL} tick 产 1 蒸汽注入相邻管道。
  * 不消耗燃料（水是无限资源），这样蒸汽链有"锅炉烧煤"和"离岸泵抽水"两种供给方式。</p>
  */
 public class OffshorePumpBlockEntity extends BlockEntity implements ISteamNode {
@@ -39,14 +39,7 @@ public class OffshorePumpBlockEntity extends BlockEntity implements ISteamNode {
     @Override
     public void onLoad() {
         super.onLoad();
-        Level level = this.getLevel();
-        if (level == null || level.isClientSide()) {
-            return;
-        }
-        BlockState state = this.getBlockState();
-        if (state.getBlock() instanceof OffshorePumpBlock blk && state.getValue(OffshorePumpBlock.PART) == 0) {
-            blk.repair(level, this.getBlockPos(), state);
-        }
+        MultiBlockOps.repairOnLoad(this);
     }
 
     private void tickServer(Level level, BlockPos pos, BlockState state) {
@@ -63,23 +56,11 @@ public class OffshorePumpBlockEntity extends BlockEntity implements ISteamNode {
             }
         }
 
-        if (SteamNetwork.equalizeFromCells(level,
-                com.xiaoyi.astrofactory.multiblock.MultiBlockHelper
-                        .allCells(pos, state.getValue(OffshorePumpBlock.FACING), 1, 2),
-                this)) {
+        if (SteamNetwork.equalizeFromCells(level, MultiBlockOps.allCells(this), this)) {
             setChanged();
         }
 
-        if (state.getValue(OffshorePumpBlock.ACTIVE) != producing) {
-            for (BlockPos cell : com.xiaoyi.astrofactory.multiblock.MultiBlockHelper
-                    .allCells(pos, state.getValue(OffshorePumpBlock.FACING), 1, 2)) {
-                BlockState cellState = level.getBlockState(cell);
-                if (cellState.getBlock() instanceof OffshorePumpBlock
-                        && cellState.getValue(OffshorePumpBlock.ACTIVE) != producing) {
-                    level.setBlock(cell, cellState.setValue(OffshorePumpBlock.ACTIVE, producing), 3);
-                }
-            }
-        }
+        MultiBlockOps.setActive(this, producing);
     }
 
     private boolean nearWater(Level level, BlockPos pos) {

@@ -177,5 +177,6 @@ public final class ModRegistry {
         ModCreativeTab.CREATIVE_TABS.register(modBus);
         com.xiaoyi.astrofactory.research.ResearchProgress.register(modBus);
         com.xiaoyi.astrofactory.level.PlayerLevel.register(modBus);
+        com.xiaoyi.astrofactory.tutorial.Tutorial.register(modBus);
     }
 }

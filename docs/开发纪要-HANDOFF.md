@@ -3,8 +3,8 @@
 > **给接手的 AI / 开发者**：本文是「从头到现在做了什么」的完整记录。
 > 想快速了解项目看 `README.md`；想知道**为什么这样做、踩过什么坑、还差什么**，看本文。
 >
-> 最后更新：2026-11-20 18:45
-> 当前提交：`7e28df6`（工作区干净）
+> 最后更新：2026-11-20 18:56
+> 当前提交：`032b368`（工作区干净）
 
 ---
 
@@ -19,7 +19,7 @@
 | 规模 | 73 个 Java 文件 / 7620 行；13 方块 / 22 物品 / 13 方块实体 |
 | 版本 | 0.1.0（20 次提交，`0118c2a` → `7e28df6`） |
 | 仓库 | `https://github.com/kyyzyh/MC_AstroFactory.git` |
-| 最新产物 | `build/libs/astrofactory-0.1.0.jar`（830 KB），已复制到 `E:\AI Work\XiaoYi\MC\McMod\` |
+| 最新产物 | `build/libs/astrofactory-0.1.0.jar`（830 KB） |
 | 状态 | 可构建、可运行、旧存档兼容验证通过 |
 
 **一句话**：规格 v3.2 的 8 个阶段里，阶段 1–6 已实现并验证；阶段 7（科技树重写）、阶段 8（新手教程 HUD）部分完成。
@@ -53,6 +53,17 @@ gradlew.bat runServer --offline    :: 服务端，--nogui
 - `runData` **不可用**（moddev 2.0.148 没定义 data run 类型），所有资源都是手写或脚本生成。
 - 用 bash 后台跑 `gradlew.bat` 容易留下僵尸 JVM 占住 25565 端口，第二次启动会 `BindException`。杀进程：`taskkill //PID <pid> //F`。查端口占用：`netstat -ano | Select-String ":25565"`。
 - `gradlew.bat runClient --args="..."` **不生效**（会被当成主类名）。要传参必须在 `build.gradle` 里新建一个 run 配置。
+
+**构建流程里自动做的两件事**（`032b368` 起）：
+
+| 任务 | 时机 | 作用 |
+|---|---|---|
+| `validateJson` | 挂在 `check`，`build` 会跑 | 递归校验 `src/main/resources` 下全部 `.json`（当前 495 个）。**Gradle 打包不校验 JSON 内容**，语法错会一路带进游戏。 |
+| `syncJar` | `build` 后自动触发 | 把 jar 复制到 ①`game_mods_dir`（`gradle.properties` 配置，当前指向 HMCL 的 `26.3-NeoForge/mods`）②`dist/` ③`../MC/McMod/`；并清理同 modId 的旧版本 jar。目标目录不存在则跳过。 |
+
+> **真实事故**：`zh_cn.json` 少一个逗号 → `gradlew build` 成功 → 进游戏才报
+> `MalformedJsonException` → 整个语言文件被丢弃 → **界面全部回落成英文**。
+> 这就是加 `validateJson` 的原因。同类问题（模型/配方/成就 JSON）都会静默通过构建。
 
 ---
 
@@ -258,6 +269,33 @@ registry/ModCreativeTab.java   创造模式标签页
 - 结果：采矿机燃料槽 coal×61/62/63、锅炉 coal×62/63、熔炉 slot0 coal×64、组装机 slot0 electronic_circuit×16 **全部正确还原**
 - 102 个 AstroFactory 方块实体全部正常实例化，零 exception
 - 存档回写后自动升级成官方带 `Slot` 字段的新格式（老档只读一次即升级）
+
+### 11-20 18:53 · 修「启动是英文」+ 构建流程加固（`032b368`）—— 最新提交
+
+**现象**：用户启动游戏，模组内容全是英文（`Transport Belt` 而非「传送带」），但 `options.txt` 里 `lang:zh_cn` 正常。
+
+**根因链**：
+
+```
+14:00 打的 dist/ jar 里 zh_cn.json / en_us.json 各缺一个逗号
+   ↓（Gradle 打包不校验 JSON 内容，构建显示 SUCCESSFUL）
+用户复制进 E:\Game\MC\.minecraft\versions\26.3-NeoForge\mods\
+   ↓
+18:45 启动 → 日志 WARN: Unable to load languages: [en_us, zh_cn]
+              MalformedJsonException: Unterminated object at line 70 column 4
+              path $.item.astrofactory.ore_vein
+   ↓
+整个语言文件被丢弃 → 所有名字回落成英文注册名
+```
+
+**处理**：
+
+1. 用 `a5e5e88cbc45`（17:17 重构后含修复的构建）替换游戏 mods 目录里的坏 jar，旧的备份到 `mods/_backup/`。
+2. 新增 `validateJson` 任务并挂到 `check`——递归校验 495 个 JSON，失败时给文件路径 + 行号 + 上下文。**已故意复现原始 bug 实测能拦住。**
+3. 新增 `syncJar` 任务，`build` 后自动同步到游戏 mods 目录 / `dist/` / `../MC/McMod/`，并清理同 modId 旧 jar。
+4. `gradle.properties` 加 `game_mods_dir=E:/Game/MC/.minecraft/versions/26.3-NeoForge/mods`。
+
+**教训**：JSON 类资源「打包成功」≠「内容合法」。构建通过不等于游戏能跑。
 
 ---
 

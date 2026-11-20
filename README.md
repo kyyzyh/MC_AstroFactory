@@ -67,7 +67,7 @@ gradlew.bat build --offline
 
 | 方块 | 说明 |
 |---|---|
-| 传送带 `transport_belt` | 真连续移动，**2 条**并行轨道，支持汇流与 backpressure，物品按 progress 平滑插值渲染。带速 0.094/tick（约 10.6 tick 走一格） |
+| 传送带 `transport_belt` | 真连续移动，**2 条**并行轨道，支持汇流与 backpressure，物品按 progress 平滑插值渲染。带速 0.094/tick（约 10.6 tick 走一格）。**支持斜坡**：`SLOPE` 三态（flat/up/down）按相邻带子自动判定，物品 y 线性插值，可逐格爬升/下降 |
 | 高速传送带 `fast_transport_belt` | 带速 0.188（2 倍），由 `logistics_1` 解锁 |
 | 机械臂 `burner_inserter` | **自己烧煤 + stolen 燃料**，背面抓、正面放，遵守容器的 `canPlaceItem`（不会塞进输出槽）；目标满了拿在手上等，不丢物品 |
 
@@ -188,8 +188,9 @@ tools/                                   贴图生成脚本（PIL 程序化绘�
 - 阶段④「制作台」已删，零件走熔炼炉 crafting 通道；README 与部分历史文案仍写「制作台」
 - `copper_cable` 注册名与中文显示「铜线」不一致，配方/成就/指南文案统一写「铜线圈」（历史遗留，待统一）
 - 科技树 9 个节点已全部接入，但 `unlocks` 里的 `assembler_2` / `steel_furnace` / `steel_chest` 等**尚无对应方块**（0.1.0 范围外，仅作展示）
-- 斜坡传送带（SLOPE 属性 + 线性插值 + 上下交接）未实现（规格新增待办）
 - 出生点包（1 采矿机 + 1 石熔炉 + 20 传送带 + 1 手册）未实现
 - 配方表内置部分是硬编码 Java，数据包 `machine_recipes` 已有 3 条示例（含红瓶）
+- 下坡段的物品会从本格带面斜穿到格底再进入下一格，**下坡段下方必须是空气**（架空坡道），否则视觉上物品像钻进地面
+- 斜坡传送带只做 1 格高差（45°），不支持 2 格以上单段跨越，需逐格串联
 - 机械臂的抓取/投放逻辑较简单，未做多方块结构与朝向寻址（`canPlaceItem` 已遵守）
 - 已用 git 版本控制并推送（`https://github.com/kyyzyh/MC_AstroFactory.git`）

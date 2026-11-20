@@ -1,18 +1,48 @@
 {
   "variants": {
-    "facing=north": {
+    "facing=north,slope=flat": {
       "model": "astrofactory:block/fast_transport_belt"
     },
-    "facing=east": {
+    "facing=north,slope=up": {
+      "model": "astrofactory:block/fast_transport_belt_up"
+    },
+    "facing=north,slope=down": {
+      "model": "astrofactory:block/fast_transport_belt_down"
+    },
+    "facing=east,slope=flat": {
       "model": "astrofactory:block/fast_transport_belt",
       "y": 90
     },
-    "facing=south": {
+    "facing=east,slope=up": {
+      "model": "astrofactory:block/fast_transport_belt_up",
+      "y": 90
+    },
+    "facing=east,slope=down": {
+      "model": "astrofactory:block/fast_transport_belt_down",
+      "y": 90
+    },
+    "facing=south,slope=flat": {
       "model": "astrofactory:block/fast_transport_belt",
       "y": 180
     },
-    "facing=west": {
+    "facing=south,slope=up": {
+      "model": "astrofactory:block/fast_transport_belt_up",
+      "y": 180
+    },
+    "facing=south,slope=down": {
+      "model": "astrofactory:block/fast_transport_belt_down",
+      "y": 180
+    },
+    "facing=west,slope=flat": {
       "model": "astrofactory:block/fast_transport_belt",
+      "y": 270
+    },
+    "facing=west,slope=up": {
+      "model": "astrofactory:block/fast_transport_belt_up",
+      "y": 270
+    },
+    "facing=west,slope=down": {
+      "model": "astrofactory:block/fast_transport_belt_down",
       "y": 270
     }
   }

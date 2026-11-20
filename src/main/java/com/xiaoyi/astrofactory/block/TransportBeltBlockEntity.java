@@ -74,6 +74,40 @@ public class TransportBeltBlockEntity extends BlockEntity {
         return SPEED;
     }
 
+    /** 本格的坡度；非传送带方块（异常情况）按平坦处理。 */
+    public TransportBeltBlock.Slope getSlope() {
+        BlockState state = getBlockState();
+        if (state.hasProperty(TransportBeltBlock.SLOPE)) {
+            return state.getValue(TransportBeltBlock.SLOPE);
+        }
+        return TransportBeltBlock.Slope.FLAT;
+    }
+
+    /**
+     * 本格的出口位置（物品 progress 达到 1.0 后要去的格子）。
+     *
+     * <pre>
+     *   flat -> pos.relative(facing)
+     *   up   -> pos.relative(facing).above()
+     *   down -> pos.relative(facing).below()
+     * </pre>
+     *
+     * <p>「上下游必须同向」在这里自然成立：出口格如果不是同向带子，
+     * 就交接失败 → 物品停在末端 → 背压向上游传导（规格 §5.2）。</p>
+     */
+    public BlockPos exitPos(BlockState state) {
+        Direction facing = state.getValue(TransportBeltBlock.FACING);
+        BlockPos front = getBlockPos().relative(facing);
+        TransportBeltBlock.Slope slope = getSlope();
+        if (slope.exitsAbove()) {
+            return front.above();
+        }
+        if (slope.exitsBelow()) {
+            return front.below();
+        }
+        return front;
+    }
+
     // ------------------------------------------------------------ 服务端推进
 
     public static void serverTick(Level level, BlockPos pos, BlockState state, TransportBeltBlockEntity be) {
@@ -88,7 +122,6 @@ public class TransportBeltBlockEntity extends BlockEntity {
             }
             return;
         }
-        Direction facing = state.getValue(TransportBeltBlock.FACING);
         boolean changed = false;
         float speed = getSpeed();
 
@@ -106,7 +139,8 @@ public class TransportBeltBlockEntity extends BlockEntity {
             }
         }
         if (!leaving.isEmpty()) {
-            BlockPos nextPos = pos.relative(facing);
+            // 出口位置由坡度决定：flat 同级 / up 上一格 / down 下一格
+            BlockPos nextPos = exitPos(state);
             BlockState nextState = level.getBlockState(nextPos);
             TransportBeltBlockEntity next = null;
             if (nextState.getBlock() instanceof TransportBeltBlock
@@ -122,7 +156,7 @@ public class TransportBeltBlockEntity extends BlockEntity {
                     items.remove(slot);
                     markSyncDirty();
                 } else {
-                    // 下游阻塞：停在末端等待（不越过 1.0，避免视觉穿模）
+                    // 下游阻塞（含上下游不同向 / 坡顶没有带子）：停在末端等待
                     slot.progress = 1.0f - speed;
                 }
             }

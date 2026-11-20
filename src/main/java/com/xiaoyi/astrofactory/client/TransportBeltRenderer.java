@@ -27,8 +27,12 @@ import java.util.List;
 /**
  * 传送带物品渲染（26.3 渲染管线：extract -> submit）。
  *
- * 位置按 progress 连续插值，因此物品在带面上是平滑滑动，
- * 而不是逐格跳动——这是"真传送带"的视觉关键。
+ * <p>位置按 progress 连续插值，因此物品在带面上是平滑滑动，
+ * 而不是逐格跳动 —— 这是「真传送带」的视觉关键。</p>
+ *
+ * <p><b>坡度</b>：y 坐标按 {@code 0.1875 + progress × 坡度高度差} <b>线性插值</b>
+ * （规格 §5.2 明确禁止曲线插值）。三种坡度的入口 y 都是 0.1875，
+ * 所以相邻带子交接时物品高度天然连续。</p>
  */
 public class TransportBeltRenderer
         implements BlockEntityRenderer<TransportBeltBlockEntity, TransportBeltRenderer.State> {
@@ -43,6 +47,7 @@ public class TransportBeltRenderer
     public static class State extends BlockEntityRenderState {
         public final List<TransportBeltBlockEntity.ItemSlot> slots = new ArrayList<>();
         public Direction facing = Direction.NORTH;
+        public TransportBeltBlock.Slope slope = TransportBeltBlock.Slope.FLAT;
         public float partialTick;
         public float speed = TransportBeltBlockEntity.SPEED;
         public Level level;
@@ -67,6 +72,9 @@ public class TransportBeltRenderer
         state.facing = blockState.hasProperty(TransportBeltBlock.FACING)
                 ? blockState.getValue(TransportBeltBlock.FACING)
                 : Direction.NORTH;
+        state.slope = blockState.hasProperty(TransportBeltBlock.SLOPE)
+                ? blockState.getValue(TransportBeltBlock.SLOPE)
+                : TransportBeltBlock.Slope.FLAT;
         state.partialTick = partialTick;
         state.speed = be.getSpeed();
         state.level = be.getLevel();
@@ -74,15 +82,27 @@ public class TransportBeltRenderer
 
     @Override
     public int getViewDistance() {
-        // 距离剔除：超过 64 格不渲染（规格 6.4 与工程约束"性能红线"）。
+        // 距离剔除：超过 64 格不渲染（规格 6.4 与工程约束「性能红线」）。
         return 64;
     }
 
     @Override
     public AABB getRenderBoundingBox(TransportBeltBlockEntity blockEntity) {
-        // 视锥剔除由 BlockEntityRenderDispatcher 依据此包围盒判定；
-        // 物品可能略超出格边界，给 0.25 余量。
-        return new AABB(blockEntity.getBlockPos()).inflate(0.25);
+        // 视锥剔除由 BlockEntityRenderDispatcher 依据此包围盒判定。
+        // up 的物品会爬到上一格、down 的物品会降到下一格，两者都要扩包围盒，
+        // 否则坡顶 / 坡底的物品会被误剔除（视觉上「闪一下消失」）。
+        AABB box = new AABB(blockEntity.getBlockPos()).inflate(0.25);
+        BlockState state = blockEntity.getBlockState();
+        if (state.hasProperty(TransportBeltBlock.SLOPE)) {
+            TransportBeltBlock.Slope slope = state.getValue(TransportBeltBlock.SLOPE);
+            if (slope.exitsAbove()) {
+                return box.expandTowards(0.0, 1.0, 0.0);
+            }
+            if (slope.exitsBelow()) {
+                return box.expandTowards(0.0, -1.0, 0.0);
+            }
+        }
+        return box;
     }
 
     @Override
@@ -111,6 +131,9 @@ public class TransportBeltRenderer
                 default -> { }
             }
 
+            // 坡度：y 线性插值（规格 §5.2 明确禁止曲线插值）
+            double y = state.slope.yAt(progress) + 0.0125;   // 略高于带面，避免 z-fighting
+
             itemRenderState.clear();
             itemModelResolver.updateForTopItem(itemRenderState, slot.stack,
                     ItemDisplayContext.GROUND, state.level, owner, 0);
@@ -119,7 +142,7 @@ public class TransportBeltRenderer
             }
 
             poseStack.pushPose();
-            poseStack.translate(x, 0.20, z);
+            poseStack.translate(x, y, z);
             poseStack.scale(0.42f, 0.42f, 0.42f);
             itemRenderState.submit(poseStack, collector,
                     state.lightCoords, OverlayTexture.NO_OVERLAY, 0);

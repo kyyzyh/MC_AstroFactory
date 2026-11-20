@@ -138,6 +138,103 @@ tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
 
+// ---------------------------------------------------------------------------
+// 资源校验：Gradle 打包不校验 JSON 内容，语法错会一路带到游戏里
+// （真实事故：lang 少一个逗号 → 整个语言文件被丢弃 → 界面回落成英文）
+// ---------------------------------------------------------------------------
+def jsonSourceDir = file('src/main/resources')
+
+tasks.register('validateJson') {
+    description = '校验 src/main/resources 下所有 .json 的语法'
+    group = 'verification'
+
+    def scanDir = jsonSourceDir
+    inputs.dir(scanDir)
+    outputs.upToDateWhen { false }   // 每次都查，成本很低（毫秒级）
+
+    doLast {
+        def errors = []
+        def count = 0
+        scanDir.eachFileRecurse { f ->
+            if (!f.isFile() || !f.name.endsWith('.json')) {
+                return
+            }
+            count++
+            try {
+                new groovy.json.JsonSlurper().parseText(f.getText('UTF-8'))
+            } catch (Exception e) {
+                errors << "  ${f.absolutePath.replace(scanDir.absolutePath + File.separator, '')}\n    -> ${e.message}"
+            }
+        }
+        if (!errors.isEmpty()) {
+            throw new GradleException(
+                    "JSON 语法错误 ${errors.size()} 处（共检查 ${count} 个文件）：\n" + errors.join('\n'))
+        }
+        logger.lifecycle("JSON 校验通过：${count} 个文件")
+    }
+}
+
+tasks.named('check').configure {
+    dependsOn 'validateJson'
+}
+
+// ---------------------------------------------------------------------------
+// 构建产物自动同步
+//   build 成功后 → 复制 jar 到游戏 mods 目录 + dist/ + ../McMod/
+//   目标路径在 gradle.properties 的 game_mods_dir 里配置；
+//   目录不存在时跳过（换机器构建不会报错）。
+// ---------------------------------------------------------------------------
+def jarFile = tasks.named('jar').flatMap { it.archiveFile }
+def syncTargets = [
+        'game' : providers.gradleProperty('game_mods_dir').getOrElse(''),
+        'dist' : file('dist').absolutePath,
+        'McMod': file('../MC/McMod').absolutePath,
+]
+
+tasks.register('syncJar') {
+    description = '把构建产物同步到游戏 mods 目录、dist/ 与 ../McMod/'
+    group = 'distribution'
+    dependsOn tasks.named('jar')
+
+    def archive = jarFile
+    def targets = syncTargets
+    def modIdPrefix = mod_id + '-'
+
+    doLast {
+        def src = archive.get().asFile
+        if (!src.exists()) {
+            throw new GradleException("找不到构建产物：${src}")
+        }
+        targets.each { name, dirPath ->
+            if (!dirPath) {
+                logger.lifecycle("[sync] 跳过 ${name}：未配置路径")
+                return
+            }
+            def dir = new File(dirPath)
+            if (!dir.parentFile?.exists()) {
+                logger.lifecycle("[sync] 跳过 ${name}：父目录不存在 ${dir}")
+                return
+            }
+            dir.mkdirs()
+            // 清掉旧版本同名 jar，否则两个 jar 同 modId 会启动即崩
+            dir.listFiles()?.each { f ->
+                if (f.isFile() && f.name.startsWith(modIdPrefix) && f.name.endsWith('.jar')
+                        && f.name != src.name) {
+                    f.delete()
+                    logger.lifecycle("[sync] 移除旧版本 ${name}/${f.name}")
+                }
+            }
+            def dest = new File(dir, src.name)
+            dest.bytes = src.bytes
+            logger.lifecycle("[sync] ${name} <- ${dest.absolutePath} (${src.length()} bytes)")
+        }
+    }
+}
+
+tasks.named('build').configure {
+    finalizedBy 'syncJar'
+}
+
 jar {
     manifest {
         attributes([

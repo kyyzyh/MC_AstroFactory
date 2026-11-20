@@ -1,0 +1,9 @@
+{
+  "type": "smelting",
+  "ingredients": [
+    "minecraft:raw_gold"
+  ],
+  "result": "minecraft:gold_ingot",
+  "count": 1,
+  "time": 60
+}

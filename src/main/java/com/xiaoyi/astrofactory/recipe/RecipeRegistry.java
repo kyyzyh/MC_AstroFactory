@@ -62,21 +62,12 @@ public final class RecipeRegistry {
         }
         List<MachineRecipe> list = new ArrayList<>();
 
-        // ---- 熔炼炉：原矿 -> 锭
+        // 规格 §6：配方走 JSON，Java 只放默认值。
+        // 完整配方在 data/astrofactory/machine_recipes/*.json（11 条），
+        // 这里只保留「零数据包也能跑通最小产线」的兜底 3 条：
+        // 原矿 -> 锭 -> 齿轮 -> 电路板。缺了数据包，玩家仍能走完主线。
         smelt(list, "raw_iron_to_iron_ingot", Items.RAW_IRON, Items.IRON_INGOT);
-        smelt(list, "raw_copper_to_copper_ingot", Items.RAW_COPPER, Items.COPPER_INGOT);
-        smelt(list, "raw_gold_to_gold_ingot", Items.RAW_GOLD, Items.GOLD_INGOT);
-        smelt(list, "cobblestone_to_stone", Items.COBBLESTONE, Items.STONE);
-        smelt(list, "sand_to_glass", Items.SAND, Items.GLASS);
-
-        // ---- 制作台：锭 -> 零件
         craft(list, "iron_ingot_to_iron_gear", Items.IRON_INGOT, 2, ModRegistry.IRON_GEAR.get(), 1);
-        craft(list, "copper_ingot_to_copper_coil", Items.COPPER_INGOT, 3, ModRegistry.COPPER_CABLE.get(), 1);
-
-        // ---- 组装机：零件 -> 成品（3x3 网格，行优先）
-        //  g c g
-        //  . c .
-        //  . . .
         assemble(list, "circuit_board", new String[]{"gcg", ".c.", "..."},
                 Map.of('g', ModRegistry.IRON_GEAR.get(),
                         'c', ModRegistry.COPPER_CABLE.get()),
@@ -104,8 +95,15 @@ public final class RecipeRegistry {
                 expandPattern(rows, key), result, count, MachineType.ASSEMBLING.defaultTicks()));
     }
 
+    /**
+     * 兜底配方 id —— <b>与数据包同名配方使用完全相同的 id</b>。
+     *
+     * <p>这样数据包里的 {@code raw_iron_to_iron_ingot.json} 会覆盖同名的兜底条目，
+     * 而不是在 {@link #all()} 里出现两条内容相同的配方。这正是本类注释里
+     * 「同一 id 数据包覆盖内置」的设计意图。</p>
+     */
     private static Identifier builtinId(String name) {
-        return Identifier.fromNamespaceAndPath(com.xiaoyi.astrofactory.Astrofactory.MODID, "builtin/" + name);
+        return Identifier.fromNamespaceAndPath(com.xiaoyi.astrofactory.Astrofactory.MODID, name);
     }
 
     /** 把 3 行图案 + 字符表展开成 9 格输入（null 表示该格不放东西）。 */

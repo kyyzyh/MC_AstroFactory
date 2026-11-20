@@ -1,0 +1,181 @@
+package com.xiaoyi.astrofactory.demo;
+
+import com.mojang.logging.LogUtils;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.server.ServerStartedEvent;
+import org.slf4j.Logger;
+
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+
+import com.xiaoyi.astrofactory.Astrofactory;
+import com.xiaoyi.astrofactory.ModRegistry;
+import com.xiaoyi.astrofactory.recipe.MachineRecipe;
+import com.xiaoyi.astrofactory.recipe.MachineType;
+import com.xiaoyi.astrofactory.recipe.RecipeRegistry;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * 【临时探针】机器配方 JSON 化自检，跑完自动关服。不属于交付代码。
+ *
+ * 覆盖（规格 §6「配方走 JSON，Java 只放默认值」）：
+ * 1. 数据包 11 条配方全部解析成功（不是靠兜底）
+ * 2. 每条配方都能按输入匹配到（ItemStack 匹配真的通）
+ * 3. 同 id 数据包覆盖兜底，不出现重复
+ * 4. 兜底 3 条仍在（拔掉数据包也能跑最小产线）
+ * 5. 配方产物 ItemStack 可正常构造（组件已绑定）
+ */
+@EventBusSubscriber(modid = Astrofactory.MODID)
+public final class RecipeProbe {
+    private static final Logger LOGGER = LogUtils.getLogger();
+    private static int passed = 0;
+    private static int failed = 0;
+
+    @SubscribeEvent
+    public static void onServerStarted(ServerStartedEvent event) {
+        try {
+            run(event.getServer().overworld());
+        } catch (Throwable t) {
+            LOGGER.error("[recipeprobe] FAILED", t);
+            failed++;
+        } finally {
+            LOGGER.info("[recipeprobe] passed={} failed={}", passed, failed);
+            LOGGER.info("[recipeprobe] done, halting");
+            event.getServer().halt(false);
+        }
+    }
+
+    private static void check(String name, boolean ok) {
+        if (ok) {
+            passed++;
+            LOGGER.info("[recipeprobe]   OK {}", name);
+        } else {
+            failed++;
+            LOGGER.error("[recipeprobe]   FAIL {}", name);
+        }
+    }
+
+    private static void run(ServerLevel level) {
+        List<MachineRecipe> all = RecipeRegistry.all();
+        LOGGER.info("[recipeprobe] 配方总数={}", all.size());
+        for (MachineRecipe r : all) {
+            LOGGER.info("[recipeprobe]   {} type={} ticks={} -> {} x{}",
+                    r.id(), r.type(), r.ticks(), r.result(), r.count());
+        }
+
+        // ============ 1. 数据包 11 条全部解析成功 ============
+        // 数据包配方 id 形如 astrofactory:raw_iron_to_iron_ingot（不含 builtin/ 前缀）
+        List<String> expected = List.of(
+                "raw_iron_to_iron_ingot", "raw_copper_to_copper_ingot", "raw_gold_to_gold_ingot",
+                "cobblestone_to_stone", "sand_to_glass",
+                "iron_ingot_to_iron_gear", "copper_ingot_to_copper_coil",
+                "circuit_board", "automation_pack", "clay_to_brick", "gold_ingot_to_nuggets");
+        int found = 0;
+        for (String name : expected) {
+            boolean hit = all.stream().anyMatch(r -> r.id().getPath().equals(name));
+            if (!hit) {
+                LOGGER.error("[recipeprobe] 缺配方 {}", name);
+            } else {
+                found++;
+            }
+        }
+        LOGGER.info("[recipeprobe] 数据包配方命中 {}/{}", found, expected.size());
+        check("11 条数据包配方全部存在", found == expected.size());
+
+        // ============ 2. 无重复 id ============
+        long distinct = all.stream().map(MachineRecipe::id).distinct().count();
+        check("配方 id 无重复（" + distinct + "/" + all.size() + "）", distinct == all.size());
+
+        // ============ 3. 单输入配方真能匹配 ============
+        MachineRecipe ironSmelt = RecipeRegistry.findSingle(
+                MachineType.SMELTING, new ItemStack(Items.RAW_IRON));
+        check("raw_iron 能匹配熔炼配方", ironSmelt != null
+                && ironSmelt.result() == Items.IRON_INGOT);
+        LOGGER.info("[recipeprobe] raw_iron -> {}", ironSmelt == null ? "null" : ironSmelt.id());
+
+        MachineRecipe gear = RecipeRegistry.findSingle(
+                MachineType.CRAFTING, new ItemStack(Items.IRON_INGOT, 2));
+        check("2 铁锭能匹配齿轮配方", gear != null
+                && gear.result() == ModRegistry.IRON_GEAR.get());
+
+        // 数量不足不该匹配
+        MachineRecipe gearShort = RecipeRegistry.findSingle(
+                MachineType.CRAFTING, new ItemStack(Items.IRON_INGOT, 1));
+        check("1 铁锭不应匹配齿轮配方（需要 2 个）", gearShort == null);
+
+        // ============ 4. 组装网格真能匹配 ============
+        List<ItemStack> grid = new ArrayList<>();
+        for (int i = 0; i < 9; i++) {
+            grid.add(ItemStack.EMPTY);
+        }
+        grid.set(0, new ItemStack(ModRegistry.IRON_GEAR.get()));
+        grid.set(1, new ItemStack(ModRegistry.COPPER_CABLE.get()));
+        grid.set(2, new ItemStack(ModRegistry.IRON_GEAR.get()));
+        grid.set(4, new ItemStack(ModRegistry.COPPER_CABLE.get()));
+        MachineRecipe circuit = RecipeRegistry.findGrid(grid);
+        check("gcg/.c./... 能匹配电路板配方", circuit != null
+                && circuit.result() == ModRegistry.ELECTRONIC_CIRCUIT.get());
+        LOGGER.info("[recipeprobe] grid -> {}", circuit == null ? "null" : circuit.id());
+
+        // 空格多放东西也应匹配（宽松摆放）
+        grid.set(8, new ItemStack(Items.STICK));
+        MachineRecipe circuitLoose = RecipeRegistry.findGrid(grid);
+        check("多余物品放空格仍能匹配（宽松摆放）", circuitLoose != null);
+
+        // ============ 5. 兜底配方仍在（拔掉数据包也能玩）============
+        // 兜底 3 条与数据包同名同 id，被数据包覆盖；这里验证它们确实被覆盖了
+        // （即 all() 里同名 id 只有一条），以及兜底逻辑本身没崩
+        long ironCount = all.stream()
+                .filter(r -> r.id().getPath().equals("raw_iron_to_iron_ingot")).count();
+        check("raw_iron_to_iron_ingot 只有一条（数据包覆盖兜底）", ironCount == 1);
+
+        long circuitCount = all.stream()
+                .filter(r -> r.id().getPath().equals("circuit_board")).count();
+        check("circuit_board 只有一条（数据包覆盖兜底）", circuitCount == 1);
+
+        // ============ 6. 产物 ItemStack 可构造（组件已绑定）============
+        boolean stackOk = true;
+        for (MachineRecipe r : all) {
+            try {
+                ItemStack st = r.resultStack();
+                if (st.isEmpty() || st.getCount() != r.count()) {
+                    stackOk = false;
+                    LOGGER.error("[recipeprobe] 产物异常 {}", r.id());
+                }
+            } catch (Throwable t) {
+                stackOk = false;
+                LOGGER.error("[recipeprobe] 构造产物失败 {}", r.id(), t);
+            }
+        }
+        check("全部配方产物 ItemStack 可构造", stackOk);
+
+        // ============ 6b. 兜底配方本身存在（数据包缺失时的退路）============
+        // builtin() 是 private，用反射读：验证「拔掉数据包也能跑最小产线」不是空话
+        int builtinCount = -1;
+        try {
+            var m = RecipeRegistry.class.getDeclaredMethod("builtin");
+            m.setAccessible(true);
+            @SuppressWarnings("unchecked")
+            List<MachineRecipe> builtinList = (List<MachineRecipe>) m.invoke(null);
+            builtinCount = builtinList.size();
+            LOGGER.info("[recipeprobe] 兜底配方 {} 条：{}", builtinCount,
+                    builtinList.stream().map(r -> r.id().getPath()).toList());
+        } catch (Throwable t) {
+            LOGGER.error("[recipeprobe] 读兜底配方失败", t);
+        }
+        check("兜底配方应为 3 条（实际 " + builtinCount + "）", builtinCount == 3);
+
+        // ============ 7. byType 分类正确 ============
+        int smelting = RecipeRegistry.byType(MachineType.SMELTING).size();
+        int crafting = RecipeRegistry.byType(MachineType.CRAFTING).size();
+        int assembling = RecipeRegistry.byType(MachineType.ASSEMBLING).size();
+        LOGGER.info("[recipeprobe] smelting={} crafting={} assembling={}",
+                smelting, crafting, assembling);
+        check("三类配方都非空", smelting > 0 && crafting > 0 && assembling > 0);
+        check("三类之和等于总数", smelting + crafting + assembling == all.size());
+    }
+}

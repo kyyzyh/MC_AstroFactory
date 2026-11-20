@@ -1,0 +1,9 @@
+{
+  "type": "smelting",
+  "ingredients": [
+    "minecraft:raw_copper"
+  ],
+  "result": "minecraft:copper_ingot",
+  "count": 1,
+  "time": 60
+}

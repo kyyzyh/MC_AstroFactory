@@ -246,6 +246,36 @@ public final class ModRegistry {
                     props -> new com.xiaoyi.astrofactory.item.GuideBookItem(props),
                     () -> new net.minecraft.world.item.Item.Properties().stacksTo(1));
 
+    // ---------------------------------------------------------------- 武器（story 系统）
+    // 0.1.0：4 把工业工具武器，等级门槛见 Weapons.java。
+    public static final DeferredItem<com.xiaoyi.astrofactory.item.WeaponItem> IRON_WRENCH =
+            ITEMS.registerItem("iron_wrench",
+                    props -> new com.xiaoyi.astrofactory.item.WeaponItem(
+                            props, "iron_wrench",
+                            com.xiaoyi.astrofactory.weapon.Weapons.meleeAttributes(3.0, -3.2f)),
+                    () -> new net.minecraft.world.item.Item.Properties().stacksTo(1));
+
+    public static final DeferredItem<com.xiaoyi.astrofactory.item.WeaponItem> STEEL_WRENCH =
+            ITEMS.registerItem("steel_wrench",
+                    props -> new com.xiaoyi.astrofactory.item.WeaponItem(
+                            props, "steel_wrench",
+                            com.xiaoyi.astrofactory.weapon.Weapons.meleeAttributes(5.0, -3.1f)),
+                    () -> new net.minecraft.world.item.Item.Properties().stacksTo(1));
+
+    public static final DeferredItem<com.xiaoyi.astrofactory.item.WeaponItem> POWER_GAUNTLET =
+            ITEMS.registerItem("power_gauntlet",
+                    props -> new com.xiaoyi.astrofactory.item.WeaponItem(
+                            props, "power_gauntlet",
+                            com.xiaoyi.astrofactory.weapon.Weapons.meleeAttributes(7.0, -3.0f)),
+                    () -> new net.minecraft.world.item.Item.Properties().stacksTo(1));
+
+    public static final DeferredItem<com.xiaoyi.astrofactory.item.WeaponItem> RIVET_GUN =
+            ITEMS.registerItem("rivet_gun",
+                    props -> new com.xiaoyi.astrofactory.item.WeaponItem(
+                            props, "rivet_gun",
+                            com.xiaoyi.astrofactory.weapon.Weapons.meleeAttributes(2.0, -2.8f)),
+                    () -> new net.minecraft.world.item.Item.Properties().stacksTo(1));
+
     // ---------------------------------------------------------------- 方块实体
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<TransportBeltBlockEntity>> TRANSPORT_BELT_BE =
@@ -351,6 +381,11 @@ public final class ModRegistry {
                         output.accept(COPPER_CABLE.get());
                         output.accept(ELECTRONIC_CIRCUIT.get());
                         output.accept(AUTOMATION_PACK.get());
+                        output.accept(GUIDE_BOOK.get());
+                        output.accept(IRON_WRENCH.get());
+                        output.accept(STEEL_WRENCH.get());
+                        output.accept(POWER_GAUNTLET.get());
+                        output.accept(RIVET_GUN.get());
                     })
                     .build());
 
@@ -360,6 +395,7 @@ public final class ModRegistry {
         BLOCK_ENTITY_TYPES.register(modBus);
         MENUS.register(modBus);
         com.xiaoyi.astrofactory.research.ResearchProgress.register(modBus);
+        com.xiaoyi.astrofactory.level.PlayerLevel.register(modBus);
         CREATIVE_TABS.register(modBus);
     }
 }

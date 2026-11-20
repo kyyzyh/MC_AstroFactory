@@ -13,6 +13,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.phys.AABB;
 
 import com.xiaoyi.astrofactory.ModRegistry;
 import com.xiaoyi.astrofactory.power.FuelPowerSource;
@@ -204,6 +205,24 @@ public class BurnerMinerBlockEntity extends BlockEntity implements Container {
         }
         addToBuffer(OreVeinBlock.oreDrop(kind));
         setChanged();
+        // story 系统：采矿产出 +1 EXP（仅服务端）
+        if (!level.isClientSide()) {
+            awardMiningExp(level, pos);
+        }
+    }
+
+    /** 给操作者（最近使用该机器的玩家）加采矿 EXP。 */
+    private void awardMiningExp(Level level, BlockPos pos) {
+        // 采矿机无直接操作者，按「最近 8 格内玩家」判定，找不到则不发
+        // （避免无人值守时凭空涨经验）
+        var players = level.getEntitiesOfClass(net.minecraft.world.entity.player.Player.class,
+                new net.minecraft.world.phys.AABB(pos).inflate(8.0));
+        if (players.isEmpty()) {
+            return;
+        }
+        var data = com.xiaoyi.astrofactory.level.PlayerLevel.of(players.get(0));
+        data.totalMined++;
+        data.addExp(1);
     }
 
     /**

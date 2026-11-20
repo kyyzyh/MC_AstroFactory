@@ -139,6 +139,10 @@ public class LabMenu extends AbstractContainerMenu {
             container.setChanged();
         }
         progress.contribute(target.id(), 1);
+        // story 系统：首次研究科技 → 里程碑 first_tech + EXP
+        if (progress.unlocked.contains(target.id())) {
+            com.xiaoyi.astrofactory.level.PlayerLevel.awardMilestone(player, "first_tech");
+        }
         this.broadcastChanges();
         return true;
     }

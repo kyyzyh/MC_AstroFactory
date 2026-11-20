@@ -81,7 +81,7 @@ public class StoneFurnaceBlockEntity extends BlockEntity implements Container, M
             progress++;
             if (progress >= interval) {
                 progress = 0;
-                doSmelt(recipe);
+                doSmelt(recipe, pos);
             }
         } else {
             progress = 0;
@@ -102,7 +102,7 @@ public class StoneFurnaceBlockEntity extends BlockEntity implements Container, M
     }
 
     /** 执行一次熔炼：按配方消耗输入、产出结果。 */
-    private void doSmelt(MachineRecipe recipe) {
+    private void doSmelt(MachineRecipe recipe, BlockPos pos) {
         ItemStack input = items.get(INPUT_SLOT);
         input.shrink(recipe.inputs().get(0).count());
         if (input.isEmpty()) {
@@ -116,6 +116,16 @@ public class StoneFurnaceBlockEntity extends BlockEntity implements Container, M
             out.grow(result.getCount());
         }
         setChanged();
+        // story 系统：熔炉产出 +1 EXP（Q7 科技计数同源点）
+        if (!level.isClientSide()) {
+            var players = level.getEntitiesOfClass(net.minecraft.world.entity.player.Player.class,
+                    new net.minecraft.world.phys.AABB(pos).inflate(8.0));
+            if (!players.isEmpty()) {
+                var data = com.xiaoyi.astrofactory.level.PlayerLevel.of(players.get(0));
+                data.totalCrafted++;
+                data.addExp(1);
+            }
+        }
     }
 
     /** 进度百分比，供界面显示。 */

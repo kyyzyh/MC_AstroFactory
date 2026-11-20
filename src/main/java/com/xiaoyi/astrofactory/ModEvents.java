@@ -11,9 +11,12 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 
 import com.xiaoyi.astrofactory.item.GuideBookItem;
+import com.xiaoyi.astrofactory.level.PlayerLevel;
+import com.xiaoyi.astrofactory.quest.Quests;
 import com.xiaoyi.astrofactory.recipe.MachineRecipeLoader;
 import com.xiaoyi.astrofactory.recipe.MachineType;
 import com.xiaoyi.astrofactory.recipe.RecipeRegistry;
+import com.xiaoyi.astrofactory.story.Story;
 
 /**
  * 通用（双端）事件：配方数据包重载监听 + 调试命令 + 出生点包发放。
@@ -33,7 +36,7 @@ public final class ModEvents {
                 new MachineRecipeLoader());
     }
 
-    /** /astrofactory —— 子命令：recipes（配方统计）、guide（新手流程）。 */
+    /** /astrofactory —— 子命令：recipes / guide / story / quests / level。 */
     @SubscribeEvent
     public static void registerCommands(RegisterCommandsEvent event) {
         event.getDispatcher().register(
@@ -53,6 +56,44 @@ public final class ModEvents {
                         }))
                         .then(Commands.literal("guide").executes(ctx -> {
                             sendGuideTo(ctx.getSource());
+                            return 1;
+                        }))
+                        .then(Commands.literal("story").executes(ctx -> {
+                            var src = ctx.getSource();
+                            src.sendSuccess(() -> Component.translatable("story.astrofactory.header"), false);
+                            for (var c : Story.all()) {
+                                src.sendSuccess(() -> c, false);
+                            }
+                            return 1;
+                        }))
+                        .then(Commands.literal("quests").executes(ctx -> {
+                            var src = ctx.getSource();
+                            if (!(src.getEntity() instanceof ServerPlayer sp)) {
+                                src.sendFailure(Component.translatable("quest.astrofactory.needs_player"));
+                                return 0;
+                            }
+                            src.sendSuccess(() -> Component.translatable("quest.astrofactory.header"), false);
+                            for (var q : Quests.all()) {
+                                boolean done = Quests.isDone(sp, q.id());
+                                src.sendSuccess(() -> Component.translatable(
+                                        done ? "quest.astrofactory.entry.done" : "quest.astrofactory.entry.pending",
+                                        Component.translatable(q.displayKey()),
+                                        Component.translatable(q.descriptionKey())), false);
+                            }
+                            var prog = Quests.storyProgress(sp);
+                            src.sendSuccess(() -> Component.translatable("quest.astrofactory.summary",
+                                    prog[0], prog[1]), false);
+                            return 1;
+                        }))
+                        .then(Commands.literal("level").executes(ctx -> {
+                            var src = ctx.getSource();
+                            if (!(src.getEntity() instanceof ServerPlayer sp)) {
+                                src.sendFailure(Component.translatable("quest.astrofactory.needs_player"));
+                                return 0;
+                            }
+                            var data = PlayerLevel.of(sp);
+                            src.sendSuccess(() -> Component.translatable("level.astrofactory.status",
+                                    data.level, data.exp, data.expToNext(), data.totalMined, data.totalCrafted), false);
                             return 1;
                         })));
     }

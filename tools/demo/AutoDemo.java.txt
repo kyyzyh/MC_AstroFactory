@@ -137,9 +137,10 @@ public final class AutoDemo {
                     dumpState(mc);
                 }
                 // 等产线真跑起来：采矿机 80 tick 一件，机械臂 26 tick 一次，
-                // 熔炉配方 200 tick。等 900 tick（45 秒）后再截图，
-                // 这样传送带上有在途物品、熔炉在冒火、蒸汽已灌进电线杆。
-                if (++timer > 900) {
+                // 熔炉配方 200 tick。320 tick（16 秒）时带上已有在途物品、
+                // 组装机已出产物、电线杆已充能，足够截图。
+                if (++timer > 320) {
+                    LOGGER.info("[autodemo] pipeline warm, start screenshots");
                     phase = 3;
                     timer = 0;
                     shotIndex = 0;
@@ -147,7 +148,7 @@ public final class AutoDemo {
                 }
             }
             case 3 -> {
-                if (++timer > 30) {
+                if (++timer > 40) {
                     grab(mc, SHOTS.get(shotIndex).name());
                     shotIndex++;
                     timer = 0;
@@ -444,6 +445,7 @@ public final class AutoDemo {
     }
 
     private static void grab(Minecraft mc, String name) {
+        LOGGER.info("[autodemo] grabbing {}", name);
         Screenshot.grab(mc.gameDirectory, name + ".png", mc.gameRenderer.mainRenderTarget(), 1,
                 component -> LOGGER.info("[autodemo] saved {}", component.getString()));
     }

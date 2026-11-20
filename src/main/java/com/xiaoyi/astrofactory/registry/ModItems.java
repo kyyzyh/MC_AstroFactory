@@ -56,17 +56,17 @@ public final class ModItems {
 
     // ---------------------------------------------------------------- 中间物品
 
-    /** 铁齿轮：基础机械件，由铁板 ×2 冲压而成。 */
+    /** 铁齿轮：基础机械件，铁锭 ×2 → 1 个（熔炼炉 crafting 通道，见 machine_recipes）。 */
     public static final DeferredItem<Item> IRON_GEAR = ITEMS.registerSimpleItem("iron_gear");
 
-    /** 铜线：铜板 ×1 → 2 个。 */
+    /** 铜线：导线类零件，铜锭 ×3 → 1 个（熔炼炉 crafting 通道，见 machine_recipes）。 */
     public static final DeferredItem<Item> COPPER_CABLE = ITEMS.registerSimpleItem("copper_cable");
 
-    /** 电路板：铁板 ×1 + 铜线 ×3。 */
+    /** 电路板：铁齿轮 ×2 + 铜线 ×2，组装机 3×3 网格（gcg/.c./...）。 */
     public static final DeferredItem<Item> ELECTRONIC_CIRCUIT =
             ITEMS.registerSimpleItem("electronic_circuit");
 
-    /** 红瓶（自动化科技包）：铜板 ×1 + 铁齿轮 ×1，可手搓。 */
+    /** 红瓶（自动化科技包）：铜锭 ×2 + 铁齿轮 ×1 → 2 个，可手搓（工作台）。 */
     public static final DeferredItem<Item> AUTOMATION_PACK =
             ITEMS.registerSimpleItem("automation_pack");
 

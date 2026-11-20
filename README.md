@@ -40,7 +40,7 @@ gradlew.bat build --offline
 | 制作台 `crafter` | — | **已删除**（Q1 决定） |
 | 组装机 `assembler` | `assembler` | 3×3 多方块，9 格能出能进 |
 | 科研台 `research_table` | `lab` | 3×3 多方块 |
-| 铜线圈 `copper_coil` | `copper_cable` | 中文 lang 显示「铜线」，文案写「线圈」是历史遗留（见已知限制） |
+| 铜线 `copper_cable` | `copper_cable` | 已统一：中文「铜线」/ 英文 "Copper Cable"，文案不再写「线圈」 |
 
 ## 五段产线
 
@@ -52,7 +52,7 @@ gradlew.bat build --offline
                                                               └─> 科研台推进科技树
 ```
 
-> 阶段④「制作台」已被 Q1 删除：零件（铁齿轮/铜线圈）现在是**熔炼炉的熔炼产物**
+> 阶段④「制作台」已被 Q1 删除：零件（铁齿轮/铜线）现在是**熔炼炉的熔炼产物**
 > （内置配方 `iron_ingot_to_iron_gear` / `copper_ingot_to_copper_cable`，`MachineType.CRAFTING`），
 > `stone_furnace` 同时承担 ③ 原矿→锭 与 ④ 锭→零件 两段。
 
@@ -86,7 +86,7 @@ gradlew.bat build --offline
 | 产物 | 配方 | 耗时 |
 |---|---|---|
 | 铁齿轮 `iron_gear` | 铁锭 ×2 | 40 tick |
-| 铜线圈 `copper_cable` | 铜锭 ×3 | 40 tick |
+| 铜线 `copper_cable` | 铜锭 ×3 | 40 tick |
 
 ### ⑤ 组装（零件 → 成品）
 
@@ -95,7 +95,7 @@ gradlew.bat build --offline
 | 组装机 `assembler` | 3×3 多方块，**9 格输入 + 1 输出**（Q2 决定 9 格能出能进），**电力驱动**，断电停机，30 tick 合成 1 个 |
 | 科研台 `lab` | 3×3 多方块，1 个科研包输入槽，**电力驱动**，投入电路板推进科技树 |
 
-配方：铁齿轮 ×2 + 铜线圈 ×2 → 电路板
+配方：铁齿轮 ×2 + 铜线 ×2 → 电路板
 
 电路板是**唯一的科研包**，强制玩家把整条五段产线搭起来才能研究。
 
@@ -114,9 +114,9 @@ gradlew.bat build --offline
 | 物品 | 产出环节 | 配方 |
 |---|---|---|
 | 铁齿轮 `iron_gear` | ④ 熔炼炉（crafting 通道） | 铁锭 ×2 |
-| 铜线圈 `copper_cable` | ④ 熔炼炉（crafting 通道） | 铜锭 ×3 |
-| 电路板 `electronic_circuit` | ⑤ 组装机 | 铁齿轮 ×2 + 铜线圈 ×2 |
-| 自动化科技包 `automation_pack` | —（已注册，尚未配方） | — |
+| 铜线 `copper_cable` | ④ 熔炼炉（crafting 通道） | 铜锭 ×3 |
+| 电路板 `electronic_circuit` | ⑤ 组装机 | 铁齿轮 ×2 + 铜线 ×2 |
+| 自动化科技包 `automation_pack` | 组装机 / 工作台手搓 | 铜锭 ×2 + 铁齿轮 ×1 → 2 个 |
 
 ## 科技树
 
@@ -186,7 +186,6 @@ tools/                                   贴图生成脚本（PIL 程序化绘�
 ## 已知限制
 
 - 阶段④「制作台」已删，零件走熔炼炉 crafting 通道；README 与部分历史文案仍写「制作台」
-- `copper_cable` 注册名与中文显示「铜线」不一致，配方/成就/指南文案统一写「铜线圈」（历史遗留，待统一）
 - 科技树 9 个节点已全部接入，但 `unlocks` 里的 `assembler_2` / `steel_furnace` / `steel_chest` 等**尚无对应方块**（0.1.0 范围外，仅作展示）
 - 出生点包已实现（1 采矿机 + 1 石熔炉 + 20 传送带 + 1 手册，首次进服发放，用 persistentData 打标防重复）
 - 配方已迁到数据包 `data/astrofactory/machine_recipes/`（11 条），Java 只保留 3 条兜底（原矿→锭→齿轮→电路板），保证零数据包也能走完主线

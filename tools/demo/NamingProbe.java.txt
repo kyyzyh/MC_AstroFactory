@@ -1,0 +1,202 @@
+package com.xiaoyi.astrofactory.demo;
+
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.mojang.logging.LogUtils;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.server.ServerStartedEvent;
+import org.slf4j.Logger;
+
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.locale.Language;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+
+import com.xiaoyi.astrofactory.Astrofactory;
+import com.xiaoyi.astrofactory.ModRegistry;
+
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeSet;
+
+/**
+ * 【临时探针】命名统一自检，跑完自动关服。不属于交付代码。
+ *
+ * 背景：copper_cable 历史上注册名 cable、中文显示「铜线」、但配方/成就/指南文案
+ * 写「铜线圈」，英文混用 Coil/coil。本轮统一为「铜线 / Copper Cable」。
+ *
+ * 覆盖：
+ * 1. 物品显示名已统一（英文 Copper Cable、中文 铜线）
+ * 2. zh_cn / en_us 两份文案都不再出现「线圈」/ coil
+ * 3. zh_cn 与 en_us 键集合完全一致（缺键会导致游戏内显示原始 key）
+ * 4. 语言文件里引用的 item key 都对应真实物品
+ */
+@EventBusSubscriber(modid = Astrofactory.MODID)
+public final class NamingProbe {
+    private static final Logger LOGGER = LogUtils.getLogger();
+    private static int passed = 0;
+    private static int failed = 0;
+
+    private static final String LANG_DIR = "/assets/astrofactory/lang/";
+
+    @SubscribeEvent
+    public static void onServerStarted(ServerStartedEvent event) {
+        try {
+            run();
+        } catch (Throwable t) {
+            LOGGER.error("[namingprobe] FAILED", t);
+            failed++;
+        } finally {
+            LOGGER.info("[namingprobe] passed={} failed={}", passed, failed);
+            LOGGER.info("[namingprobe] done, halting");
+            event.getServer().halt(false);
+        }
+    }
+
+    private static void check(String name, boolean ok) {
+        if (ok) {
+            passed++;
+            LOGGER.info("[namingprobe]   OK {}", name);
+        } else {
+            failed++;
+            LOGGER.error("[namingprobe]   FAIL {}", name);
+        }
+    }
+
+    /** 从 classpath 读语言文件（开发环境 build/resources/main 在 classpath 上）。 */
+    private static JsonObject loadLang(String file) {
+        String path = LANG_DIR + file;
+        try (InputStream in = NamingProbe.class.getResourceAsStream(path)) {
+            if (in == null) {
+                LOGGER.error("[namingprobe] 找不到资源 {}", path);
+                return null;
+            }
+            try (Reader r = new InputStreamReader(in, StandardCharsets.UTF_8)) {
+                return JsonParser.parseReader(r).getAsJsonObject();
+            }
+        } catch (Exception e) {
+            LOGGER.error("[namingprobe] 读 {} 失败", path, e);
+            return null;
+        }
+    }
+
+    private static void run() {
+        JsonObject zh = loadLang("zh_cn.json");
+        JsonObject en = loadLang("en_us.json");
+        if (zh == null || en == null) {
+            check("两份语言文件都能读到", false);
+            return;
+        }
+        check("两份语言文件都能读到", true);
+        LOGGER.info("[namingprobe] zh_cn {} 键 / en_us {} 键", zh.size(), en.size());
+
+        // ============ 1. 物品显示名（服务端默认语言 = en_us）============
+        String descId = ModRegistry.COPPER_CABLE.get().getDescriptionId();
+        String shown = Component.translatable(descId).getString();
+        LOGGER.info("[namingprobe] copper_cable 服务端显示「{}」", shown);
+        check("英文显示名应为 Copper Cable（实际 " + shown + "）",
+                "Copper Cable".equals(shown));
+
+        // ============ 2. 中文显示名 ============
+        String zhName = str(zh, "item.astrofactory.copper_cable");
+        LOGGER.info("[namingprobe] copper_cable 中文显示「{}」", zhName);
+        check("中文显示名应为 铜线（实际 " + zhName + "）", "铜线".equals(zhName));
+
+        // ============ 3. 全量文案不含「线圈」/ coil ============
+        List<String> zhHits = new ArrayList<>();
+        for (Map.Entry<String, JsonElement> e : zh.entrySet()) {
+            if (e.getValue().getAsString().contains("线圈")) {
+                zhHits.add(e.getKey());
+            }
+        }
+        if (!zhHits.isEmpty()) {
+            LOGGER.error("[namingprobe] zh_cn 仍含「线圈」：{}", zhHits);
+        }
+        check("zh_cn 不再出现「线圈」", zhHits.isEmpty());
+
+        List<String> enHits = new ArrayList<>();
+        for (Map.Entry<String, JsonElement> e : en.entrySet()) {
+            String v = e.getValue().getAsString().toLowerCase();
+            if (v.matches(".*\\bcoils?\\b.*")) {
+                enHits.add(e.getKey());
+            }
+        }
+        if (!enHits.isEmpty()) {
+            LOGGER.error("[namingprobe] en_us 仍含 coil：{}", enHits);
+        }
+        check("en_us 不再出现 coil", enHits.isEmpty());
+
+        // ============ 4. 两份键集合一致 ============
+        TreeSet<String> zhKeys = new TreeSet<>(zh.keySet());
+        TreeSet<String> enKeys = new TreeSet<>(en.keySet());
+        TreeSet<String> onlyZh = new TreeSet<>(zhKeys);
+        onlyZh.removeAll(enKeys);
+        TreeSet<String> onlyEn = new TreeSet<>(enKeys);
+        onlyEn.removeAll(zhKeys);
+        if (!onlyZh.isEmpty()) {
+            LOGGER.error("[namingprobe] 只有 zh_cn 有：{}", onlyZh);
+        }
+        if (!onlyEn.isEmpty()) {
+            LOGGER.error("[namingprobe] 只有 en_us 有：{}", onlyEn);
+        }
+        check("zh_cn / en_us 键集合一致", onlyZh.isEmpty() && onlyEn.isEmpty());
+
+        // ============ 5. 关键文案抽查 ============
+        check("step3 提到铜线", str(zh, "msg.astrofactory.guide.step3").contains("铜线"));
+        check("step3 英文提到 cable",
+                str(en, "msg.astrofactory.guide.step3").toLowerCase().contains("cable"));
+        check("step7 提到铜线", str(zh, "msg.astrofactory.guide.step7").contains("铜线"));
+        check("step7 英文提到 Copper Cable",
+                str(en, "msg.astrofactory.guide.step7").contains("Copper Cable"));
+        check("step8 提到铜线", str(zh, "msg.astrofactory.guide.step8").contains("铜线"));
+        check("机械臂成就提到铜线",
+                str(zh, "advancements.astrofactory.burner_inserter.description").contains("铜线"));
+        check("机械臂成就英文提到 Copper Cable",
+                str(en, "advancements.astrofactory.burner_inserter.description")
+                        .contains("Copper Cable"));
+        check("组装机成就提到铜线",
+                str(zh, "advancements.astrofactory.assembler.description").contains("铜线"));
+        check("组装机成就英文提到 Copper Cable",
+                str(en, "advancements.astrofactory.assembler.description")
+                        .contains("Copper Cable"));
+        check("教程 craft_inserter 提到铜线",
+                str(zh, "tutorial.astrofactory.craft_inserter.desc").contains("铜线"));
+        check("教程 craft_assembler 提到铜线",
+                str(zh, "tutorial.astrofactory.craft_assembler.desc").contains("铜线"));
+
+        // ============ 6. item key 全部对应真实物品 ============
+        List<String> missing = new ArrayList<>();
+        for (String key : zhKeys) {
+            if (!key.startsWith("item.astrofactory.")) {
+                continue;
+            }
+            String path = key.substring("item.astrofactory.".length());
+            Identifier id = Identifier.fromNamespaceAndPath(Astrofactory.MODID, path);
+            if (BuiltInRegistries.ITEM.get(id).isEmpty()) {
+                missing.add(path);
+            }
+        }
+        if (!missing.isEmpty()) {
+            LOGGER.error("[namingprobe] 语言文件里有不存在的物品：{}", missing);
+        }
+        check("item key 全部对应真实物品", missing.isEmpty());
+
+        // ============ 7. 服务端语言表确实加载了模组文案 ============
+        Language lang = Language.getInstance();
+        check("服务端语言表有 copper_cable 条目",
+                lang.has("item.astrofactory.copper_cable"));
+        LOGGER.info("[namingprobe] 服务端语言表 copper_cable = 「{}」",
+                lang.getOrDefault("item.astrofactory.copper_cable"));
+    }
+
+    private static String str(JsonObject obj, String key) {
+        return obj.has(key) ? obj.get(key).getAsString() : "";
+    }
+}

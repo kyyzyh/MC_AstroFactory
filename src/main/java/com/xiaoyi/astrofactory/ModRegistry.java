@@ -240,6 +240,12 @@ public final class ModRegistry {
     public static final DeferredItem<net.minecraft.world.item.Item> AUTOMATION_PACK =
             ITEMS.registerSimpleItem("automation_pack");
 
+    /** 新手手册：右键展开 10 步教程（规格 §8 出生点包）。 */
+    public static final DeferredItem<com.xiaoyi.astrofactory.item.GuideBookItem> GUIDE_BOOK =
+            ITEMS.registerItem("guide_book",
+                    props -> new com.xiaoyi.astrofactory.item.GuideBookItem(props),
+                    () -> new net.minecraft.world.item.Item.Properties().stacksTo(1));
+
     // ---------------------------------------------------------------- 方块实体
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<TransportBeltBlockEntity>> TRANSPORT_BELT_BE =

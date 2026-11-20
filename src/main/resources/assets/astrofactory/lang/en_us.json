@@ -62,6 +62,8 @@
   "msg.astrofactory.guide.step10": "10. After Logistics I, craft fast transport_belts (transport_belt x2 + gear) for double belt speed",
   "msg.astrofactory.guide.footer": "Full guide: press L and open the 'AstroFactory: The Automation Path' tab",
   "item.astrofactory.automation_pack": "Automation Science Pack",
+  "item.astrofactory.guide_book": "Beginner's Handbook",
+  "msg.astrofactory.starter.given": "[AstroFactory] Starter kit given: 1 miner + 1 stone furnace + 20 belts + 1 handbook. Right-click the handbook for the 10-step guide.",
   "block.astrofactory.ore_vein": "Ore Vein",
   "item.astrofactory.ore_vein": "Ore Vein"
 }

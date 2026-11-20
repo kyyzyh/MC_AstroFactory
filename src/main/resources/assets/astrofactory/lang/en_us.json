@@ -55,6 +55,8 @@
   "msg.astrofactory.guide.step3": "3. Craft a robotic arm (gears + piston + coil): takes from back, inserts at front",
   "msg.astrofactory.guide.step4": "4. Craft a burner_miner (iron + gears + diamond pickaxe); 1 ore per 2 s from its front face",
   "msg.astrofactory.guide.step5": "5. Craft a stone_furnace (bricks + furnace + gear); ore to ingot, 1 per 3 s",
+  "msg.astrofactory.guide.step6": "6. Miner -> belt -> inserter -> furnace: route raw ore into the furnace for auto-smelting",
+  "msg.astrofactory.guide.step7": "7. Craft parts beside the furnace: Iron Gear (2 iron ingots), Copper Coil (3 copper ingots)",
   "msg.astrofactory.guide.step8": "8. Produce circuit boards in the assembler (gear-coil-gear / empty-coil-empty / empty-empty-empty)",
   "msg.astrofactory.guide.step9": "9. Craft a research table (planks + book + gears + lapis); contribute boards to unlock tech",
   "msg.astrofactory.guide.step10": "10. After Logistics I, craft fast transport_belts (transport_belt x2 + gear) for double belt speed",

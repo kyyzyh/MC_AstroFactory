@@ -243,3 +243,55 @@ if (level.getBlockEntity(pos) instanceof MyBlockEntity be) player.openMenu(be);
 stack.getItem() == ModRegistry.MY_ITEM.get()   // 直接比 Item 实例，最简单可靠
 stack.is(predicate)                            // 只有 Predicate<Holder<Item>> 重载，没有 is(Item)
 ```
+
+## 14. 方块实体向客户端同步（本轮实测，关键）
+
+传送带这类"服务端有数据、客户端要渲染"的 BE，必须显式同步，否则客户端永远读不到。
+
+```java
+// 1) 给 BE 补两个方法（返回 null / 空 tag 是基类默认值，等于不同步）
+@Override
+public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+    return this.saveCustomOnly(registries);   // 全量快照
+}
+
+@Override
+public @Nullable Packet<ClientGamePacketListener> getUpdatePacket() {
+    return ClientboundBlockEntityDataPacket.create(this);
+}
+```
+
+- 发包时机：`level.sendBlockUpdated(pos, state, state, Block.UPDATE_CLIENTS)`。
+  底层走 `ServerLevel.getChunkSource().blockChanged(pos)` → `ChunkHolder.broadcastBlockEntity`
+  → `blockEntity.getUpdatePacket()`；`getUpdatePacket()` 返回 null 就什么都不发（这是默认行为）。
+- 客户端接收：`ClientPacketListener.handleBlockEntityData` → `BE.onDataPacket(Connection, ValueInput)`
+  （NeoForge 默认实现 = `loadWithComponents(valueInput)`，即调 `loadAdditional`）。
+- 区块首次加载：走 `getUpdateTag`，客户端 `handleUpdateTag(ValueInput)`。
+- **不要每 tick 发包**：正确做法是服务端只在"集合结构变化"时发一次快照，
+  客户端自己按同样速度推进动画（`clientTick`），既平滑又不刷带宽。
+- 客户端 ticker 需要在 Block 的 `getTicker` 里对 `level.isClientSide()` 返回真实 ticker
+  （返回 null 就完全不会 tick，动画也不会动）。
+
+## 15. 客户端自动演示/截图（临时工具用）
+
+```java
+// 快速建世界
+mc.createWorldOpenFlows().createFreshLevel(
+        "level_id",
+        new LevelSettings("Name", GameType.CREATIVE,
+                new LevelSettings.DifficultySettings(Difficulty.PEACEFUL, false, false),
+                true, WorldDataConfiguration.DEFAULT),
+        new WorldOptions(seed, false, false),
+        WorldPresets::createNormalWorldDimensions,
+        null /* parentScreen */);
+
+// 截图
+Screenshot.grab(mc.gameDirectory, "name.png", mc.gameRenderer.mainRenderTarget(), 1, component -> {});
+
+// 传送玩家
+sp.teleportTo(serverLevel, x, y, z, Set.of(), yaw, pitch, false);
+```
+
+**坑（本轮踩到）**：`ClientTickEvent.Post` 跑在渲染线程，直接在其中 `level.setBlock(...)`
+写的是客户端世界副本，服务端完全不认，机器永远不动。必须 `server.execute(() -> ...)`
+投递到服务端主线程再改世界。

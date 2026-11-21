@@ -7,6 +7,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 
 import com.xiaoyi.astrofactory.Astrofactory;
 import com.xiaoyi.astrofactory.item.GuideBookItem;
+import com.xiaoyi.astrofactory.item.ProspectorItem;
 import com.xiaoyi.astrofactory.item.WeaponItem;
 import com.xiaoyi.astrofactory.weapon.Weapons;
 
@@ -84,6 +85,17 @@ public final class ModItems {
     public static final DeferredItem<GuideBookItem> GUIDE_BOOK =
             ITEMS.registerItem("guide_book",
                     GuideBookItem::new,
+                    () -> new Item.Properties().stacksTo(1));
+
+    /**
+     * 探矿仪：右键报告最近矿田的方位与距离。
+     *
+     * <p>矿田已扩到全世界（{@code OreVeinData#tryGenerateForChunk}），
+     * 这个物品让「去找新矿」变成可执行动作而不是盲挖。</p>
+     */
+    public static final DeferredItem<ProspectorItem> PROSPECTOR =
+            ITEMS.registerItem("prospector",
+                    ProspectorItem::new,
                     () -> new Item.Properties().stacksTo(1));
 
     // ---------------------------------------------------------------- 武器（story 系统）

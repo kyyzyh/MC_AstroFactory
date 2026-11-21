@@ -303,5 +303,19 @@
   "book.astrofactory.ref.trouble.belt_backup.usage": "Check from the far end backwards: is the last machine full? Unpowered? Output not collected?",
   "book.astrofactory.ref.trouble.vein_depleted.name": "The miner runs but produces nothing",
   "book.astrofactory.ref.trouble.vein_depleted.body": "The vein is exhausted.\nThe miner will not relocate or find a new vein on its own.",
-  "book.astrofactory.ref.trouble.vein_depleted.usage": "Find another vein (fields are 40-64 blocks apart) and move the miner there."
+  "book.astrofactory.ref.trouble.vein_depleted.usage": "Use the Prospector (right-click) to find the nearest ore field, then move the miner there. Ore fields exist worldwide.",
+  "item.astrofactory.prospector": "Prospector",
+  "msg.astrofactory.prospector.header": "Prospector: %s ore field(s) nearby",
+  "msg.astrofactory.prospector.line": "  %s, about %s blocks",
+  "msg.astrofactory.prospector.none": "Prospector: no ore field within %s blocks",
+  "msg.astrofactory.prospector.hint": "Keep walking. One ore field per %s chunks on average (~260 blocks apart).",
+  "dir.astrofactory.north": "north",
+  "dir.astrofactory.northeast": "northeast",
+  "dir.astrofactory.east": "east",
+  "dir.astrofactory.southeast": "southeast",
+  "dir.astrofactory.south": "south",
+  "dir.astrofactory.southwest": "southwest",
+  "dir.astrofactory.west": "west",
+  "dir.astrofactory.northwest": "northwest",
+  "msg.astrofactory.prospector.unvisited": " (unexplored)"
 }

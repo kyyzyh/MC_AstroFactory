@@ -35,6 +35,7 @@ import com.xiaoyi.astrofactory.block.StoneFurnaceBlockEntity;
 import com.xiaoyi.astrofactory.block.TransportBeltBlock;
 import com.xiaoyi.astrofactory.block.TransportBeltBlockEntity;
 import com.xiaoyi.astrofactory.item.GuideBookItem;
+import com.xiaoyi.astrofactory.item.ProspectorItem;
 import com.xiaoyi.astrofactory.item.WeaponItem;
 import com.xiaoyi.astrofactory.menu.AssemblerMenu;
 import com.xiaoyi.astrofactory.menu.BoilerMenu;
@@ -122,6 +123,7 @@ public final class ModRegistry {
     public static final DeferredItem<Item> AUTOMATION_PACK = ModItems.AUTOMATION_PACK;
     public static final DeferredItem<Item> STEEL_INGOT = ModItems.STEEL_INGOT;
     public static final DeferredItem<GuideBookItem> GUIDE_BOOK = ModItems.GUIDE_BOOK;
+    public static final DeferredItem<ProspectorItem> PROSPECTOR = ModItems.PROSPECTOR;
     public static final DeferredItem<WeaponItem> IRON_WRENCH = ModItems.IRON_WRENCH;
     public static final DeferredItem<WeaponItem> STEEL_WRENCH = ModItems.STEEL_WRENCH;
     public static final DeferredItem<WeaponItem> POWER_GAUNTLET = ModItems.POWER_GAUNTLET;

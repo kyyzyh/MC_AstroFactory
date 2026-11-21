@@ -4,6 +4,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.level.ChunkEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
 
 import com.xiaoyi.astrofactory.world.OreVeinData;
@@ -28,6 +29,7 @@ public class Astrofactory {
         ModRegistry.register(modEventBus);
         modEventBus.addListener(this::commonSetup);
         NeoForge.EVENT_BUS.addListener(this::onServerStarted);
+        NeoForge.EVENT_BUS.addListener(this::onChunkLoad);
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {
@@ -50,5 +52,31 @@ public class Astrofactory {
         var spawn = level.getLevelData().getRespawnData().pos();
         var data = level.getDataStorage().computeIfAbsent(OreVeinData.TYPE);
         data.generateIfAbsent(level, spawn);
+    }
+
+    /**
+     * chunk 首次加载时按确定性概率散布矿田。
+     *
+     * <p>出生点保底只有 4 片矿，挖完就没了。这一层让「扩张找矿」成立：
+     * 玩家越往外走，越能遇到新矿田。</p>
+     *
+     * <p>只在 {@link ChunkEvent.Load#isNewChunk()} 为 true 时尝试，
+     * 避免玩家来回走动时反复触发。放置本身还有 SavedData 幂等保护，
+     * 双重保险。</p>
+     */
+    private void onChunkLoad(ChunkEvent.Load event) {
+        if (!(event.getLevel() instanceof net.minecraft.server.level.ServerLevel serverLevel)) {
+            return;
+        }
+        if (!event.isNewChunk()) {
+            return;
+        }
+        var chunk = event.getChunk();
+        var spawn = serverLevel.getLevelData().getRespawnData().pos();
+        var spawnChunk = new net.minecraft.world.level.ChunkPos(spawn.getX(), spawn.getZ());
+        var data = serverLevel.getDataStorage().computeIfAbsent(OreVeinData.TYPE);
+        if (data.tryGenerateForChunk(serverLevel, chunk.getPos(), spawnChunk)) {
+            LOGGER.debug("[AstroFactory] 散布矿田生成于 chunk {}", chunk.getPos());
+        }
     }
 }

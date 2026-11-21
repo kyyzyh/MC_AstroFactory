@@ -49,6 +49,7 @@ public final class ModCreativeTab {
                         output.accept(ModItems.AUTOMATION_PACK.get());
                         // 手册与武器
                         output.accept(ModItems.GUIDE_BOOK.get());
+                        output.accept(ModItems.PROSPECTOR.get());
                         output.accept(ModItems.IRON_WRENCH.get());
                         output.accept(ModItems.STEEL_WRENCH.get());
                         output.accept(ModItems.POWER_GAUNTLET.get());

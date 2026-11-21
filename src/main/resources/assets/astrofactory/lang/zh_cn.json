@@ -303,5 +303,19 @@
   "book.astrofactory.ref.trouble.belt_backup.usage": "从末端往前查：末端机器是不是满了？没电？输出没人取？",
   "book.astrofactory.ref.trouble.vein_depleted.name": "采矿机还在转但不出矿",
   "book.astrofactory.ref.trouble.vein_depleted.body": "矿脉挖空了。\n采矿机不会自己搬家，也不会自动找新矿。",
-  "book.astrofactory.ref.trouble.vein_depleted.usage": "去别处找新矿脉（矿田之间隔 40~64 格），把采矿机挪过去。"
+  "book.astrofactory.ref.trouble.vein_depleted.usage": "用探矿仪（右键）找最近的矿田，把采矿机挪过去。矿田全世界都有，越往外越多。",
+  "item.astrofactory.prospector": "探矿仪",
+  "msg.astrofactory.prospector.header": "探矿仪：附近 %s 片矿田",
+  "msg.astrofactory.prospector.line": "  %s 约 %s 格",
+  "msg.astrofactory.prospector.none": "探矿仪：%s 格内没探到矿田",
+  "msg.astrofactory.prospector.hint": "继续往外走。平均每 %s 个区块有一片矿田（约 260 格见方一片）。",
+  "dir.astrofactory.north": "北",
+  "dir.astrofactory.northeast": "东北",
+  "dir.astrofactory.east": "东",
+  "dir.astrofactory.southeast": "东南",
+  "dir.astrofactory.south": "南",
+  "dir.astrofactory.southwest": "西南",
+  "dir.astrofactory.west": "西",
+  "dir.astrofactory.northwest": "西北",
+  "msg.astrofactory.prospector.unvisited": "（尚未探索）"
 }

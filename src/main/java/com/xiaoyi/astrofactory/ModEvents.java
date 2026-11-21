@@ -142,6 +142,7 @@ public final class ModEvents {
         giveOnce(sp, new ItemStack(ModRegistry.STONE_FURNACE_ITEM.get()));
         giveOnce(sp, new ItemStack(ModRegistry.TRANSPORT_BELT_ITEM.get(), 20));
         giveOnce(sp, new ItemStack(ModRegistry.GUIDE_BOOK.get()));
+        giveOnce(sp, new ItemStack(ModRegistry.PROSPECTOR.get()));
 
         sp.sendSystemMessage(Component.translatable("msg.astrofactory.starter.given"));
     }

@@ -32,6 +32,18 @@ public final class ModBlocks {
     public static final DeferredRegister.Blocks BLOCKS =
             DeferredRegister.createBlocks(Astrofactory.MODID);
 
+    /**
+     * 运行中机器的自发光等级（0-15）。
+     *
+     * <p><b>为什么这条最重要</b>：机器在跑就发光、停机就熄灯 —— 玩家站在
+     * 产线外扫一眼就知道哪台停了，不用打开任何 GUI。Mekanism 的
+     * {@code ACTIVE_LIGHT} 就是这个思路，成本只有一行 {@code lightLevel}。</p>
+     *
+     * <p>取 7 而不是 15：7 刚好在黑暗中能看清轮廓，又不会把厂房照得像白天，
+     * 保留「机器在工作」的视觉对比。</p>
+     */
+    public static final int MACHINE_LIGHT = 7;
+
     // ---------------------------------------------------------------- 物流
 
     /** 传送带：真连续移动，无 GUI，带朝向。开局免费可造。 */
@@ -64,7 +76,8 @@ public final class ModBlocks {
                     () -> BlockBehaviour.Properties.of()
                             .mapColor(MapColor.STONE)
                             .strength(3.5f, 8.0f)
-                            .noOcclusion());
+                            .noOcclusion()
+                            .lightLevel(state -> state.getValue(BurnerMinerBlock.ACTIVE) ? MACHINE_LIGHT : 0));
 
     /** 石熔炉：2×2 多方块，烧煤熔炼。 */
     public static final DeferredBlock<StoneFurnaceBlock> STONE_FURNACE =
@@ -72,7 +85,8 @@ public final class ModBlocks {
                     () -> BlockBehaviour.Properties.of()
                             .mapColor(MapColor.STONE)
                             .strength(3.5f, 8.0f)
-                            .noOcclusion());
+                            .noOcclusion()
+                            .lightLevel(state -> state.getValue(StoneFurnaceBlock.ACTIVE) ? MACHINE_LIGHT : 0));
 
     /** 组装机：3×3 多方块，电力驱动，按配方自动合成。 */
     public static final DeferredBlock<AssemblerBlock> ASSEMBLER =
@@ -80,7 +94,8 @@ public final class ModBlocks {
                     () -> BlockBehaviour.Properties.of()
                             .mapColor(MapColor.METAL)
                             .strength(3.0f, 8.0f)
-                            .noOcclusion());
+                            .noOcclusion()
+                            .lightLevel(state -> state.getValue(AssemblerBlock.ACTIVE) ? MACHINE_LIGHT : 0));
 
     /** 科研台（lab）：3×3 多方块，电力驱动，推进科技树。 */
     public static final DeferredBlock<LabBlock> LAB =
@@ -106,7 +121,8 @@ public final class ModBlocks {
                     () -> BlockBehaviour.Properties.of()
                             .mapColor(MapColor.METAL)
                             .strength(3.5f, 8.0f)
-                            .noOcclusion());
+                            .noOcclusion()
+                            .lightLevel(state -> state.getValue(BoilerBlock.ACTIVE) ? MACHINE_LIGHT : 0));
 
     /** 蒸汽机：3×5 多方块，消耗蒸汽发电（规格 §5.5）。 */
     public static final DeferredBlock<SteamEngineBlock> STEAM_ENGINE =
@@ -114,7 +130,8 @@ public final class ModBlocks {
                     () -> BlockBehaviour.Properties.of()
                             .mapColor(MapColor.METAL)
                             .strength(3.5f, 8.0f)
-                            .noOcclusion());
+                            .noOcclusion()
+                            .lightLevel(state -> state.getValue(SteamEngineBlock.ACTIVE) ? MACHINE_LIGHT : 0));
 
     /** 离岸泵：1×2 多方块，贴水时持续产蒸汽（规格 §5.5）。 */
     public static final DeferredBlock<OffshorePumpBlock> OFFSHORE_PUMP =
@@ -122,7 +139,8 @@ public final class ModBlocks {
                     () -> BlockBehaviour.Properties.of()
                             .mapColor(MapColor.METAL)
                             .strength(3.0f, 8.0f)
-                            .noOcclusion());
+                            .noOcclusion()
+                            .lightLevel(state -> state.getValue(OffshorePumpBlock.ACTIVE) ? MACHINE_LIGHT : 0));
 
     /** 蒸汽管道：单格蒸汽节点（规格 §5.5）。 */
     public static final DeferredBlock<SteamPipeBlock> STEAM_PIPE =

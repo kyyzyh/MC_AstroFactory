@@ -165,6 +165,14 @@ public abstract class AbstractMachineEntity extends BaseContainerBlockEntity {
                 level.setBlock(cell, cellState.setValue(activeProp, active), Block.UPDATE_CLIENTS);
             }
         }
+        // 状态切换的音效：启动一声闷响、停机一声轻响。
+        // 放在这里是因为它是所有多方块机器的唯一收口点 —— 加一次全部生效。
+        // 只在真正的状态翻转时响（上面已经 return 掉了「状态没变」的情况）。
+        if (active) {
+            MachineFeedback.playStart(level, getBlockPos());
+        } else {
+            MachineFeedback.playStop(level, getBlockPos());
+        }
     }
 
     // ------------------------------------------------------------ 存档

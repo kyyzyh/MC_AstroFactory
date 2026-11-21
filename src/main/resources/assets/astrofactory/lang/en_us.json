@@ -192,5 +192,11 @@
   "book.astrofactory.guide.cover.hint": "Turn pages to see what to do next.\nPress K to fold the task card in the corner.",
   "book.astrofactory.guide.exp": "Reward: +%s EXP",
   "book.astrofactory.guide.summary.title": "Line Overview",
-  "book.astrofactory.guide.summary.body": "Miner -> Belt -> Inserter -> Furnace\n\nOre goes in, ingots come out. Ingots become\ngears and cables. Gears + cables make circuit\nboards in the assembler. Boards unlock tech\nat the lab.\n\nRunning out of power is expected: hit the wall\nfirst, then get the ladder."
+  "book.astrofactory.guide.summary.body": "Miner -> Belt -> Inserter -> Furnace\n\nOre goes in, ingots come out. Ingots become\ngears and cables. Gears + cables make circuit\nboards in the assembler. Boards unlock tech\nat the lab.\n\nRunning out of power is expected: hit the wall\nfirst, then get the ladder.",
+  "gui.astrofactory.status.running": "Running",
+  "gui.astrofactory.status.no_power": "No Power",
+  "gui.astrofactory.status.no_input": "No Input",
+  "gui.astrofactory.status.output_full": "Output Full",
+  "gui.astrofactory.status.no_fuel": "No Fuel",
+  "gui.astrofactory.status.idle": "Idle"
 }

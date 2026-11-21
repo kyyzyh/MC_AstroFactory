@@ -13,6 +13,7 @@ import net.minecraft.world.level.storage.ValueOutput;
 
 import com.xiaoyi.astrofactory.ModRegistry;
 import com.xiaoyi.astrofactory.machine.AbstractMachineEntity;
+import com.xiaoyi.astrofactory.machine.MachineFeedback;
 import com.xiaoyi.astrofactory.menu.StoneFurnaceMenu;
 import com.xiaoyi.astrofactory.power.FuelPowerSource;
 import com.xiaoyi.astrofactory.power.PowerSource;
@@ -66,9 +67,13 @@ public class StoneFurnaceBlockEntity extends AbstractMachineEntity {
         if (canWork && hasFuel) {
             power.consume(false); // 实际消费 1 tick
             progress++;
+            // 熔炼时冒烟（原版营火烟，零资产）
+            MachineFeedback.tickParticles(level, pos,
+                    net.minecraft.core.particles.ParticleTypes.CAMPFIRE_COSY_SMOKE);
             if (progress >= interval) {
                 progress = 0;
                 doSmelt(recipe, pos);
+                MachineFeedback.playCraft(level, pos);
             }
         } else {
             progress = 0;

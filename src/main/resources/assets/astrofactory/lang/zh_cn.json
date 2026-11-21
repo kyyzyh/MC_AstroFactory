@@ -192,5 +192,11 @@
   "book.astrofactory.guide.cover.hint": "翻页看每一步该做什么。\n按 K 可以收起右上角的任务卡。",
   "book.astrofactory.guide.exp": "完成奖励：+%s EXP",
   "book.astrofactory.guide.summary.title": "产线一览",
-  "book.astrofactory.guide.summary.body": "采矿机 → 传送带 → 机械臂 → 熔炼炉\n\n原矿进熔炉出锭，锭做成齿轮和铜线，\n齿轮+铜线在组装机拼成电路板，\n电路板投进科研台解锁科技。\n\n缺电是正常的：先撞墙，再给梯子。"
+  "book.astrofactory.guide.summary.body": "采矿机 → 传送带 → 机械臂 → 熔炼炉\n\n原矿进熔炉出锭，锭做成齿轮和铜线，\n齿轮+铜线在组装机拼成电路板，\n电路板投进科研台解锁科技。\n\n缺电是正常的：先撞墙，再给梯子。",
+  "gui.astrofactory.status.running": "运行中",
+  "gui.astrofactory.status.no_power": "无电力",
+  "gui.astrofactory.status.no_input": "缺原料",
+  "gui.astrofactory.status.output_full": "输出满",
+  "gui.astrofactory.status.no_fuel": "缺燃料",
+  "gui.astrofactory.status.idle": "停机"
 }

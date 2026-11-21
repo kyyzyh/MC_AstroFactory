@@ -13,6 +13,7 @@ import net.minecraft.world.level.storage.ValueOutput;
 
 import com.xiaoyi.astrofactory.ModRegistry;
 import com.xiaoyi.astrofactory.machine.AbstractMachineEntity;
+import com.xiaoyi.astrofactory.machine.MachineFeedback;
 import com.xiaoyi.astrofactory.menu.AssemblerMenu;
 import com.xiaoyi.astrofactory.power.ElectricPowerSource;
 import com.xiaoyi.astrofactory.recipe.MachineRecipe;
@@ -57,11 +58,14 @@ public class AssemblerBlockEntity extends AbstractMachineEntity {
             power.consume(false);
             int interval = match.ticks();
             craftProgress++;
+            // 加工中偶发火花（零资产，用原版 CRIT 粒子）
+            MachineFeedback.tickParticles(level, pos, net.minecraft.core.particles.ParticleTypes.CRIT);
             if (craftProgress >= interval) {
                 craftProgress = 0;
                 if (craft(match)) {
                     setChanged();
                     level.sendBlockUpdated(pos, state, state, 3);
+                    MachineFeedback.playCraft(level, pos);
                 }
             }
         } else {

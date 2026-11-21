@@ -1,0 +1,142 @@
+package com.xiaoyi.astrofactory.demo;
+
+import com.mojang.logging.LogUtils;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.server.ServerStartedEvent;
+import org.slf4j.Logger;
+
+import net.minecraft.network.chat.Component;
+
+import com.xiaoyi.astrofactory.Astrofactory;
+import com.xiaoyi.astrofactory.tutorial.Tutorial;
+
+import java.util.List;
+
+/**
+ * 【临时探针】手册书页自检，跑完自动关服。不属于交付代码。
+ *
+ * 覆盖：
+ * 1. 页数 = 封面 1 + 步骤 N + 末页 1
+ * 2. 每页都能取到非空文本，且不含未翻译的 lang key
+ * 3. 进度标记正确：已完成 [v] / 当前 [>] / 未开始 [ ]
+ * 4. 全部完成后每页都是 [v]
+ * 5. tutorial.astrofactory.title 这个 key 存在（HUD 曾经显示原始 key）
+ */
+@EventBusSubscriber(modid = Astrofactory.MODID)
+public final class BookProbe {
+    private static final Logger LOGGER = LogUtils.getLogger();
+    private static int passed = 0;
+    private static int failed = 0;
+
+    @SubscribeEvent
+    public static void onServerStarted(ServerStartedEvent event) {
+        try {
+            run();
+        } catch (Throwable t) {
+            LOGGER.error("[bookprobe] FAILED", t);
+            failed++;
+        } finally {
+            LOGGER.info("[bookprobe] passed={} failed={}", passed, failed);
+            LOGGER.info("[bookprobe] done, halting");
+            event.getServer().halt(false);
+        }
+    }
+
+    private static void check(String name, boolean ok) {
+        if (ok) {
+            passed++;
+            LOGGER.info("[bookprobe]   OK {}", name);
+        } else {
+            failed++;
+            LOGGER.error("[bookprobe]   FAIL {}", name);
+        }
+    }
+
+    private static void run() {
+        int steps = Tutorial.count();
+        LOGGER.info("[bookprobe] 教程步数={}", steps);
+
+        // ============ 1. 页数 ============
+        List<Component> pages = com.xiaoyi.astrofactory.client.GuideBookPages.build(0, false);
+        check("页数 = 1 封面 + " + steps + " 步 + 1 末页 = " + (steps + 2)
+                        + "（实际 " + pages.size() + "）",
+                pages.size() == steps + 2);
+
+        // ============ 2. 每页有内容且无未翻译 key ============
+        boolean allText = true;
+        boolean noRawKey = true;
+        for (int i = 0; i < pages.size(); i++) {
+            String s = pages.get(i).getString();
+            if (s.isBlank()) {
+                allText = false;
+                LOGGER.error("[bookprobe] 第 {} 页为空", i);
+            }
+            // 未翻译的 translatable 会原样返回 key
+            if (s.contains("astrofactory.guide.") || s.contains("tutorial.astrofactory.")) {
+                noRawKey = false;
+                LOGGER.error("[bookprobe] 第 {} 页含未翻译 key：{}", i, s);
+            }
+        }
+        check("每页都有文本", allText);
+        check("没有未翻译的 lang key", noRawKey);
+
+        // ============ 3. 进度标记（step=3 时）============
+        List<Component> mid = com.xiaoyi.astrofactory.client.GuideBookPages.build(3, false);
+        // 页面下标 0=封面, 1..N=步骤, 最后一页=末页
+        String p1 = mid.get(1).getString();   // 第 1 步（index 0，已完成）
+        String p4 = mid.get(4).getString();   // 第 4 步（index 3，当前）
+        String p5 = mid.get(5).getString();   // 第 5 步（index 4，未开始）
+        LOGGER.info("[bookprobe] step=3 时 第1步「{}」", firstLine(p1));
+        LOGGER.info("[bookprobe] step=3 时 第4步「{}」", firstLine(p4));
+        LOGGER.info("[bookprobe] step=3 时 第5步「{}」", firstLine(p5));
+        check("第 1 步标记为已完成 [v]", p1.startsWith("[v]"));
+        check("第 4 步标记为当前 [>]", p4.startsWith("[>]"));
+        check("第 5 步标记为未开始 [ ]", p5.startsWith("[ ]"));
+
+        // ============ 4. 全部完成时都是 [v] ============
+        List<Component> done = com.xiaoyi.astrofactory.client.GuideBookPages.build(steps, true);
+        boolean allDone = true;
+        for (int i = 1; i <= steps; i++) {
+            if (!done.get(i).getString().startsWith("[v]")) {
+                allDone = false;
+                LOGGER.error("[bookprobe] 全部完成时第 {} 页不是 [v]", i);
+            }
+        }
+        check("全部完成后每步都是 [v]", allDone);
+
+        // ============ 5. 封面进度文案 ============
+        String coverMid = mid.get(0).getString();
+        String coverDone = done.get(0).getString();
+        LOGGER.info("[bookprobe] 封面(step=3)「{}」", coverMid.replace('\n', '|'));
+        LOGGER.info("[bookprobe] 封面(全部完成)「{}」", coverDone.replace('\n', '|'));
+        check("封面含进度 3/" + steps, coverMid.contains("3 / " + steps));
+        check("封面含进度 " + steps + "/" + steps,
+                coverDone.contains(steps + " / " + steps));
+
+        // ============ 6. HUD 标题 key 存在 ============
+        String hudTitle = Component.translatable("tutorial.astrofactory.title").getString();
+        LOGGER.info("[bookprobe] HUD 标题 = 「{}」", hudTitle);
+        check("tutorial.astrofactory.title 已翻译（曾经显示原始 key）",
+                !hudTitle.equals("tutorial.astrofactory.title"));
+
+        // ============ 7. 每步的 title/desc key 都能翻译 ============
+        boolean stepKeysOk = true;
+        for (int i = 0; i < steps; i++) {
+            Tutorial.Step st = Tutorial.stepAt(i);
+            String t = Component.translatable(st.titleKey()).getString();
+            String d = Component.translatable(st.descKey()).getString();
+            if (t.equals(st.titleKey()) || d.equals(st.descKey())) {
+                stepKeysOk = false;
+                LOGGER.error("[bookprobe] 步骤 {} key 未翻译: {} / {}",
+                        st.id(), st.titleKey(), st.descKey());
+            }
+        }
+        check("18 步的 title/desc 全部已翻译", stepKeysOk);
+    }
+
+    private static String firstLine(String s) {
+        int nl = s.indexOf('\n');
+        return nl < 0 ? s : s.substring(0, nl);
+    }
+}

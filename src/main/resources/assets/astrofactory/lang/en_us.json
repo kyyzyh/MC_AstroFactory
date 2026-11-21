@@ -184,5 +184,13 @@
   "tutorial.astrofactory.steam_running.title": "Get steam running",
   "tutorial.astrofactory.steam_running.desc": "Boiler makes steam -> steam engine makes power -> poles deliver it",
   "tutorial.astrofactory.auto_line.title": "Build an automated line",
-  "tutorial.astrofactory.auto_line.desc": "Mine -> convey -> smelt -> assemble, all without manual work"
+  "tutorial.astrofactory.auto_line.desc": "Mine -> convey -> smelt -> assemble, all without manual work",
+  "tutorial.astrofactory.title": "Tutorial",
+  "book.astrofactory.guide.cover.title": "AstroFactory Handbook",
+  "book.astrofactory.guide.cover.subtitle": "From one ore to a full production line",
+  "book.astrofactory.guide.cover.progress": "Progress: %s / %s steps",
+  "book.astrofactory.guide.cover.hint": "Turn pages to see what to do next.\nPress K to fold the task card in the corner.",
+  "book.astrofactory.guide.exp": "Reward: +%s EXP",
+  "book.astrofactory.guide.summary.title": "Line Overview",
+  "book.astrofactory.guide.summary.body": "Miner -> Belt -> Inserter -> Furnace\n\nOre goes in, ingots come out. Ingots become\ngears and cables. Gears + cables make circuit\nboards in the assembler. Boards unlock tech\nat the lab.\n\nRunning out of power is expected: hit the wall\nfirst, then get the ladder."
 }

@@ -184,5 +184,13 @@
   "tutorial.astrofactory.steam_running.title": "让蒸汽跑起来",
   "tutorial.astrofactory.steam_running.desc": "锅炉产汽 → 蒸汽机发电 → 电线杆把电送到组装机",
   "tutorial.astrofactory.auto_line.title": "搭出自动产线",
-  "tutorial.astrofactory.auto_line.desc": "采矿 → 传送 → 熔炼 → 组装，全程不用手动"
+  "tutorial.astrofactory.auto_line.desc": "采矿 → 传送 → 熔炼 → 组装，全程不用手动",
+  "tutorial.astrofactory.title": "新手任务",
+  "book.astrofactory.guide.cover.title": "AstroFactory 新手手册",
+  "book.astrofactory.guide.cover.subtitle": "从一块矿到一条自动化产线",
+  "book.astrofactory.guide.cover.progress": "进度：%s / %s 步",
+  "book.astrofactory.guide.cover.hint": "翻页看每一步该做什么。\n按 K 可以收起右上角的任务卡。",
+  "book.astrofactory.guide.exp": "完成奖励：+%s EXP",
+  "book.astrofactory.guide.summary.title": "产线一览",
+  "book.astrofactory.guide.summary.body": "采矿机 → 传送带 → 机械臂 → 熔炼炉\n\n原矿进熔炉出锭，锭做成齿轮和铜线，\n齿轮+铜线在组装机拼成电路板，\n电路板投进科研台解锁科技。\n\n缺电是正常的：先撞墙，再给梯子。"
 }

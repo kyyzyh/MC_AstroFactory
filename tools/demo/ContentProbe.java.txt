@@ -1,0 +1,269 @@
+package com.xiaoyi.astrofactory.demo;
+
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.server.ServerStartedEvent;
+
+import com.xiaoyi.astrofactory.ModRegistry;
+import com.xiaoyi.astrofactory.client.GuideBookPages;
+import com.xiaoyi.astrofactory.recipe.MachineType;
+import com.xiaoyi.astrofactory.recipe.RecipeRegistry;
+import com.xiaoyi.astrofactory.tutorial.Tutorial;
+import com.xiaoyi.astrofactory.weapon.Weapons;
+
+/**
+ * 内容完整性探针。
+ *
+ * <p>验证的不是「能编译」，而是<b>玩家能不能真的走到</b>：</p>
+ * <ol>
+ *   <li>钢锭物品存在、有贴图、有模型、有炼钢配方（320 tick）；</li>
+ *   <li>4 把武器都有生存配方，且配方引用的物品都真实存在；</li>
+ *   <li>武器 tooltip 的 desc 键与等级键齐全；</li>
+ *   <li>手册页数 = 封面 + 18 步 + 摘要 + 3 章节 + 23 条参考；</li>
+ *   <li>所有参考条目的 name/body 键都能解析（不残留原始键名）；</li>
+ *   <li>所有配方 JSON 引用的 item id 都能解析到真实物品。</li>
+ * </ol>
+ */
+@EventBusSubscriber(modid = "astrofactory")
+public final class ContentProbe {
+
+    private static final org.slf4j.Logger LOG = com.mojang.logging.LogUtils.getLogger();
+    private static int passed = 0;
+    private static int failed = 0;
+
+    /** 手册参考条目（与 GuideBookPages 保持同步的清单）。 */
+    private static final String[] MACHINES = {
+            "burner_miner", "transport_belt", "funnel", "burner_inserter",
+            "stone_furnace", "assembler", "lab",
+            "boiler", "steam_engine", "offshore_pump", "steam_pipe", "power_pole",
+            "ore_vein"
+    };
+    private static final String[] ITEMS = {
+            "iron_gear", "copper_cable", "electronic_circuit",
+            "automation_pack", "steel_ingot"
+    };
+    private static final String[] TROUBLE = {
+            "machine_stopped", "no_power", "arm_stuck", "belt_backup", "vein_depleted"
+    };
+
+    @SubscribeEvent
+    public static void onServerStarted(ServerStartedEvent event) {
+        LOG.info("[contentprobe] ===== 内容完整性探针 =====");
+        ServerLevel level = event.getServer().overworld();
+        try {
+            testSteel(level);
+            testWeapons();
+            testWeaponRecipes(level);
+            testGuidePages();
+            testRefKeys();
+            testRecipeRefs(level);
+        } catch (Throwable t) {
+            LOG.error("[contentprobe] 探针异常", t);
+            failed++;
+        }
+        LOG.info("[contentprobe] passed={} failed={}", passed, failed);
+        event.getServer().halt(false);
+    }
+
+    // ------------------------------------------------------------ 1. 钢
+
+    private static void testSteel(ServerLevel level) {
+        var item = ModRegistry.STEEL_INGOT.get();
+        check("钢锭物品已注册", item != null, "null");
+        check("钢锭显示名非键名",
+                !item.getDescriptionId().equals(item.getName(new ItemStack(item)).getString()),
+                "显示名仍是键名");
+        check("钢锭显示名 = 钢锭/Steel Ingot",
+                item.getName(new ItemStack(item)).getString().contains("钢")
+                        || item.getName(new ItemStack(item)).getString().contains("Steel"),
+                item.getName(new ItemStack(item)).getString());
+
+        for (String res : new String[]{
+                "assets/astrofactory/textures/item/steel_ingot.png",
+                "assets/astrofactory/models/item/steel_ingot.json",
+                "assets/astrofactory/items/steel_ingot.json",
+        }) {
+            check("钢锭资源 " + res.substring(res.lastIndexOf('/') + 1),
+                    ContentProbe.class.getClassLoader().getResource(res) != null, "缺失");
+        }
+
+        // 炼钢配方：铁锭 -> 钢锭，320 tick
+        var steelRecipes = RecipeRegistry.all().stream()
+                .filter(r -> r.type() == MachineType.SMELTING)
+                .filter(r -> r.result() == item)
+                .toList();
+        check("存在炼钢配方", !steelRecipes.isEmpty(), "0 条");
+        if (!steelRecipes.isEmpty()) {
+            var r = steelRecipes.get(0);
+            check("炼钢耗时 320 tick", r.ticks() == 320, "实际 " + r.ticks());
+            check("炼钢输入是铁锭",
+                    r.inputs().get(0).item() == Items.IRON_INGOT,
+                    String.valueOf(r.inputs().get(0).item()));
+        }
+    }
+
+    // ------------------------------------------------------------ 2. 武器
+
+    private static void testWeapons() {
+        check("武器共 4 把", Weapons.all().size() == 4, "实际 " + Weapons.all().size());
+        for (String id : new String[]{"iron_wrench", "steel_wrench", "power_gauntlet", "rivet_gun"}) {
+            var w = Weapons.get(id);
+            check("武器存在 " + id, w != null, "null");
+            if (w == null) {
+                continue;
+            }
+            // tooltip 键能解析（不等于键名本身）
+            String desc = Component.translatable(w.descriptionKey()).getString();
+            check("desc 键可解析 " + id, !desc.equals(w.descriptionKey()), desc);
+            String name = Component.translatable(w.displayKey()).getString();
+            check("显示名可解析 " + id, !name.equals(w.displayKey()), name);
+        }
+        // 等级门槛键
+        String lvl = Component.translatable("weapon.astrofactory.tooltip.level", 5).getString();
+        check("等级 tooltip 键可解析",
+                !lvl.startsWith("weapon.astrofactory.tooltip.level"), lvl);
+        String wr = Component.translatable("weapon.astrofactory.tooltip.wrench").getString();
+        check("扳手 tooltip 键可解析",
+                !wr.startsWith("weapon.astrofactory.tooltip.wrench"), wr);
+    }
+
+    // ------------------------------------------------------------ 3. 武器配方
+
+    private static void testWeaponRecipes(ServerLevel level) {
+        var recipes = level.recipeAccess();
+        for (String id : new String[]{"iron_wrench", "steel_wrench", "power_gauntlet", "rivet_gun"}) {
+            var key = net.minecraft.resources.ResourceKey.create(
+                    net.minecraft.core.registries.Registries.RECIPE,
+                    net.minecraft.resources.Identifier.fromNamespaceAndPath("astrofactory", id));
+            var holder = recipes.byKey(key);
+            check("工作台配方存在 " + id, holder.isPresent(), "缺失 " + key);
+        }
+    }
+
+    // ------------------------------------------------------------ 4. 手册页数
+
+    private static void testGuidePages() {
+        var pages = GuideBookPages.build(0, false);
+        int expected = 1 + Tutorial.count() + 1
+                + 1 + MACHINES.length
+                + 1 + ITEMS.length
+                + 1 + TROUBLE.length;
+        check("手册页数 = " + expected, pages.size() == expected,
+                "实际 " + pages.size());
+
+        // 每页不能为空
+        int empty = 0;
+        for (Component p : pages) {
+            if (p.getString().isBlank()) {
+                empty++;
+            }
+        }
+        check("没有空白页", empty == 0, empty + " 页空白");
+
+        // 章节标题页存在
+        String machinesTitle = pages.get(1 + Tutorial.count() + 1).getString();
+        check("机器速查章节标题页", machinesTitle.contains("机器") || machinesTitle.contains("Machine"),
+                machinesTitle);
+    }
+
+    // ------------------------------------------------------------ 5. 参考条目键
+
+    private static void testRefKeys() {
+        int missing = 0;
+        for (String id : MACHINES) {
+            missing += checkRef("machine." + id, true);
+        }
+        for (String id : ITEMS) {
+            missing += checkRef("item." + id, true);
+        }
+        for (String id : TROUBLE) {
+            missing += checkRef("trouble." + id, true);
+        }
+        check("全部参考条目键可解析", missing == 0, "缺 " + missing + " 个");
+
+        // 章节 intro 键
+        for (String ch : new String[]{"machines", "items", "trouble"}) {
+            String k = "book.astrofactory.ref." + ch + ".title";
+            String v = Component.translatable(k).getString();
+            check("章节键 " + ch, !v.equals(k), v);
+        }
+    }
+
+    private static int checkRef(String key, boolean needBody) {
+        String base = "book.astrofactory.ref." + key;
+        int bad = 0;
+        String name = Component.translatable(base + ".name").getString();
+        if (name.equals(base + ".name") || name.isBlank()) {
+            LOG.error("[contentprobe]   缺 {}.name", base);
+            bad++;
+        }
+        if (needBody) {
+            String body = Component.translatable(base + ".body").getString();
+            if (body.equals(base + ".body") || body.isBlank()) {
+                LOG.error("[contentprobe]   缺 {}.body", base);
+                bad++;
+            }
+        }
+        return bad;
+    }
+
+    // ------------------------------------------------------------ 6. 配方引用
+
+    private static void testRecipeRefs(ServerLevel level) {
+        var itemRegistry = level.registryAccess()
+                .lookupOrThrow(net.minecraft.core.registries.Registries.ITEM);
+
+        // 机器配方：所有 result 必须是真实物品
+        int badResult = 0;
+        for (var r : RecipeRegistry.all()) {
+            if (r.result() == null) {
+                continue;
+            }
+            var id = itemRegistry.getKey(r.result());
+            if (id == null) {
+                LOG.error("[contentprobe]   机器配方产物未注册: {}", r.id());
+                badResult++;
+            }
+        }
+        check("机器配方产物全部已注册", badResult == 0, badResult + " 个未注册");
+
+        // 工作台配方：所有 astrofactory: 前缀的 key 必须真实存在
+        int badKey = 0;
+        for (var holder : level.recipeAccess().getRecipes()) {
+            if (!(holder.value() instanceof net.minecraft.world.item.crafting.ShapedRecipe shaped)) {
+                continue;
+            }
+            for (var opt : shaped.getIngredients()) {
+                if (opt.isEmpty()) {
+                    continue;
+                }
+                var ingredient = opt.get();
+                if (ingredient.isEmpty()) {
+                    continue;
+                }
+                boolean anyMissing = ingredient.items()
+                        .noneMatch(h -> itemRegistry.getKey(h.value()) != null);
+                if (anyMissing) {
+                    badKey++;
+                }
+            }
+        }
+        check("工作台配方原料全部已注册", badKey == 0, badKey + " 个未注册");
+    }
+
+    // ------------------------------------------------------------ 断言
+
+    private static void check(String what, boolean ok, String detail) {
+        if (ok) {
+            passed++;
+            LOG.info("[contentprobe]   OK {}", what);
+        } else {
+            failed++;
+            LOG.error("[contentprobe]   FAIL {} -> {}", what, detail);
+        }
+    }
+}

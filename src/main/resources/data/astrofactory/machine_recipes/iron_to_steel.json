@@ -1,0 +1,9 @@
+{
+  "type": "smelting",
+  "ingredients": [
+    "minecraft:iron_ingot"
+  ],
+  "result": "astrofactory:steel_ingot",
+  "count": 1,
+  "time": 320
+}

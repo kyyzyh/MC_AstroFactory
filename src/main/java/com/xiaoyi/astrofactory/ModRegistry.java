@@ -120,6 +120,7 @@ public final class ModRegistry {
     public static final DeferredItem<Item> COPPER_CABLE = ModItems.COPPER_CABLE;
     public static final DeferredItem<Item> ELECTRONIC_CIRCUIT = ModItems.ELECTRONIC_CIRCUIT;
     public static final DeferredItem<Item> AUTOMATION_PACK = ModItems.AUTOMATION_PACK;
+    public static final DeferredItem<Item> STEEL_INGOT = ModItems.STEEL_INGOT;
     public static final DeferredItem<GuideBookItem> GUIDE_BOOK = ModItems.GUIDE_BOOK;
     public static final DeferredItem<WeaponItem> IRON_WRENCH = ModItems.IRON_WRENCH;
     public static final DeferredItem<WeaponItem> STEEL_WRENCH = ModItems.STEEL_WRENCH;

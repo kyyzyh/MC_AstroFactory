@@ -48,7 +48,84 @@ public final class GuideBookPages {
         }
 
         pages.add(summaryPage());
+
+        // ---- 参考章节（不属于教程进度，是查得到的字典）----
+        pages.add(chapterTitle("machines"));
+        for (String id : MACHINE_ENTRIES) {
+            pages.add(referencePage("machine." + id));
+        }
+        pages.add(chapterTitle("items"));
+        for (String id : ITEM_ENTRIES) {
+            pages.add(referencePage("item." + id));
+        }
+        pages.add(chapterTitle("trouble"));
+        for (String id : TROUBLE_ENTRIES) {
+            pages.add(referencePage("trouble." + id));
+        }
         return pages;
+    }
+
+    // ------------------------------------------------------------ 参考章节数据
+
+    /**
+     * 机器速查条目（顺序 = 玩家遇到顺序）。
+     *
+     * <p>只列「玩家会去翻书问它干什么」的方块。传送带、漏斗这种一看就懂的
+     * 不占篇幅 —— 手册的价值在解释，不在复述名字。</p>
+     */
+    private static final String[] MACHINE_ENTRIES = {
+            "burner_miner", "transport_belt", "funnel", "burner_inserter",
+            "stone_furnace", "assembler", "lab",
+            "boiler", "steam_engine", "offshore_pump", "steam_pipe", "power_pole",
+            "ore_vein"
+    };
+
+    /** 物品链条目：从原料到成品，让玩家能倒推「我现在缺哪一环」。 */
+    private static final String[] ITEM_ENTRIES = {
+            "iron_gear", "copper_cable", "electronic_circuit",
+            "automation_pack", "steel_ingot"
+    };
+
+    /** 常见故障：每条都是「症状 → 原因 → 怎么办」。 */
+    private static final String[] TROUBLE_ENTRIES = {
+            "machine_stopped", "no_power", "arm_stuck", "belt_backup", "vein_depleted"
+    };
+
+    /** 章节标题页。 */
+    private static Component chapterTitle(String chapter) {
+        MutableComponent page = Component.empty();
+        page.append(Component.translatable("book.astrofactory.ref." + chapter + ".title")
+                .withStyle(ChatFormatting.BOLD, ChatFormatting.DARK_BLUE));
+        page.append("\n\n");
+        page.append(Component.translatable("book.astrofactory.ref." + chapter + ".intro")
+                .withStyle(ChatFormatting.DARK_GRAY));
+        return page;
+    }
+
+    /**
+     * 单条参考页：标题 + 正文。
+     *
+     * <p>机器条目额外给一行「怎么用」和一行「什么时候解锁」——
+     * 前者是操作，后者是路线图，玩家最常问的就是这两件事。</p>
+     */
+    private static Component referencePage(String key) {
+        String base = "book.astrofactory.ref." + key;
+
+        MutableComponent page = Component.empty();
+        page.append(Component.translatable(base + ".name")
+                .withStyle(ChatFormatting.BOLD, ChatFormatting.DARK_AQUA));
+        page.append("\n\n");
+        page.append(Component.translatable(base + ".body").withStyle(BODY));
+
+        // 有 .usage 才追加（不是所有条目都需要）
+        Component usage = Component.translatable(base + ".usage");
+        if (!usage.getString().startsWith("book.astrofactory.ref.")) {
+            page.append("\n\n");
+            page.append(Component.translatable("book.astrofactory.ref.usage_label")
+                    .withStyle(ChatFormatting.DARK_GRAY));
+            page.append(usage.copy().withStyle(BODY));
+        }
+        return page;
     }
 
     /** 封面：标题 + 进度。 */

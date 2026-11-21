@@ -9,6 +9,10 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
+import net.minecraft.world.item.component.TooltipDisplay;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.ChatFormatting;
+import java.util.function.Consumer;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 
@@ -73,6 +77,39 @@ public class WeaponItem extends Item {
     /** 名字里带 wrench 的算扳手（iron_wrench / steel_wrench）。 */
     private boolean isWrench() {
         return weaponId.endsWith("_wrench");
+    }
+
+    /**
+     * 武器说明 tooltip。
+     *
+     * <p>26.3 的签名是 5 参（多了 {@code TooltipDisplay}，它承载「按 F3+H
+     * 显示高级提示」之类的显示开关）。这里不关心开关，直接追加。</p>
+     *
+     * <p><b>为什么这条比数值更重要</b>：Mekanism 的引导靠 93 个 advancement +
+     * 长按 tooltip，Botania 靠外部 wiki —— 玩家拿在手上时是唯一必然会被
+     * 看到的界面。一条说明 + 一条等级要求，成本极低。</p>
+     */
+    @Override
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, TooltipDisplay display,
+                                Consumer<Component> tooltip, TooltipFlag flag) {
+        super.appendHoverText(stack, context, display, tooltip, flag);
+
+        Weapons.Weapon w = Weapons.get(weaponId);
+        if (w == null) {
+            return;
+        }
+        tooltip.accept(Component.translatable(w.descriptionKey()).withStyle(ChatFormatting.GRAY));
+
+        // 等级门槛：让玩家拿在手上就知道「为什么打不动 / 为什么不能用」
+        int need = Weapons.requiredLevel(weaponId);
+        if (need > 1) {
+            tooltip.accept(Component.translatable("weapon.astrofactory.tooltip.level", need)
+                    .withStyle(ChatFormatting.DARK_GRAY));
+        }
+        if (isWrench()) {
+            tooltip.accept(Component.translatable("weapon.astrofactory.tooltip.wrench")
+                    .withStyle(ChatFormatting.DARK_AQUA));
+        }
     }
 
     @Override

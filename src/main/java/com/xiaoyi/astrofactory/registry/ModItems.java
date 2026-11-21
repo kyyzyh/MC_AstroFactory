@@ -64,6 +64,14 @@ public final class ModItems {
     /** 铜线：导线类零件，铜锭 ×3 → 1 个（熔炼炉 crafting 通道，见 machine_recipes）。 */
     public static final DeferredItem<Item> COPPER_CABLE = ITEMS.registerSimpleItem("copper_cable");
 
+    /**
+     * 钢锭：铁锭在石熔炉里再炼一次（320 tick，规格 §3 表格）。
+     *
+     * <p>这是「铁 → 钢」的第二次冶炼，和 Factorio 的 steel plate 同构：
+     * 同一种矿炼两次得到更好的材料，是科技树的天然台阶。</p>
+     */
+    public static final DeferredItem<Item> STEEL_INGOT = ITEMS.registerSimpleItem("steel_ingot");
+
     /** 电路板：铁齿轮 ×2 + 铜线 ×2，组装机 3×3 网格（gcg/.c./...）。 */
     public static final DeferredItem<Item> ELECTRONIC_CIRCUIT =
             ITEMS.registerSimpleItem("electronic_circuit");

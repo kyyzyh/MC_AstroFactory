@@ -1,0 +1,100 @@
+package com.xiaoyi.astrofactory.demo;
+
+import com.mojang.logging.LogUtils;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.server.ServerStartedEvent;
+import org.slf4j.Logger;
+
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.Item;
+
+import com.xiaoyi.astrofactory.Astrofactory;
+import com.xiaoyi.astrofactory.registry.ModItems;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * 【临时探针】物品/方块显示名完整性自检，跑完自动关服。不属于交付代码。
+ *
+ * 目的：排查「模组体积小是不是缺东西」时发现的真实缺陷 ——
+ * 4 把武器（iron_wrench/steel_wrench/power_gauntlet/rivet_gun）只有
+ * weapon.astrofactory.* 键，缺 item.astrofactory.* 键。WeaponItem 没重写
+ * getName，所以游戏内显示的是原始 key 字符串。
+ */
+@EventBusSubscriber(modid = Astrofactory.MODID)
+public final class NameAuditProbe {
+    private static final Logger LOGGER = LogUtils.getLogger();
+    private static int passed = 0;
+    private static int failed = 0;
+
+    @SubscribeEvent
+    public static void onServerStarted(ServerStartedEvent event) {
+        try {
+            run();
+        } catch (Throwable t) {
+            LOGGER.error("[nameaudit] FAILED", t);
+            failed++;
+        } finally {
+            LOGGER.info("[nameaudit] passed={} failed={}", passed, failed);
+            LOGGER.info("[nameaudit] done, halting");
+            event.getServer().halt(false);
+        }
+    }
+
+    private static void check(String name, boolean ok) {
+        if (ok) {
+            passed++;
+            LOGGER.info("[nameaudit]   OK {}", name);
+        } else {
+            failed++;
+            LOGGER.error("[nameaudit]   FAIL {}", name);
+        }
+    }
+
+    private static void run() {
+        // 全量扫描：所有 astrofactory 命名空间物品的显示名
+        List<String> broken = new ArrayList<>();
+        int total = 0;
+        for (Item item : BuiltInRegistries.ITEM) {
+            Identifier id = BuiltInRegistries.ITEM.getKey(item);
+            if (!Astrofactory.MODID.equals(id.getNamespace())) {
+                continue;
+            }
+            total++;
+            String descId = item.getDescriptionId();
+            String shown = Component.translatable(descId).getString();
+            // 未翻译时 getString() 会返回 key 本身
+            boolean untranslated = shown.equals(descId);
+            LOGGER.info("[nameaudit] {} | {} | 显示「{}」{}",
+                    id.getPath(), descId, shown, untranslated ? "  <<< 未翻译" : "");
+            if (untranslated) {
+                broken.add(id.getPath() + " (" + descId + ")");
+            }
+        }
+        LOGGER.info("[nameaudit] 本模组物品总数={}", total);
+        if (!broken.isEmpty()) {
+            LOGGER.error("[nameaudit] 未翻译物品 {} 个：{}", broken.size(), broken);
+        }
+        check("全部 " + total + " 个物品都有显示名（未翻译 " + broken.size() + " 个）",
+                broken.isEmpty());
+
+        // 逐个点名检查 4 把武器
+        check("iron_wrench 有显示名",
+                hasName(ModItems.IRON_WRENCH.get()));
+        check("steel_wrench 有显示名",
+                hasName(ModItems.STEEL_WRENCH.get()));
+        check("power_gauntlet 有显示名",
+                hasName(ModItems.POWER_GAUNTLET.get()));
+        check("rivet_gun 有显示名",
+                hasName(ModItems.RIVET_GUN.get()));
+    }
+
+    private static boolean hasName(Item item) {
+        String descId = item.getDescriptionId();
+        return !Component.translatable(descId).getString().equals(descId);
+    }
+}

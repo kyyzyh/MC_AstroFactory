@@ -38,6 +38,7 @@ import com.xiaoyi.astrofactory.item.GuideBookItem;
 import com.xiaoyi.astrofactory.item.WeaponItem;
 import com.xiaoyi.astrofactory.menu.AssemblerMenu;
 import com.xiaoyi.astrofactory.menu.BoilerMenu;
+import com.xiaoyi.astrofactory.menu.InserterMenu;
 import com.xiaoyi.astrofactory.menu.LabMenu;
 import com.xiaoyi.astrofactory.menu.StoneFurnaceMenu;
 import com.xiaoyi.astrofactory.registry.ModBlockEntities;
@@ -74,6 +75,7 @@ public final class ModRegistry {
     public static final DeferredBlock<FastTransportBeltBlock> FAST_TRANSPORT_BELT =
             ModBlocks.FAST_TRANSPORT_BELT;
     public static final DeferredBlock<BurnerInserterBlock> BURNER_INSERTER = ModBlocks.BURNER_INSERTER;
+    public static final DeferredBlock<com.xiaoyi.astrofactory.block.FunnelBlock> FUNNEL = ModBlocks.FUNNEL;
     public static final DeferredBlock<BurnerMinerBlock> BURNER_MINER = ModBlocks.BURNER_MINER;
     public static final DeferredBlock<StoneFurnaceBlock> STONE_FURNACE = ModBlocks.STONE_FURNACE;
     public static final DeferredBlock<AssemblerBlock> ASSEMBLER = ModBlocks.ASSEMBLER;
@@ -93,6 +95,8 @@ public final class ModRegistry {
             ModItems.FAST_TRANSPORT_BELT_ITEM;
     public static final DeferredItem<net.minecraft.world.item.BlockItem> BURNER_INSERTER_ITEM =
             ModItems.BURNER_INSERTER_ITEM;
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> FUNNEL_ITEM =
+            ModItems.FUNNEL_ITEM;
     public static final DeferredItem<net.minecraft.world.item.BlockItem> BURNER_MINER_ITEM =
             ModItems.BURNER_MINER_ITEM;
     public static final DeferredItem<net.minecraft.world.item.BlockItem> ASSEMBLER_ITEM =
@@ -163,6 +167,8 @@ public final class ModRegistry {
             ModMenus.STONE_FURNACE_MENU;
     public static final DeferredHolder<net.minecraft.world.inventory.MenuType<?>,
             net.minecraft.world.inventory.MenuType<BoilerMenu>> BOILER_MENU = ModMenus.BOILER_MENU;
+    public static final DeferredHolder<net.minecraft.world.inventory.MenuType<?>,
+            net.minecraft.world.inventory.MenuType<InserterMenu>> INSERTER_MENU = ModMenus.INSERTER_MENU;
 
     // ---------------------------------------------------------------- 创造模式标签页
 

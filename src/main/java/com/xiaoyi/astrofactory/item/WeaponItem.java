@@ -60,7 +60,19 @@ public class WeaponItem extends Item {
         if (player == null) {
             return InteractionResult.PASS;
         }
+        // 扳手类武器对本模组机器右键 = 诊断（不是攻击）。
+        // 理由：扳手的语义是「工具」，玩家拿它对着机器右键时想的是
+        // 「这机器怎么了」，不是「打它」。这与 Pipez/EnderIO 的扳手一致。
+        if (isWrench() && !player.isShiftKeyDown()
+                && WrenchItem.tryDiagnose(context)) {
+            return InteractionResult.CONSUME;
+        }
         return use(player.level(), player, context.getHand());
+    }
+
+    /** 名字里带 wrench 的算扳手（iron_wrench / steel_wrench）。 */
+    private boolean isWrench() {
+        return weaponId.endsWith("_wrench");
     }
 
     @Override

@@ -175,6 +175,29 @@ public abstract class AbstractMachineEntity extends BaseContainerBlockEntity {
         }
     }
 
+    // ------------------------------------------------------------ 诊断（供扳手右键）
+
+    /**
+     * 动力状态的一句话描述。
+     *
+     * <p>子类覆写并转调自己的 {@code PowerSource.statusText()}。默认返回
+     * 「无动力」是因为基类不持有 PowerSource —— 由子类组合持有（见
+     * {@code PowerSource} 的注释：不通过继承区分动力类型）。</p>
+     */
+    public String getPowerStatusText() {
+        return "no power";
+    }
+
+    /**
+     * 缺什么输入，返回<b>物品的语言键</b>（不是成品文案）。
+     *
+     * <p>返回 null 或空表示「不缺东西」（要么在正常跑，要么问题不在原料）。
+     * 具体到物品是关键：告诉玩家「缺 2 个铁齿轮」比「原料不足」有用得多。</p>
+     */
+    public String describeMissingInput() {
+        return null;
+    }
+
     // ------------------------------------------------------------ 存档
 
     @Override

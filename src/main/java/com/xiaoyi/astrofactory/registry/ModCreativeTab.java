@@ -28,6 +28,7 @@ public final class ModCreativeTab {
                         // 物流
                         output.accept(ModItems.TRANSPORT_BELT_ITEM.get());
                         output.accept(ModItems.FAST_TRANSPORT_BELT_ITEM.get());
+                        output.accept(ModItems.FUNNEL_ITEM.get());
                         output.accept(ModItems.BURNER_INSERTER_ITEM.get());
                         // 生产机器
                         output.accept(ModItems.BURNER_MINER_ITEM.get());

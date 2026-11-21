@@ -1,0 +1,27 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "astrofactory:block/funnel"
+    },
+    "facing=east": {
+      "model": "astrofactory:block/funnel",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "astrofactory:block/funnel",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "astrofactory:block/funnel",
+      "y": 270
+    },
+    "facing=up": {
+      "model": "astrofactory:block/funnel",
+      "x": 90
+    },
+    "facing=down": {
+      "model": "astrofactory:block/funnel",
+      "x": 270
+    }
+  }
+}

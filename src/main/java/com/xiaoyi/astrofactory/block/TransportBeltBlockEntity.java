@@ -175,9 +175,51 @@ public class TransportBeltBlockEntity extends BlockEntity {
         }
     }
 
+    /**
+     * 只读地看带尾下一个可取走的物品（不取走）。
+     *
+     * <p>机械臂用它实现「放不下就不抓」：先 peek 看是什么，模拟插入确认放得下，
+     * 再 {@link #extractReady()} 真取。避免物品取出来却塞不进去、卡在手上。</p>
+     */
+    public ItemStack peekReady() {
+        ItemSlot best = null;
+        for (ItemSlot slot : items) {
+            if (slot.progress >= 0.999f && (best == null || slot.progress > best.progress)) {
+                best = slot;
+            }
+        }
+        return best == null ? ItemStack.EMPTY : best.stack.copy();
+    }
+
+    /**
+     * 只读地判断带首能不能再收一个（模拟 {@link #insertAtStart}）。
+     *
+     * <p>两列任意一列有空位即算可收。</p>
+     */
+    public boolean canAcceptAtStart(ItemStack stack) {
+        if (stack.isEmpty()) {
+            return false;
+        }
+        for (int lane = 0; lane < LANES; lane++) {
+            if (laneCount(lane) >= PER_LANE_CAPACITY) {
+                continue;
+            }
+            boolean blocked = false;
+            for (ItemSlot slot : items) {
+                if (slot.lane == lane && slot.progress < MIN_GAP) {
+                    blocked = true;
+                    break;
+                }
+            }
+            if (!blocked) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /** 上游移交入口：成功接收返回 true。 */
-    public boolean tryAcceptFromUpstream(ItemStack stack, int preferredLane) {
-        int lane = Math.max(0, Math.min(LANES - 1, preferredLane));
+    public boolean tryAcceptFromUpstream(ItemStack stack, int preferredLane) {        int lane = Math.max(0, Math.min(LANES - 1, preferredLane));
         if (laneCount(lane) >= PER_LANE_CAPACITY) {
             return false;
         }

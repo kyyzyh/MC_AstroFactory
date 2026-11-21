@@ -164,4 +164,23 @@ public class StoneFurnaceBlockEntity extends AbstractMachineEntity {
     public boolean hasFuel() {
         return power.isPowered();
     }
+
+    @Override
+    public String getPowerStatusText() {
+        return power.statusText();
+    }
+
+    @Override
+    public String describeMissingInput() {
+        if (!getItem(INPUT_SLOT).isEmpty()) {
+            return null;
+        }
+        var recipes = com.xiaoyi.astrofactory.recipe.RecipeRegistry.all().stream()
+                .filter(r -> r.type() == com.xiaoyi.astrofactory.recipe.MachineType.SMELTING)
+                .toList();
+        if (recipes.isEmpty() || recipes.get(0).inputs().isEmpty()) {
+            return null;
+        }
+        return recipes.get(0).inputs().get(0).item().getDescriptionId();
+    }
 }

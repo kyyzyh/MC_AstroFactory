@@ -11,6 +11,7 @@ import com.xiaoyi.astrofactory.block.BoilerBlock;
 import com.xiaoyi.astrofactory.block.BurnerInserterBlock;
 import com.xiaoyi.astrofactory.block.BurnerMinerBlock;
 import com.xiaoyi.astrofactory.block.FastTransportBeltBlock;
+import com.xiaoyi.astrofactory.block.FunnelBlock;
 import com.xiaoyi.astrofactory.block.LabBlock;
 import com.xiaoyi.astrofactory.block.OffshorePumpBlock;
 import com.xiaoyi.astrofactory.block.OreVeinBlock;
@@ -58,6 +59,19 @@ public final class ModBlocks {
                     () -> BlockBehaviour.Properties.of()
                             .mapColor(MapColor.METAL)
                             .strength(2.5f, 6.0f)
+                            .noOcclusion());
+
+    /**
+     * 漏斗：1 格被动转移，无 GUI、无电、无燃料。
+     *
+     * <p>补上「机器出口掉进下方箱子」这个最低成本连接 ——
+     * 没有它，玩家为了 1 格落差被迫摆一个要喂煤的机械臂。</p>
+     */
+    public static final DeferredBlock<FunnelBlock> FUNNEL =
+            BLOCKS.registerBlock("funnel", FunnelBlock::new,
+                    () -> BlockBehaviour.Properties.of()
+                            .mapColor(MapColor.METAL)
+                            .strength(2.0f, 6.0f)
                             .noOcclusion());
 
     /** 燃烧机械臂：抓取 / 投放，自己烧煤，会偷燃料。 */

@@ -30,6 +30,8 @@ public final class ModItems {
             ITEMS.registerSimpleBlockItem(ModBlocks.FAST_TRANSPORT_BELT);
     public static final DeferredItem<BlockItem> BURNER_INSERTER_ITEM =
             ITEMS.registerSimpleBlockItem(ModBlocks.BURNER_INSERTER);
+    public static final DeferredItem<BlockItem> FUNNEL_ITEM =
+            ITEMS.registerSimpleBlockItem(ModBlocks.FUNNEL);
     public static final DeferredItem<BlockItem> BURNER_MINER_ITEM =
             ITEMS.registerSimpleBlockItem(ModBlocks.BURNER_MINER);
     public static final DeferredItem<BlockItem> ASSEMBLER_ITEM =

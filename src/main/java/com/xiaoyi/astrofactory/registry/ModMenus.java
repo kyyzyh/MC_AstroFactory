@@ -8,6 +8,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 import com.xiaoyi.astrofactory.Astrofactory;
 import com.xiaoyi.astrofactory.menu.AssemblerMenu;
 import com.xiaoyi.astrofactory.menu.BoilerMenu;
+import com.xiaoyi.astrofactory.menu.InserterMenu;
 import com.xiaoyi.astrofactory.menu.LabMenu;
 import com.xiaoyi.astrofactory.menu.StoneFurnaceMenu;
 
@@ -31,4 +32,7 @@ public final class ModMenus {
 
     public static final DeferredHolder<MenuType<?>, MenuType<BoilerMenu>> BOILER_MENU =
             MENUS.register("boiler", () -> BoilerMenu.TYPE);
+
+    public static final DeferredHolder<MenuType<?>, MenuType<InserterMenu>> INSERTER_MENU =
+            MENUS.register("burner_inserter", () -> InserterMenu.TYPE);
 }

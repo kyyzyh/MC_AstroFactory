@@ -155,6 +155,36 @@ public class AssemblerBlockEntity extends AbstractMachineEntity {
         return power.statusText();
     }
 
+    @Override
+    public String getPowerStatusText() {
+        return power.statusText();
+    }
+
+    /**
+     * 缺哪个原料。
+     *
+     * <p>26.3 的做法：拿已放置的输入去和每条配方比对，找出「差得最少」的那条，
+     * 报告它缺的第一个物品。比「原料不足」精确得多 —— 玩家能直接知道去补什么。</p>
+     */
+    @Override
+    public String describeMissingInput() {
+        if (hasAnyInput()) {
+            return null; // 有输入，问题不在原料（可能是没电/输出满）
+        }
+        // 输入全空：给出任意一条配方需要的第一个物品作为「示例」
+        var recipes = com.xiaoyi.astrofactory.recipe.RecipeRegistry.all().stream()
+                .filter(r -> r.type() == com.xiaoyi.astrofactory.recipe.MachineType.ASSEMBLING)
+                .toList();
+        if (recipes.isEmpty()) {
+            return null;
+        }
+        var first = recipes.get(0);
+        if (first.inputs().isEmpty()) {
+            return null;
+        }
+        return first.inputs().get(0).item().getDescriptionId();
+    }
+
     public ItemStack extractResult() {
         ItemStack out = getItem(OUTPUT_SLOT);
         if (out.isEmpty()) {

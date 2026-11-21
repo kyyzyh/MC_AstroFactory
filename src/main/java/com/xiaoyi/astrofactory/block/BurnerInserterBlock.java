@@ -2,6 +2,12 @@ package com.xiaoyi.astrofactory.block;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.SimpleMenuProvider;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
@@ -23,9 +29,13 @@ import com.xiaoyi.astrofactory.ModRegistry;
 
 /**
  * 机械臂：六向抓取/投放。
- * 逻辑：每 N tick 从"输入面"相邻的容器/传送带取一个物品，
- * 再从"输出面"相邻的容器/传送带放入。
- * 输入面 = 朝向的反面；输出面 = 朝向。
+ *
+ * <p>逻辑：每 N tick 从「输入面」相邻的容器/传送带按过滤规则取物品，
+ * 再放到「输出面」相邻的容器/传送带。输入面 = 朝向的反面；输出面 = 朝向。</p>
+ *
+ * <p><b>方向由摆放决定</b>（和 Create 机械臂一样），不在 GUI 里选 ——
+ * 摆放即配置，零点击成本。GUI 只放三个真正需要调的东西：
+ * 过滤槽 + 白黑名单 + 数量档 + Keep N。</p>
  */
 public class BurnerInserterBlock extends BaseEntityBlock {
     public static final EnumProperty<Direction> FACING = BlockStateProperties.FACING;
@@ -80,6 +90,24 @@ public class BurnerInserterBlock extends BaseEntityBlock {
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new BurnerInserterBlockEntity(pos, state);
+    }
+
+    /** 右键打开配置界面（过滤 / 白黑名单 / 数量 / Keep N）。 */
+    @Override
+    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos,
+                                               Player player, BlockHitResult hit) {
+        if (level.isClientSide()) {
+            return InteractionResult.SUCCESS;
+        }
+        BlockEntity be = level.getBlockEntity(pos);
+        if (be instanceof BurnerInserterBlockEntity inserter) {
+            player.openMenu(new SimpleMenuProvider(
+                    (windowId, inv, p) -> new com.xiaoyi.astrofactory.menu.InserterMenu(
+                            windowId, inv, inserter.getContainer()),
+                    Component.translatable("block.astrofactory.burner_inserter")));
+            return InteractionResult.CONSUME;
+        }
+        return InteractionResult.PASS;
     }
 
     @Override

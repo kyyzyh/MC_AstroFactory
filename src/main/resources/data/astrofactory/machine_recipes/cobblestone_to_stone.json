@@ -1,9 +1,0 @@
-{
-  "type": "smelting",
-  "ingredients": [
-    "minecraft:cobblestone"
-  ],
-  "result": "minecraft:stone",
-  "count": 1,
-  "time": 60
-}

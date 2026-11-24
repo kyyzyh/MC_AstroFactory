@@ -1,16 +1,13 @@
 {
-  "type": "minecraft:crafting_shaped",
+  "type": "minecraft:crafting_shapeless",
   "category": "misc",
-  "key": {
-    "C": "minecraft:copper_ingot",
-    "G": "astrofactory:iron_gear"
-  },
-  "pattern": [
-    " C ",
-    "CGC"
+  "ingredients": [
+    {
+      "item": "minecraft:copper_ingot"
+    }
   ],
   "result": {
-    "count": 1,
-    "id": "astrofactory:copper_cable"
+    "id": "astrofactory:copper_cable",
+    "count": 2
   }
 }

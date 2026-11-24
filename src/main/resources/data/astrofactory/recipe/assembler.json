@@ -1,19 +1,18 @@
 {
   "type": "minecraft:crafting_shaped",
   "category": "misc",
-  "key": {
-    "I": "minecraft:iron_ingot",
-    "G": "astrofactory:iron_gear",
-    "C": "minecraft:iron_ingot",
-    "K": "astrofactory:copper_cable"
-  },
   "pattern": [
-    "IGI",
-    "GCG",
-    "IKI"
+    "ICI",
+    "CFC",
+    "ICI"
   ],
+  "key": {
+    "I": { "item": "astrofactory:steel_plate" },
+    "C": { "item": "astrofactory:circuit" },
+    "F": { "item": "minecraft:crafting_table" }
+  },
   "result": {
-    "count": 1,
-    "id": "astrofactory:assembler"
+    "id": "astrofactory:assembler",
+    "count": 1
   }
 }

@@ -1,64 +1,73 @@
-# ============================================================
-# 构建产物
-# ============================================================
-build/
-out/
-bin/
-dist/
-*.jar
-!gradle/wrapper/gradle-wrapper.jar
-
-# ============================================================
-# Gradle / 本地工具链（体积巨大，不入库）
-# ============================================================
-.gradle/
+### Gradle ###
+.gradle
 .gradle-home/
-jdk-*/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/**/build/
 local-maven/
 
-# ============================================================
-# 游戏运行目录（runClient / runServer 生成的世界与日志）
-# ============================================================
+### 本地工具链（体积巨大，不入库） ###
+jdk-*/
+
+### 游戏运行目录 ###
 run/
 run-data/
 run-client/
 run-server/
+!**/src/**/run/
 logs/
 crash-reports/
 
-# ============================================================
-# 本地参考资料与备份（含个人数据）
-# ============================================================
-api-ref/
-backup-saves/
-
-# ============================================================
-# 日志
-# ============================================================
+### 构建产物 ###
+dist/
+*.jar
+!gradle/wrapper/gradle-wrapper.jar
 *.log
 *.log.*
 
-# ============================================================
-# IDE
-# ============================================================
+### 本地参考资料 ###
+api-ref/
+backup-saves/
+1795491851647_1_异星工厂前期流程_纯文字版.txt
+
+### IntelliJ IDEA ###
 .idea/
+*.iws
 *.iml
 *.ipr
-*.iws
-.vscode/
-.settings/
-.classpath
-.project
-.eclipse/
+out/
+!**/src/**/out/
 
-# ============================================================
-# 操作系统
-# ============================================================
+.run/
+
+### Eclipse ###
+.apt_generated
+.classpath
+.eclipse/
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+bin/
+!**/src/**/bin/
+
+### VS Code ###
+.vscode/
+
+### Mac OS ###
+.DS_Store
 Thumbs.db
 Desktop.ini
-.DS_Store
+
+### Python ###
 __pycache__/
 tools/__pycache__/
 
-# JiuwenSwarm runtime file operation logs
+### Minecraft Modding ###
+**/src/generated/**/.cache/
+repo/
+!**/src/**/repo/
+
+### JiuwenSwarm runtime ###
 .agent_history/

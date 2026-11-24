@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "IBI",
+    "BPB",
+    "IBI"
+  ],
+  "key": {
+    "I": { "item": "astrofactory:steel_plate" },
+    "B": { "item": "astrofactory:conveyor" },
+    "P": { "item": "astrofactory:research_pack" }
+  },
+  "result": {
+    "id": "astrofactory:advanced_research_pack",
+    "count": 2
+  }
+}

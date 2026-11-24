@@ -1,9 +1,0 @@
-{
-  "type": "smelting",
-  "ingredients": [
-    "minecraft:raw_iron"
-  ],
-  "result": "minecraft:iron_ingot",
-  "count": 1,
-  "time": 60
-}

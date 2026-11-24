@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "astrofactory:block/wood_crate", "y": 0 },
+    "facing=east": { "model": "astrofactory:block/wood_crate", "y": 90 },
+    "facing=south": { "model": "astrofactory:block/wood_crate", "y": 180 },
+    "facing=west": { "model": "astrofactory:block/wood_crate", "y": 270 }
+  }
+}

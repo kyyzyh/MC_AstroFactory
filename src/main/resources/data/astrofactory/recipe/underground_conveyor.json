@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "I I",
+    "C C",
+    "I I"
+  ],
+  "key": {
+    "I": { "item": "minecraft:iron_ingot" },
+    "C": { "item": "astrofactory:conveyor" }
+  },
+  "result": {
+    "id": "astrofactory:underground_conveyor",
+    "count": 2
+  }
+}

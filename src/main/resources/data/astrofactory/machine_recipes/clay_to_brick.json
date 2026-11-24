@@ -1,7 +1,0 @@
-{
-  "type": "smelting",
-  "ingredients": ["minecraft:clay_ball"],
-  "result": "minecraft:brick",
-  "count": 1,
-  "time": 40
-}

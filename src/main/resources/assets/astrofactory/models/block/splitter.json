@@ -1,0 +1,22 @@
+{
+  "parent": "block/block",
+  "textures": {
+    "particle": "astrofactory:block/splitter_top",
+    "top": "astrofactory:block/splitter_top",
+    "side": "astrofactory:block/splitter_side"
+  },
+  "elements": [
+    {
+      "from": [0, 0, 0],
+      "to": [16, 4, 16],
+      "faces": {
+        "up": { "texture": "#top" },
+        "down": { "texture": "#side" },
+        "north": { "texture": "#side", "uv": [0, 12, 16, 16] },
+        "south": { "texture": "#side", "uv": [0, 12, 16, 16] },
+        "west": { "texture": "#side", "uv": [0, 12, 16, 16] },
+        "east": { "texture": "#side", "uv": [0, 12, 16, 16] }
+      }
+    }
+  ]
+}

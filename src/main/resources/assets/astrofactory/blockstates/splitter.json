@@ -1,0 +1,12 @@
+{
+  "variants": {
+    "facing=north,next_left=true": { "model": "astrofactory:block/splitter", "y": 0 },
+    "facing=north,next_left=false": { "model": "astrofactory:block/splitter", "y": 0 },
+    "facing=east,next_left=true": { "model": "astrofactory:block/splitter", "y": 90 },
+    "facing=east,next_left=false": { "model": "astrofactory:block/splitter", "y": 90 },
+    "facing=south,next_left=true": { "model": "astrofactory:block/splitter", "y": 180 },
+    "facing=south,next_left=false": { "model": "astrofactory:block/splitter", "y": 180 },
+    "facing=west,next_left=true": { "model": "astrofactory:block/splitter", "y": 270 },
+    "facing=west,next_left=false": { "model": "astrofactory:block/splitter", "y": 270 }
+  }
+}

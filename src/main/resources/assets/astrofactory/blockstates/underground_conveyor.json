@@ -1,0 +1,12 @@
+{
+  "variants": {
+    "facing=north,entrance=true": { "model": "astrofactory:block/underground_conveyor_entrance", "y": 0 },
+    "facing=north,entrance=false": { "model": "astrofactory:block/underground_conveyor_exit", "y": 0 },
+    "facing=east,entrance=true": { "model": "astrofactory:block/underground_conveyor_entrance", "y": 90 },
+    "facing=east,entrance=false": { "model": "astrofactory:block/underground_conveyor_exit", "y": 90 },
+    "facing=south,entrance=true": { "model": "astrofactory:block/underground_conveyor_entrance", "y": 180 },
+    "facing=south,entrance=false": { "model": "astrofactory:block/underground_conveyor_exit", "y": 180 },
+    "facing=west,entrance=true": { "model": "astrofactory:block/underground_conveyor_entrance", "y": 270 },
+    "facing=west,entrance=false": { "model": "astrofactory:block/underground_conveyor_exit", "y": 270 }
+  }
+}

@@ -1,7 +1,0 @@
-{
-  "type": "crafting",
-  "ingredients": [{"item": "minecraft:gold_ingot", "count": 2}],
-  "result": "minecraft:gold_nugget",
-  "count": 9,
-  "time": 30
-}

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "ICI",
+    "CIC",
+    "ICI"
+  ],
+  "key": {
+    "I": { "item": "minecraft:iron_ingot" },
+    "C": { "item": "astrofactory:conveyor" }
+  },
+  "result": {
+    "id": "astrofactory:splitter",
+    "count": 2
+  }
+}

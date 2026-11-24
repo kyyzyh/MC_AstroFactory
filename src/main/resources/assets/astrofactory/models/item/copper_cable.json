@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "astrofactory:item/copper_cable"
+    "layer0": "astrofactory:block/copper_cable"
   }
 }

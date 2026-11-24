@@ -1,9 +1,0 @@
-{
-  "type": "smelting",
-  "ingredients": [
-    "minecraft:sand"
-  ],
-  "result": "minecraft:glass",
-  "count": 1,
-  "time": 60
-}

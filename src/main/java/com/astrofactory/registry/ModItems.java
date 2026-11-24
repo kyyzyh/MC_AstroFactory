@@ -1,0 +1,123 @@
+package com.astrofactory.registry;
+
+import com.astrofactory.AstroFactory;
+import com.astrofactory.item.TechGatedBlockItem;
+import com.astrofactory.item.WrenchItem;
+import com.astrofactory.tech.TechNodes;
+import net.minecraft.world.item.Item;
+import net.neoforged.neoforge.registries.DeferredItem;
+import net.neoforged.neoforge.registries.DeferredRegister;
+
+/**
+ * 物品注册表：这里只注册方块对应的 BlockItem。
+ */
+public final class ModItems {
+
+    public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(AstroFactory.MODID);
+
+    // -------- v0.5 贫瘠开局：开局仅研究台/研究包/扳手/木箱可用，其余加科技锁 --------
+
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> CONVEYOR =
+            ITEMS.register("conveyor", () -> new TechGatedBlockItem(
+                    ModBlocks.CONVEYOR.get(), new Item.Properties(), TechNodes.BASIC_AUTOMATION));
+
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> INSERTER =
+            ITEMS.register("inserter", () -> new TechGatedBlockItem(
+                    ModBlocks.INSERTER.get(), new Item.Properties(), TechNodes.BASIC_AUTOMATION));
+
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> MINER =
+            ITEMS.register("miner", () -> new TechGatedBlockItem(
+                    ModBlocks.MINER.get(), new Item.Properties(), TechNodes.MINING));
+
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> SMELTER =
+            ITEMS.register("smelter", () -> new TechGatedBlockItem(
+                    ModBlocks.SMELTER.get(), new Item.Properties(), TechNodes.SMELTING));
+
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> CRATE =
+            ITEMS.register("crate", () -> new TechGatedBlockItem(
+                    ModBlocks.CRATE.get(), new Item.Properties(), TechNodes.BASIC_AUTOMATION));
+
+    /** 木箱：9 格，贫瘠开局唯一存储（不加锁）。 */
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> WOOD_CRATE =
+            ITEMS.registerSimpleBlockItem("wood_crate", ModBlocks.WOOD_CRATE);
+
+    /** 铁箱：54 格（需「物流学」科技）。 */
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> IRON_CRATE =
+            ITEMS.register("iron_crate", () -> new TechGatedBlockItem(
+                    ModBlocks.IRON_CRATE.get(), new Item.Properties(), TechNodes.LOGISTICS));
+
+    /** 分流器（需「物流学」科技）。 */
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> SPLITTER =
+            ITEMS.register("splitter", () -> new TechGatedBlockItem(
+                    ModBlocks.SPLITTER.get(), new Item.Properties(), TechNodes.LOGISTICS));
+
+    /** 地下传送带（需「物流学」科技）。 */
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> UNDERGROUND_CONVEYOR =
+            ITEMS.register("underground_conveyor", () -> new TechGatedBlockItem(
+                    ModBlocks.UNDERGROUND_CONVEYOR.get(), new Item.Properties(), TechNodes.LOGISTICS));
+
+    /** 抽水机（需「蒸汽动力」科技）。 */
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> WATER_PUMP =
+            ITEMS.register("water_pump", () -> new TechGatedBlockItem(
+                    ModBlocks.WATER_PUMP.get(), new Item.Properties(), TechNodes.STEAM_POWER));
+
+    /** 锅炉（需「蒸汽动力」科技）。 */
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> BOILER =
+            ITEMS.register("boiler", () -> new TechGatedBlockItem(
+                    ModBlocks.BOILER.get(), new Item.Properties(), TechNodes.STEAM_POWER));
+
+    /** 蒸汽机（需「蒸汽动力」科技）。 */
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> STEAM_ENGINE =
+            ITEMS.register("steam_engine", () -> new TechGatedBlockItem(
+                    ModBlocks.STEAM_ENGINE.get(), new Item.Properties(), TechNodes.STEAM_POWER));
+
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> GENERATOR =
+            ITEMS.register("generator", () -> new TechGatedBlockItem(
+                    ModBlocks.GENERATOR.get(), new Item.Properties(), TechNodes.ELECTRIC_POWER));
+
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> CABLE =
+            ITEMS.register("cable", () -> new TechGatedBlockItem(
+                    ModBlocks.CABLE.get(), new Item.Properties(), TechNodes.ELECTRIC_POWER));
+
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> RESEARCH_TABLE =
+            ITEMS.registerSimpleBlockItem("research_table", ModBlocks.RESEARCH_TABLE);
+
+    /** 扳手：把机器从燃料模式升级为电力模式。 */
+    public static final DeferredItem<WrenchItem> WRENCH =
+            ITEMS.register("wrench", () -> new WrenchItem(
+                    new Item.Properties().stacksTo(1).durability(64)));
+
+    /** 研究包：投入研究台换取科技点。 */
+    public static final DeferredItem<Item> RESEARCH_PACK =
+            ITEMS.register("research_pack", () -> new Item(new Item.Properties()));
+
+    /** 高级研究包：电力时代后的科技需要（需「高级研究」科技解锁配方）。 */
+    public static final DeferredItem<Item> ADVANCED_RESEARCH_PACK =
+            ITEMS.register("advanced_research_pack", () -> new Item(new Item.Properties()));
+
+    /** 科技终端：随身打开科技树 GUI。 */
+    public static final DeferredItem<com.astrofactory.item.TechTerminalItem> TECH_TERMINAL =
+            ITEMS.register("tech_terminal", () -> new com.astrofactory.item.TechTerminalItem(
+                    new Item.Properties().stacksTo(1)));
+
+    // -------- v0.6 产物链：钢板 / 铜缆 / 电路板（对应异星工厂 steel / copper cable / electronic circuit） --------
+
+    /** 钢板：铁锭在熔炉中二次冶炼（需「钢材」科技）。 */
+    public static final DeferredItem<Item> STEEL_PLATE =
+            ITEMS.register("steel_plate", () -> new Item(new Item.Properties()));
+
+    /** 铜缆：铜锭合成（电路板原料）。 */
+    public static final DeferredItem<Item> COPPER_CABLE =
+            ITEMS.register("copper_cable", () -> new Item(new Item.Properties()));
+
+    /** 电路板：铜缆 + 铁锭合成（高级研究包 / 科技终端 / 组装机原料）。 */
+    public static final DeferredItem<Item> CIRCUIT =
+            ITEMS.register("circuit", () -> new Item(new Item.Properties()));
+
+    /** 组装机 BlockItem（科技锁：自动组装）。 */
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> ASSEMBLER =
+            ITEMS.register("assembler", () -> new TechGatedBlockItem(
+                    ModBlocks.ASSEMBLER.get(), new Item.Properties(), TechNodes.AUTOMATION));
+
+    private ModItems() {}
+}

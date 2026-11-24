@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "CIC",
+    "CIC",
+    "CIC"
+  ],
+  "key": {
+    "C": { "item": "astrofactory:copper_cable" },
+    "I": { "item": "minecraft:iron_ingot" }
+  },
+  "result": {
+    "id": "astrofactory:circuit",
+    "count": 3
+  }
+}

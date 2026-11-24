@@ -194,6 +194,24 @@ public class SmelterBlockEntity extends PoweredBlockEntity {
         }
     }
 
+    /** 拆熔炉时把输入槽与输出槽的成品一起掉出来。 */
+    @Override
+    public void addContentDrops(java.util.List<ItemStack> drops) {
+        super.addContentDrops(drops);
+        for (int i = 0; i < input.getSlots(); i++) {
+            ItemStack stack = input.getStackInSlot(i);
+            if (!stack.isEmpty()) {
+                drops.add(stack.copy());
+            }
+        }
+        for (int i = 0; i < output.getSlots(); i++) {
+            ItemStack stack = output.getStackInSlot(i);
+            if (!stack.isEmpty()) {
+                drops.add(stack.copy());
+            }
+        }
+    }
+
     @Override
     protected void saveData(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveData(tag, registries);

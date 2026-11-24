@@ -158,6 +158,16 @@ public class GeneratorBlockEntity extends FactoryBlockEntity {
     }
 
     @Override
+    public void addContentDrops(java.util.List<net.minecraft.world.item.ItemStack> drops) {
+        for (int i = 0; i < fuel.getSlots(); i++) {
+            net.minecraft.world.item.ItemStack stack = fuel.getStackInSlot(i);
+            if (!stack.isEmpty()) {
+                drops.add(stack.copy());
+            }
+        }
+    }
+
+    @Override
     protected void saveData(CompoundTag tag, HolderLookup.Provider registries) {
         tag.put("Fuel", fuel.serializeNBT(registries));
         tag.put("Energy", energy.serializeNBT(registries));

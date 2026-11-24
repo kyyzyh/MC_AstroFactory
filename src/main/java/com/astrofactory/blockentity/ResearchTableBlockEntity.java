@@ -91,6 +91,9 @@ public class ResearchTableBlockEntity extends FactoryBlockEntity {
         var done = tech.addProgress(points);
         setChanged();
 
+        // v0.7 修复：科技进度 / 解锁必须同步给客户端，否则 GUI 一直显示旧状态
+        com.astrofactory.network.ModNetwork.syncToAll(tech);
+
         if (done != null && serverLevel.getServer().getPlayerList() != null) {
             TechNodes.Node node = TechNodes.get(done.getKey());
             String nameKey = node.nameKey();
@@ -109,6 +112,16 @@ public class ResearchTableBlockEntity extends FactoryBlockEntity {
             case 3 -> "III";
             default -> String.valueOf(level);
         };
+    }
+
+    @Override
+    public void addContentDrops(java.util.List<ItemStack> drops) {
+        for (int i = 0; i < this.input.getSlots(); i++) {
+            ItemStack stack = this.input.getStackInSlot(i);
+            if (!stack.isEmpty()) {
+                drops.add(stack.copy());
+            }
+        }
     }
 
     @Override

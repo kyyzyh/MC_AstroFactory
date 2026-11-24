@@ -37,10 +37,22 @@ public abstract class FactoryBlock extends Block implements EntityBlock {
         return RenderShape.MODEL;
     }
 
-    /** 简化掉落逻辑：直接掉落自身，避免额外维护 loot table 数据包。 */
+    /**
+     * 掉落逻辑：掉自身 + 机器内部物品（输入/输出/燃料槽）。
+     *
+     * <p>以前只掉自身，玩家拆机器时内部的东西会全部消失；
+     * 现在从 {@link LootParams} 里取方块实体，让方块实体把内容物追加进掉落列表。</p>
+     */
     @Override
     public List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
-        return List.of(new ItemStack(this.asItem()));
+        List<ItemStack> drops = new java.util.ArrayList<>();
+        drops.add(new ItemStack(this.asItem()));
+        BlockEntity be = params.getOptionalParameter(
+                net.minecraft.world.level.storage.loot.parameters.LootContextParams.BLOCK_ENTITY);
+        if (be instanceof com.astrofactory.blockentity.FactoryBlockEntity machine) {
+            machine.addContentDrops(drops);
+        }
+        return drops;
     }
 
     /** 读取水平朝向（方块必须带 FACING 属性）。 */

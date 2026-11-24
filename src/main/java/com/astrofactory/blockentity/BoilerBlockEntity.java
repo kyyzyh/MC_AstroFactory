@@ -179,6 +179,16 @@ public class BoilerBlockEntity extends FactoryBlockEntity {
     // ---------------------------------------------------------------- NBT
 
     @Override
+    public void addContentDrops(java.util.List<net.minecraft.world.item.ItemStack> drops) {
+        for (int i = 0; i < this.fuel.getSlots(); i++) {
+            net.minecraft.world.item.ItemStack stack = this.fuel.getStackInSlot(i);
+            if (!stack.isEmpty()) {
+                drops.add(stack.copy());
+            }
+        }
+    }
+
+    @Override
     protected void saveData(CompoundTag tag, HolderLookup.Provider registries) {
         tag.put("Fuel", this.fuel.serializeNBT(registries));
         tag.putInt("Water", this.water);

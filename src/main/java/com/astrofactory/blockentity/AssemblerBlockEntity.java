@@ -212,6 +212,18 @@ public class AssemblerBlockEntity extends PoweredBlockEntity
 
     // ---------------------------------------------------------------- NBT
 
+    /** 拆组装机时把 3x3 网格与输出槽的东西一起掉出来。 */
+    @Override
+    public void addContentDrops(java.util.List<ItemStack> drops) {
+        super.addContentDrops(drops);
+        for (int i = 0; i < this.slots.getSlots(); i++) {
+            ItemStack stack = this.slots.getStackInSlot(i);
+            if (!stack.isEmpty()) {
+                drops.add(stack.copy());
+            }
+        }
+    }
+
     @Override
     protected void saveData(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveData(tag, registries);

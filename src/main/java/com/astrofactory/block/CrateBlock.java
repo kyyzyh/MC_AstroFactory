@@ -3,6 +3,7 @@ package com.astrofactory.block;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
@@ -63,5 +64,53 @@ public class CrateBlock extends FactoryBlock {
     @Override
     public net.minecraft.world.level.block.entity.BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new com.astrofactory.blockentity.CrateBlockEntity(pos, state);
+    }
+
+    /**
+     * 空手右键打开原版箱子 GUI（v0.7）。
+     *
+     * <p>之前储物箱完全没有交互方式，只能靠机械臂读写，玩家没法手动存取；
+     * 现在复用原版 {@link net.minecraft.world.inventory.ChestMenu}，
+     * 行数按容量自动选择（9 格 → 1 行，27 格 → 3 行，54 格 → 6 行）。</p>
+     */
+    @Override
+    protected net.minecraft.world.InteractionResult useWithoutItem(
+            BlockState state, net.minecraft.world.level.Level level, BlockPos pos,
+            net.minecraft.world.entity.player.Player player,
+            net.minecraft.world.phys.BlockHitResult hitResult) {
+        if (level.isClientSide) {
+            return net.minecraft.world.InteractionResult.SUCCESS;
+        }
+        if (!(level.getBlockEntity(pos) instanceof com.astrofactory.blockentity.CrateBlockEntity crate)) {
+            return net.minecraft.world.InteractionResult.PASS;
+        }
+        if (player instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
+            serverPlayer.openMenu(new net.minecraft.world.SimpleMenuProvider(
+                    (containerId, playerInv, p) -> openMenuFor(containerId, playerInv, crate),
+                    Component.translatable("block.astrofactory." + crateName())));
+        }
+        return net.minecraft.world.InteractionResult.CONSUME;
+    }
+
+    /** 按容量选原版箱子菜单（1 / 3 / 6 行；其它行数走通用构造器）。 */
+    private static net.minecraft.world.inventory.AbstractContainerMenu openMenuFor(
+            int containerId, net.minecraft.world.entity.player.Inventory playerInv,
+            com.astrofactory.blockentity.CrateBlockEntity crate) {
+        int size = crate.getContainerSize();
+        int rows = Math.max(1, Math.min(6, size / 9));
+        net.minecraft.world.inventory.MenuType<?> type = switch (rows) {
+            case 1 -> net.minecraft.world.inventory.MenuType.GENERIC_9x1;
+            case 2 -> net.minecraft.world.inventory.MenuType.GENERIC_9x2;
+            case 4 -> net.minecraft.world.inventory.MenuType.GENERIC_9x4;
+            case 5 -> net.minecraft.world.inventory.MenuType.GENERIC_9x5;
+            case 6 -> net.minecraft.world.inventory.MenuType.GENERIC_9x6;
+            default -> net.minecraft.world.inventory.MenuType.GENERIC_9x3;
+        };
+        return new net.minecraft.world.inventory.ChestMenu(type, containerId, playerInv, crate, rows);
+    }
+
+    /** 箱子名称的 lang key 后缀（子类覆写）。 */
+    protected String crateName() {
+        return "crate";
     }
 }

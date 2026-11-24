@@ -273,6 +273,17 @@ public abstract class PoweredBlockEntity extends FactoryBlockEntity {
 
     // ---------------------------------------------------------------- NBT
 
+    /** 拆机器时把燃料槽里的东西一起掉出来。 */
+    @Override
+    public void addContentDrops(java.util.List<ItemStack> drops) {
+        for (int i = 0; i < this.fuelSlot.getSlots(); i++) {
+            ItemStack stack = this.fuelSlot.getStackInSlot(i);
+            if (!stack.isEmpty()) {
+                drops.add(stack.copy());
+            }
+        }
+    }
+
     @Override
     protected void saveData(CompoundTag tag, HolderLookup.Provider registries) {
         tag.put("Energy", this.energy.serializeNBT(registries));

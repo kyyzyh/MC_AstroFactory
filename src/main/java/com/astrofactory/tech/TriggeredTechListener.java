@@ -54,6 +54,8 @@ public final class TriggeredTechListener {
     private void handle(ServerPlayer player, String itemId, int count) {
         TechTreeData data = TechTreeData.get(player.serverLevel().getServer());
         String unlocked = data.onItemCrafted(itemId, count);
+        // v0.7 修复：触发计数与自动解锁都要同步给客户端，否则科技树 GUI 不刷新
+        com.astrofactory.network.ModNetwork.syncToAll(data);
         if (unlocked != null) {
             TechNodes.Node node = TechNodes.get(unlocked);
             player.serverLevel().getServer().getPlayerList().broadcastSystemMessage(

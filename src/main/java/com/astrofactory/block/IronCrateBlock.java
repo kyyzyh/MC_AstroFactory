@@ -25,4 +25,9 @@ public class IronCrateBlock extends CrateBlock {
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new com.astrofactory.blockentity.IronCrateBlockEntity(pos, state);
     }
+
+    @Override
+    protected String crateName() {
+        return "iron_crate";
+    }
 }

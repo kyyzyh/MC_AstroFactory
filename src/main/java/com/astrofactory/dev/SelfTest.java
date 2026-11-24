@@ -756,6 +756,60 @@ public final class SelfTest {
             }
         }
 
+        // ---------------- v0.7 修复项验证：掉落不丢内容物 + 箱子可手动存取 ----------------
+        if (tick == 1150) {
+            level.setBlock(at(30, 0, 6), ModBlocks.WOOD_CRATE.get().defaultBlockState(), 3);
+            if (level.getBlockEntity(at(30, 0, 6)) instanceof com.astrofactory.blockentity.CrateBlockEntity crate) {
+                crate.setItem(0, new ItemStack(Items.IRON_INGOT, 5));
+                crate.setItem(1, new ItemStack(Items.COAL, 3));
+
+                // #1 掉落丢内容物：构造 LootParams（带 BLOCK_ENTITY）再取掉落
+                var params = new net.minecraft.world.level.storage.loot.LootParams.Builder(level)
+                        .withParameter(net.minecraft.world.level.storage.loot.parameters.LootContextParams.ORIGIN,
+                                net.minecraft.world.phys.Vec3.atCenterOf(at(30, 0, 6)))
+                        .withParameter(net.minecraft.world.level.storage.loot.parameters.LootContextParams.TOOL,
+                                ItemStack.EMPTY)
+                        .withOptionalParameter(
+                                net.minecraft.world.level.storage.loot.parameters.LootContextParams.BLOCK_ENTITY,
+                                crate);
+                List<ItemStack> drops = level.getBlockState(at(30, 0, 6)).getDrops(params);
+
+                int irons = 0;
+                int coals = 0;
+                int selfDrops = 0;
+                for (ItemStack d : drops) {
+                    if (d.is(Items.IRON_INGOT)) {
+                        irons += d.getCount();
+                    } else if (d.is(Items.COAL)) {
+                        coals += d.getCount();
+                    } else if (d.is(ModItems.WOOD_CRATE.get())) {
+                        selfDrops += d.getCount();
+                    }
+                }
+                if (irons == 5 && coals == 3 && selfDrops == 1) {
+                    RESULTS.add("PASS 拆箱掉落内容物（铁锭 " + irons + " 煤 " + coals + " 箱子 " + selfDrops + "）");
+                } else {
+                    RESULTS.add("FAIL 拆箱掉落异常（铁锭 " + irons + " 煤 " + coals
+                            + " 箱子 " + selfDrops + " 总掉落 " + drops.size() + "）");
+                }
+
+                // #3 箱子可手动存取：Container 接口读写
+                crate.setItem(2, new ItemStack(Items.GOLD_INGOT, 7));
+                ItemStack readBack = crate.getItem(2);
+                ItemStack removed = crate.removeItem(2, 3);
+                int remain = crate.getItem(2).getCount();
+                if (readBack.is(Items.GOLD_INGOT) && readBack.getCount() == 7
+                        && removed.getCount() == 3 && remain == 4) {
+                    RESULTS.add("PASS 箱子 Container 接口可读写（读回 7，取 3 剩 " + remain + "）");
+                } else {
+                    RESULTS.add("FAIL 箱子 Container 接口异常（读回 " + readBack
+                            + " 取出 " + removed + " 剩余 " + remain + "）");
+                }
+            } else {
+                RESULTS.add("FAIL 木箱方块实体未创建（掉落/存取测试无法进行）");
+            }
+        }
+
         // ---------------- 汇总 ----------------
         if (tick == 1260) {
             finished = true;

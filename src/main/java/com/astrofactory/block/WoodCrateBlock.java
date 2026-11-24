@@ -25,4 +25,9 @@ public class WoodCrateBlock extends CrateBlock {
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new com.astrofactory.blockentity.WoodCrateBlockEntity(pos, state);
     }
+
+    @Override
+    protected String crateName() {
+        return "wood_crate";
+    }
 }

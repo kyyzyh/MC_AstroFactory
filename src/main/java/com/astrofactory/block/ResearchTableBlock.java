@@ -135,13 +135,19 @@ public class ResearchTableBlock extends FactoryBlock {
 
         // 空手：显示进度，必要时自动选定下一个可研究项
         TechTreeData tech = TechTreeData.get(serverLevel.getServer());
+        boolean autoSelected = false;
         if (tech.getCurrentResearch() == null) {
             for (var entry : TechNodes.all().entrySet()) {
                 if (TechNodes.canResearch(entry.getKey(), tech)) {
                     tech.setResearch(entry.getKey());
+                    autoSelected = true;
                     break;
                 }
             }
+        }
+        if (autoSelected) {
+            // 自动选定研究目标后同步给客户端，否则科技树 GUI 显示不出「在研」
+            com.astrofactory.network.ModNetwork.syncToAll(tech);
         }
 
         String current = tech.getCurrentResearch();

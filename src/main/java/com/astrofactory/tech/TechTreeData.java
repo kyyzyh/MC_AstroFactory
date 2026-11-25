@@ -87,13 +87,48 @@ public class TechTreeData extends SavedData {
 
     // ---------------------------------------------------------------- 查询
 
-    /** 某科技的已研究等级（0 = 未研究）。 */
+    /**
+     * 某科技的已研究等级（0 = 未研究）。
+     *
+     * <p>创造模式下直接返回满级，这样科技树界面全绿、依赖等级的
+     * 速度加成也自动拉满，玩家不必先研究一轮再试玩机器。</p>
+     */
     public int getLevel(String techId) {
+        if (this.creativeBypass) {
+            TechNodes.Node node = TechNodes.get(techId);
+            return node == null ? 1 : node.maxLevel();
+        }
         return this.levels.getOrDefault(techId, 0);
     }
 
-    /** 兼容旧接口：等级 >= 1 视为已解锁。 */
+    /**
+     * 创造模式旁路开关。
+     *
+     * <p>创造模式是「沙盒试玩」场景，玩家要能直接摆出任何机器看效果，
+     * 不该被科技树卡住。开启后所有科技视为已满级：方块能放、扳手能升级、
+     * 钢材配方能用、科技树界面全绿。</p>
+     *
+     * <p>只在服务端内存里生效，<b>不写存档</b>——退出创造模式就恢复真实进度。</p>
+     */
+    private boolean creativeBypass = false;
+
+    public void setCreativeBypass(boolean value) {
+        if (this.creativeBypass == value) {
+            return;
+        }
+        this.creativeBypass = value;
+        // 故意不调 setDirty()：这是会话态，不该污染存档
+    }
+
+    public boolean isCreativeBypass() {
+        return this.creativeBypass;
+    }
+
+    /** 兼容旧接口：等级 >= 1 视为已解锁。创造模式下一律已解锁。 */
     public boolean isUnlocked(String techId) {
+        if (this.creativeBypass) {
+            return true;
+        }
         return getLevel(techId) >= 1;
     }
 
@@ -127,11 +162,13 @@ public class TechTreeData extends SavedData {
 
     /** 采矿速度加成：每级高效采矿 +20%。返回 1.0 = 无加成。 */
     public double miningSpeedMultiplier() {
+        // getLevel 在创造模式下已返回满级，无需额外判断
         return 1.0 + 0.2 * getLevel(TechNodes.EFFICIENT_MINING);
     }
 
     /** 熔炉速度加成：高效冶炼 +30%。 */
     public double smeltingSpeedMultiplier() {
+        // isUnlocked 在创造模式下恒为 true
         return isUnlocked(TechNodes.EFFICIENT_SMELTING) ? 1.3 : 1.0;
     }
 

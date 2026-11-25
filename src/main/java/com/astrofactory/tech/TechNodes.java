@@ -170,6 +170,11 @@ public final class TechNodes {
                 || data.getLevel(id) >= node.maxLevel()) {
             return false;
         }
+        // 创造模式下所有科技都已满级（getLevel 返回 maxLevel），上面那条已拦掉，
+        // 这里再兜一层，防止将来改判定逻辑时漏掉。
+        if (data.isCreativeBypass()) {
+            return false;
+        }
         for (String parent : node.parents()) {
             if (data.getLevel(parent) < 1) {
                 return false;

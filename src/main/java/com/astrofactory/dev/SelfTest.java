@@ -810,6 +810,45 @@ public final class SelfTest {
             }
         }
 
+        // ---------------- v0.8 创造模式旁路 ----------------
+        if (tick == 1200) {
+            TechTreeData tech = TechTreeData.get(event.getServer());
+            // 记录真实状态（此时自检流程已解锁不少科技）
+            int realLevel = tech.getLevel(TechNodes.AUTOMATION);
+            boolean realUnlocked = tech.isUnlocked(TechNodes.AUTOMATION);
+
+            // 打开旁路：所有科技应立刻视为满级
+            tech.setCreativeBypass(true);
+            boolean allMax = true;
+            for (var node : TechNodes.all().values()) {
+                if (tech.getLevel(node.id()) < node.maxLevel()) {
+                    allMax = false;
+                    AstroFactory.LOGGER.warn("[SELFTEST] 创造模式下 {} 等级未满：{} / {}",
+                            node.id(), tech.getLevel(node.id()), node.maxLevel());
+                    break;
+                }
+            }
+            boolean autoUnlocked = tech.isUnlocked(TechNodes.AUTOMATION);
+            // 创造模式下不能再「研究」（都已完成）
+            boolean cannotResearch = !TechNodes.canResearch(TechNodes.AUTOMATION, tech);
+
+            if (allMax && autoUnlocked && cannotResearch) {
+                RESULTS.add("PASS 创造模式：全部科技视为满级且不可再研究");
+            } else {
+                RESULTS.add("FAIL 创造模式旁路异常（allMax=" + allMax
+                        + " autoUnlocked=" + autoUnlocked + " cannotResearch=" + cannotResearch + "）");
+            }
+
+            // 关闭旁路：应恢复真实进度，且不污染存档
+            tech.setCreativeBypass(false);
+            int restored = tech.getLevel(TechNodes.AUTOMATION);
+            if (restored == realLevel && tech.isUnlocked(TechNodes.AUTOMATION) == realUnlocked) {
+                RESULTS.add("PASS 创造模式旁路可逆：关闭后恢复真实进度（等级 " + restored + "）");
+            } else {
+                RESULTS.add("FAIL 旁路关闭后进度被污染（原 " + realLevel + " 现 " + restored + "）");
+            }
+        }
+
         // ---------------- 汇总 ----------------
         if (tick == 1260) {
             finished = true;

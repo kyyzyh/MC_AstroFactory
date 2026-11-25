@@ -32,11 +32,11 @@ public final class ModNetwork {
      * 触发型科技的真实进度，而不是只显示阈值。</p>
      */
     public record TechSyncPayload(Map<String, Integer> levels, String current, int progress,
-                                  Map<String, Integer> triggerCounts)
+                                  Map<String, Integer> triggerCounts, boolean creativeBypass)
             implements CustomPacketPayload {
 
         public static final TechSyncPayload EMPTY =
-                new TechSyncPayload(Map.of(), null, 0, Map.of());
+                new TechSyncPayload(Map.of(), null, 0, Map.of(), false);
 
         public static final CustomPacketPayload.Type<TechSyncPayload> TYPE =
                 new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(
@@ -52,8 +52,11 @@ public final class ModNetwork {
                         TechSyncPayload::progress,
                         ByteBufCodecs.map(HashMap::new, ByteBufCodecs.STRING_UTF8, ByteBufCodecs.VAR_INT),
                         TechSyncPayload::triggerCounts,
-                        (levels, current, progress, triggerCounts) -> new TechSyncPayload(
-                                levels, current.isEmpty() ? null : current, progress, triggerCounts)
+                        ByteBufCodecs.BOOL,
+                        TechSyncPayload::creativeBypass,
+                        (levels, current, progress, triggerCounts, creativeBypass) -> new TechSyncPayload(
+                                levels, current.isEmpty() ? null : current, progress,
+                                triggerCounts, creativeBypass)
                 );
 
         @Override
@@ -88,13 +91,15 @@ public final class ModNetwork {
     public static volatile int CLIENT_PROGRESS = 0;
     /** 触发型科技的累计物品数（物品 id → 已做出数量）。 */
     public static final Map<String, Integer> CLIENT_TRIGGER_COUNTS = new HashMap<>();
+    /** 创造模式旁路是否生效（界面据此显示「创造模式：已全解锁」）。 */
+    public static volatile boolean CLIENT_CREATIVE_BYPASS = false;
 
     /** 把服务端进度打包成 payload。 */
     public static TechSyncPayload snapshot(TechTreeData data) {
         Map<String, Integer> levels = new HashMap<>();
         TechNodes.all().forEach((id, node) -> levels.put(id, data.getLevel(id)));
         return new TechSyncPayload(levels, data.getCurrentResearch(), data.getResearchProgress(),
-                new HashMap<>(data.triggerCountsView()));
+                new HashMap<>(data.triggerCountsView()), data.isCreativeBypass());
     }
 
     /** 服务端：把进度广播给所有玩家。 */
@@ -116,6 +121,7 @@ public final class ModNetwork {
                     CLIENT_PROGRESS = payload.progress();
                     CLIENT_TRIGGER_COUNTS.clear();
                     CLIENT_TRIGGER_COUNTS.putAll(payload.triggerCounts());
+                    CLIENT_CREATIVE_BYPASS = payload.creativeBypass();
                 }));
         registrar.playToServer(SelectResearchPayload.TYPE, SelectResearchPayload.STREAM_CODEC,
                 (payload, context) -> context.enqueueWork(() -> {

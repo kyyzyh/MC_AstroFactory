@@ -100,5 +100,7 @@
   "gui.astrofactory.assembler.energy": "能量：%s / %s FE",
   "gui.astrofactory.assembler.no_power": "无电",
   "gui.astrofactory.assembler.working": "运行中",
-  "gui.astrofactory.assembler.idle": "待料"
+  "gui.astrofactory.assembler.idle": "待料",
+  "gui.astrofactory.creative_badge": "创造模式 · 已全解锁",
+  "message.astrofactory.creative_unlocked": "创造模式：全部科技已解锁，所有机器可直接使用"
 }

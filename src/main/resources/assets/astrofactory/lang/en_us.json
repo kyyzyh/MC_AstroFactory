@@ -100,5 +100,7 @@
   "gui.astrofactory.assembler.energy": "Energy: %s / %s FE",
   "gui.astrofactory.assembler.no_power": "No Power",
   "gui.astrofactory.assembler.working": "Running",
-  "gui.astrofactory.assembler.idle": "Idle"
+  "gui.astrofactory.assembler.idle": "Idle",
+  "gui.astrofactory.creative_badge": "Creative · All Unlocked",
+  "message.astrofactory.creative_unlocked": "Creative mode: all tech unlocked, every machine usable"
 }

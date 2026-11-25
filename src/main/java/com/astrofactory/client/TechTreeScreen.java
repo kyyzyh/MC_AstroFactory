@@ -315,6 +315,17 @@ public class TechTreeScreen extends AbstractContainerScreen<TechTreeMenu> {
         graphics.drawString(this.font,
                 Component.translatable("gui.astrofactory.completed", done, total).getString(),
                 x, y0 + 8, C_TEXT_DIM, false);
+        x += this.font.width(
+                Component.translatable("gui.astrofactory.completed", done, total).getString()) + 8;
+
+        // 创造模式徽章：明确告诉玩家「现在是全解锁试玩态」，而不是真的研究完了
+        if (ModNetwork.CLIENT_CREATIVE_BYPASS) {
+            String badge = Component.translatable("gui.astrofactory.creative_badge").getString();
+            int bw = this.font.width(badge) + 8;
+            graphics.fill(x, y0 + 4, x + bw, y0 + TOP_BAR_H - 3, 0xFF1E2A1F);
+            outline(graphics, x, y0 + 4, bw, TOP_BAR_H - 7, C_GREEN);
+            graphics.drawString(this.font, badge, x + 4, y0 + 8, C_GREEN, false);
+        }
 
         // 在研进度（右对齐）
         String current = ModNetwork.CLIENT_CURRENT;
@@ -730,6 +741,12 @@ public class TechTreeScreen extends AbstractContainerScreen<TechTreeMenu> {
     // ---------------------------------------------------------------- 数据 / 工具
 
     private static int clientLevel(String id) {
+        // 创造模式旁路生效时，服务端 snapshot 已把每项等级填成满级；
+        // 这里再兜一层，防止客户端在收到新 payload 之前短暂显示灰色。
+        if (ModNetwork.CLIENT_CREATIVE_BYPASS) {
+            TechNodes.Node node = TechNodes.get(id);
+            return node == null ? 1 : node.maxLevel();
+        }
         return ModNetwork.CLIENT_LEVELS.getOrDefault(id, 0);
     }
 

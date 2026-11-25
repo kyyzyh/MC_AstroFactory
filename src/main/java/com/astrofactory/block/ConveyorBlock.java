@@ -189,8 +189,23 @@ public class ConveyorBlock extends Block {
             return false;
         }
 
+        // 熔炉 / 组装机的「朝向面」暴露的是输出槽，从这一侧卸货会把原料
+        // 塞进成品槽、污染产物。遇到这种朝向就不卸，让玩家把带子接到侧面。
+        BlockState frontState = level.getBlockState(front);
+        Direction accessSide = facing.getOpposite();
+        if (frontState.getBlock() instanceof SmelterBlock
+                && frontState.hasProperty(SmelterBlock.FACING)
+                && frontState.getValue(SmelterBlock.FACING) == accessSide) {
+            return false;
+        }
+        if (frontState.getBlock() instanceof AssemblerBlock
+                && frontState.hasProperty(AssemblerBlock.FACING)
+                && frontState.getValue(AssemblerBlock.FACING) == accessSide) {
+            return false;
+        }
+
         var handler = level.getCapability(net.neoforged.neoforge.capabilities.Capabilities.ItemHandler.BLOCK,
-                front, facing.getOpposite());
+                front, accessSide);
         if (handler == null) {
             return false;
         }

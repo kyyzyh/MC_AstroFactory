@@ -71,6 +71,21 @@ public class AssemblerBlockEntity extends PoweredBlockEntity
         return this.slots;
     }
 
+    /** 当前合成进度（tick），供 GUI 进度条读取。 */
+    public int getCraftProgress() {
+        return this.progress;
+    }
+
+    /** 本次合成需要的总 tick（含科技加成），供 GUI 计算进度条比例。 */
+    public int getCraftMaxProgress() {
+        return techTicks(CRAFT_TICKS);
+    }
+
+    /** 本机器是否正在工作（供 GUI 显示状态）。 */
+    public boolean isWorking() {
+        return getBlockState().getValue(AssemblerBlock.LIT);
+    }
+
     // ---------------------------------------------------------------- MenuProvider
 
     @Override
@@ -117,32 +132,65 @@ public class AssemblerBlockEntity extends PoweredBlockEntity
         if (this.progress < CRAFT_TICKS) {
             return;
         }
-        this.progress = 0;
 
-        // 产出
+        // 进度已满：先算出产物并确认「有地方放」，再消耗原料。
+        // 之前是先消耗原料、产物塞不下就静默丢弃——玩家净亏一批材料。
         CraftingInput input = makeInput();
         ItemStack result = holder.value().assemble(input, serverLevel.registryAccess());
         if (result.isEmpty()) {
+            this.progress = 0;
             return;
         }
 
-        // 消耗原料（每格 1 个）
-        for (int i = 0; i < 9; i++) {
-            this.slots.extractItem(i, 1, false);
+        ItemStack outSlot = this.slots.getStackInSlot(9);
+        boolean canStoreLocally = outSlot.isEmpty()
+                || (ItemStack.isSameItemSameComponents(outSlot, result)
+                    && outSlot.getCount() + result.getCount() <= outSlot.getMaxStackSize());
+        if (!canStoreLocally) {
+            // 输出槽放不下：试试直接推给朝向的容器
+            ItemStack pushed = ItemTransferUtil.insertInto(serverLevel,
+                    this.worldPosition.relative(
+                            getBlockState().getValue(AssemblerBlock.FACING)),
+                    getBlockState().getValue(AssemblerBlock.FACING).getOpposite(),
+                    result.copy());
+            if (!pushed.isEmpty()) {
+                // 前后都放不下：停在满进度等待，不消耗原料（下 tick 再试）
+                this.progress = CRAFT_TICKS;
+                setLit(false);
+                return;
+            }
+            // 邻居已全部接收，原料照常消耗，本次不占输出槽
+            consumeMaterials();
+            consumeEnergy(ENERGY_PER_CRAFT);
+            setChanged();
+            return;
         }
 
-        // 扣电
+        this.progress = 0;
+        consumeMaterials();
         consumeEnergy(ENERGY_PER_CRAFT);
 
-        // 产出进输出槽或外推
         ItemStack remaining = this.slots.insertItem(9, result, false);
         if (!remaining.isEmpty()) {
-            remaining = pushToNeighbors(serverLevel, remaining);
-        }
-        if (!remaining.isEmpty()) {
-            // 实在放不下就丢弃（与采矿机策略一致，避免卡死）
+            // 兜底：理论上进不来（上面已确认容量），真发生就掉在机器上方，不凭空消失
+            net.minecraft.world.entity.item.ItemEntity drop =
+                    new net.minecraft.world.entity.item.ItemEntity(serverLevel,
+                            this.worldPosition.getX() + 0.5D,
+                            this.worldPosition.getY() + 1.0D,
+                            this.worldPosition.getZ() + 0.5D,
+                            remaining);
+            serverLevel.addFreshEntity(drop);
         }
         setChanged();
+    }
+
+    /** 按配方消耗 3x3 网格里的原料（每格 1 个）。 */
+    private void consumeMaterials() {
+        for (int i = 0; i < 9; i++) {
+            if (!this.slots.getStackInSlot(i).isEmpty()) {
+                this.slots.extractItem(i, 1, false);
+            }
+        }
     }
 
     private void setLit(boolean lit) {

@@ -35,7 +35,9 @@ public class TechTreeMenu extends AbstractContainerMenu {
     /** 客户端构造（来自 MenuType，IContainerFactory 三参签名）。 */
     public TechTreeMenu(int containerId, Inventory playerInv,
                         net.minecraft.network.RegistryFriendlyByteBuf buf) {
-        this(containerId, playerInv, false, null);
+        // extraData 里只有 1 个 boolean：是否由研究台打开（决定是否加 2 个输入槽）。
+        // 客户端必须读同一个标志，否则两边槽位数量不一致，索引会整体错位。
+        this(containerId, playerInv, buf.readableBytes() > 0 && buf.readBoolean(), null);
     }
 
     /** 客户端构造（无额外数据）。 */

@@ -51,6 +51,24 @@ public class CableBlock extends Block {
     /** 每根电缆每 tick 最多搬运的能量。 */
     private static final int TRANSFER_PER_CABLE = 256;
 
+    /**
+     * 电网拓扑缓存：电缆位置 → 所属电网（全部电缆 + 负责搬运的 owner）。
+     *
+     * <p>之前每根电缆每 tick 都跑一次 BFS（最多 512 格）。一条 100 根的电网
+     * 就是每 tick 5 万次方块查询——这是真正的卡服来源。现在同一张电网只在
+     * 结构变化后重算一次，其余电缆直接命中缓存。</p>
+     */
+    private static final java.util.Map<net.minecraft.world.level.Level,
+            java.util.Map<BlockPos, GridInfo>> GRID_CACHE = new java.util.WeakHashMap<>();
+
+    /** 一张电网的拓扑快照。 */
+    private record GridInfo(java.util.Set<BlockPos> cables, BlockPos owner) {}
+
+    /** 结构变化（放置/移除/邻居变动）时作废该维度的缓存。 */
+    private static void invalidateCache(net.minecraft.world.level.Level level) {
+        GRID_CACHE.remove(level);
+    }
+
     private static final VoxelShape CORE = Block.box(6.0D, 6.0D, 6.0D, 10.0D, 10.0D, 10.0D);
 
     public CableBlock(Properties properties) {
@@ -120,6 +138,7 @@ public class CableBlock extends Block {
         if (level.isClientSide) {
             return;
         }
+        invalidateCache(level);
         // 刷新自身与邻居的连接位
         level.setBlock(pos, updateConnections(state, level, pos), 2);
         for (Direction dir : Direction.values()) {
@@ -133,12 +152,21 @@ public class CableBlock extends Block {
     }
 
     @Override
+    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
+        if (!level.isClientSide && !state.is(newState.getBlock())) {
+            invalidateCache(level);
+        }
+        super.onRemove(state, level, pos, newState, movedByPiston);
+    }
+
+    @Override
     protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block neighborBlock,
                                    BlockPos neighborPos, boolean movedByPiston) {
         super.neighborChanged(state, level, pos, neighborBlock, neighborPos, movedByPiston);
         if (level.isClientSide) {
             return;
         }
+        invalidateCache(level);
         BlockState updated = updateConnections(state, level, pos);
         if (updated != state) {
             level.setBlock(pos, updated, 2);
@@ -156,33 +184,30 @@ public class CableBlock extends Block {
 
     /** 从本格出发遍历电网并搬运能量。 */
     private void distribute(ServerLevel level, BlockPos origin) {
-        Set<BlockPos> cables = new HashSet<>();
+        // 先查缓存：同一张电网只有 owner 负责搬运，其余电缆直接返回
+        GridInfo info = resolveGrid(level, origin);
+        if (info == null || !info.owner().equals(origin)) {
+            return;
+        }
+
+        // 只在真正要搬运时，才去扫描电网边界上的发电机与机器
         List<IEnergyStorage> sources = new ArrayList<>();
         List<IEnergyStorage> sinks = new ArrayList<>();
-
-        Deque<BlockPos> queue = new ArrayDeque<>();
-        queue.add(origin);
-        cables.add(origin);
-
-        while (!queue.isEmpty() && cables.size() <= MAX_CABLES) {
-            BlockPos current = queue.poll();
+        for (BlockPos cable : info.cables()) {
             for (Direction dir : Direction.values()) {
-                BlockPos next = current.relative(dir);
+                BlockPos next = cable.relative(dir);
                 if (level.getBlockState(next).getBlock() instanceof CableBlock) {
-                    if (cables.add(next)) {
-                        queue.add(next);
-                    }
-                } else {
-                    IEnergyStorage storage = level.getCapability(Capabilities.EnergyStorage.BLOCK, next, dir.getOpposite());
-                    if (storage == null) {
-                        continue;
-                    }
-                    if (storage.canExtract()) {
-                        sources.add(storage);
-                    }
-                    if (storage.canReceive()) {
-                        sinks.add(storage);
-                    }
+                    continue;
+                }
+                IEnergyStorage storage = level.getCapability(Capabilities.EnergyStorage.BLOCK, next, dir.getOpposite());
+                if (storage == null) {
+                    continue;
+                }
+                if (storage.canExtract()) {
+                    sources.add(storage);
+                }
+                if (storage.canReceive()) {
+                    sinks.add(storage);
                 }
             }
         }
@@ -191,18 +216,7 @@ public class CableBlock extends Block {
             return;
         }
 
-        // 只有电网里坐标最小的电缆负责搬运，避免重复执行
-        BlockPos owner = origin;
-        for (BlockPos cable : cables) {
-            if (compare(cable, owner) < 0) {
-                owner = cable;
-            }
-        }
-        if (!owner.equals(origin)) {
-            return;
-        }
-
-        int budget = TRANSFER_PER_CABLE * cables.size();
+        int budget = TRANSFER_PER_CABLE * info.cables().size();
 
         // 只统计「还有空间」的机器，否则会白白占用电量配额
         List<IEnergyStorage> activeSinks = new ArrayList<>();
@@ -258,6 +272,50 @@ public class CableBlock extends Block {
                 }
             }
         }
+    }
+
+    /**
+     * 取得 {@code origin} 所在电网的拓扑快照（带缓存）。
+     *
+     * <p>缓存按维度存放，电缆结构变化时整体作废。这样一张 N 根的电网
+     * 只在结构变动后跑一次 BFS，而不是每 tick 每根都跑。</p>
+     */
+    private static GridInfo resolveGrid(ServerLevel level, BlockPos origin) {
+        var byDim = GRID_CACHE.computeIfAbsent(level, k -> new java.util.HashMap<>());
+        GridInfo cached = byDim.get(origin);
+        if (cached != null) {
+            return cached;
+        }
+
+        // BFS 收集整张电网
+        Set<BlockPos> cables = new HashSet<>();
+        Deque<BlockPos> queue = new ArrayDeque<>();
+        queue.add(origin);
+        cables.add(origin);
+        while (!queue.isEmpty() && cables.size() <= MAX_CABLES) {
+            BlockPos current = queue.poll();
+            for (Direction dir : Direction.values()) {
+                BlockPos next = current.relative(dir);
+                if (level.getBlockState(next).getBlock() instanceof CableBlock && cables.add(next)) {
+                    queue.add(next);
+                }
+            }
+        }
+
+        // 坐标最小的那根负责搬运（确定性，无需额外状态同步）
+        BlockPos owner = origin;
+        for (BlockPos cable : cables) {
+            if (compare(cable, owner) < 0) {
+                owner = cable;
+            }
+        }
+
+        GridInfo info = new GridInfo(cables, owner);
+        // 整张电网的每根电缆都记同一个快照
+        for (BlockPos cable : cables) {
+            byDim.put(cable, info);
+        }
+        return info;
     }
 
     private static int compare(BlockPos a, BlockPos b) {

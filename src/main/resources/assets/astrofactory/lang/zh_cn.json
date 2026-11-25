@@ -96,5 +96,9 @@
   "gui.astrofactory.detail.pack": "研究包",
   "gui.astrofactory.detail.requires": "前置科技",
   "gui.astrofactory.detail.trigger": "触发条件",
-  "gui.astrofactory.detail.level": "等级"
+  "gui.astrofactory.detail.level": "等级",
+  "gui.astrofactory.assembler.energy": "能量：%s / %s FE",
+  "gui.astrofactory.assembler.no_power": "无电",
+  "gui.astrofactory.assembler.working": "运行中",
+  "gui.astrofactory.assembler.idle": "待料"
 }

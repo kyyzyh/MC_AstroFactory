@@ -93,7 +93,10 @@ public class MinerBlockEntity extends PoweredBlockEntity {
         // 朝四个水平方向依次尝试输出
         for (Direction dir : Direction.Plane.HORIZONTAL) {
             BlockPos target = this.worldPosition.relative(dir);
-            ItemStack remaining = ItemTransferUtil.insertInto(serverLevel, target, dir.getOpposite(), product);
+            // insertIntoInputSide 会自动跳过熔炉/组装机的输出面，
+            // 避免把原料塞进成品槽污染产物
+            ItemStack remaining = ItemTransferUtil.insertIntoInputSide(
+                    serverLevel, target, dir.getOpposite(), product);
             if (remaining.isEmpty()) {
                 return;
             }

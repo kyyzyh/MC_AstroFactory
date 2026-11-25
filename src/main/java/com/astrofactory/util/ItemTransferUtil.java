@@ -25,6 +25,37 @@ public final class ItemTransferUtil {
     }
 
     /**
+     * 从 {@code accessSide} 这一侧往 {@code pos} 塞物品，但若该侧是
+     * 熔炉 / 组装机的「输出面」则拒绝。
+     *
+     * <p>这两类机器的朝向面暴露输出槽，原料必须从其它面进入；否则原料会被
+     * 塞进成品槽，把产物污染成原料。</p>
+     *
+     * @return 没能塞进去的剩余堆
+     */
+    public static ItemStack insertIntoInputSide(ServerLevel level, BlockPos pos,
+                                                Direction accessSide, ItemStack stack) {
+        if (isOutputFace(level, pos, accessSide)) {
+            return stack;
+        }
+        return insertInto(level, pos, accessSide, stack);
+    }
+
+    /** 判断 {@code accessSide} 是不是该方块的输出面。 */
+    public static boolean isOutputFace(ServerLevel level, BlockPos pos, Direction accessSide) {
+        var state = level.getBlockState(pos);
+        if (state.getBlock() instanceof com.astrofactory.block.SmelterBlock
+                && state.hasProperty(com.astrofactory.block.SmelterBlock.FACING)) {
+            return state.getValue(com.astrofactory.block.SmelterBlock.FACING) == accessSide;
+        }
+        if (state.getBlock() instanceof com.astrofactory.block.AssemblerBlock
+                && state.hasProperty(com.astrofactory.block.AssemblerBlock.FACING)) {
+            return state.getValue(com.astrofactory.block.AssemblerBlock.FACING) == accessSide;
+        }
+        return false;
+    }
+
+    /**
      * 把物品塞进相邻方块，返回塞不进去的剩余堆。
      *
      * @param side 从目标方块的哪一面接入（用于区分面敏感容器）

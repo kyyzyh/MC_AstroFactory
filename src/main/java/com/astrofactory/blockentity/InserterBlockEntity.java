@@ -72,12 +72,15 @@ public class InserterBlockEntity extends PoweredBlockEntity {
         }
 
         // 2) 投向前方
+        // deliver 返回「没送出去的部分」——必须按剩余堆退回，不能拿原堆退，
+        // 否则目标已收下的那部分会被复制一份出来。
         BlockPos targetPos = this.worldPosition.relative(facing);
-        if (!deliver(serverLevel, targetPos, back, picked)) {
-            // 投放失败，退回来源（能退则退，否则丢在机器上方）
-            ItemStack remaining = ItemTransferUtil.insertInto(serverLevel, sourcePos, facing, picked);
-            if (!remaining.isEmpty()) {
-                dropAbove(serverLevel, remaining);
+        ItemStack notDelivered = deliver(serverLevel, targetPos, back, picked);
+        if (!notDelivered.isEmpty()) {
+            // 投放失败/部分失败：只把剩余退回来（能退则退，否则丢在机器上方）
+            ItemStack stillLeft = ItemTransferUtil.insertInto(serverLevel, sourcePos, facing, notDelivered);
+            if (!stillLeft.isEmpty()) {
+                dropAbove(serverLevel, stillLeft);
             }
         }
 
@@ -87,20 +90,24 @@ public class InserterBlockEntity extends PoweredBlockEntity {
                 SoundSource.BLOCKS, 0.3F, 1.4F);
     }
 
-    /** 尝试把物品送到目标位置，成功返回 true。 */
-    private boolean deliver(ServerLevel level, BlockPos targetPos, Direction side, ItemStack stack) {
+    /**
+     * 尝试把物品送到目标位置。
+     *
+     * @return 没能送出去的剩余堆（全部送出返回 {@link ItemStack#EMPTY}）
+     */
+    private ItemStack deliver(ServerLevel level, BlockPos targetPos, Direction side, ItemStack stack) {
         BlockState targetState = level.getBlockState(targetPos);
 
         // 目标是传送带：直接生成物品实体，由传送带接管
         if (targetState.getBlock() instanceof ConveyorBlock) {
             Direction beltFacing = targetState.getValue(ConveyorBlock.FACING);
             spawnOnBelt(level, targetPos, beltFacing, stack);
-            return true;
+            return ItemStack.EMPTY;
         }
 
-        // 目标是容器：走能力接口
-        ItemStack remaining = ItemTransferUtil.insertInto(level, targetPos, side, stack);
-        return remaining.isEmpty();
+        // 目标是容器：走能力接口，返回真正没塞进去的部分。
+        // 用 insertIntoInputSide 是为了避开熔炉/组装机的输出面。
+        return ItemTransferUtil.insertIntoInputSide(level, targetPos, side, stack);
     }
 
     /** 从传送带带面上捡起一个物品实体。 */

@@ -96,5 +96,9 @@
   "gui.astrofactory.detail.pack": "Research Pack",
   "gui.astrofactory.detail.requires": "Prerequisites",
   "gui.astrofactory.detail.trigger": "Trigger",
-  "gui.astrofactory.detail.level": "Level"
+  "gui.astrofactory.detail.level": "Level",
+  "gui.astrofactory.assembler.energy": "Energy: %s / %s FE",
+  "gui.astrofactory.assembler.no_power": "No Power",
+  "gui.astrofactory.assembler.working": "Running",
+  "gui.astrofactory.assembler.idle": "Idle"
 }

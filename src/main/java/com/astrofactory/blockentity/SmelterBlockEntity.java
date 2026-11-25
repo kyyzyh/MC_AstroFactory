@@ -177,6 +177,11 @@ public class SmelterBlockEntity extends PoweredBlockEntity {
         }
         Direction facing = getBlockState().getValue(net.minecraft.world.level.block.HorizontalDirectionalBlock.FACING);
         BlockPos target = this.worldPosition.relative(facing);
+        // 前方是同类熔炉且它的输出面正对着我们时，推过去会塞进它的成品槽；
+        // 这种情况交给玩家改朝向，本 tick 不推，避免两个熔炉互相灌成品。
+        if (level.getBlockState(target).getBlock() instanceof com.astrofactory.block.SmelterBlock) {
+            return;
+        }
         ItemStack remaining = com.astrofactory.util.ItemTransferUtil.insertInto(
                 level, target, facing.getOpposite(), outSlot.copy());
         if (remaining.getCount() != outSlot.getCount()) {

@@ -109,15 +109,18 @@ public class ResearchTableBlock extends FactoryBlock {
             return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         }
 
-        // 投入研究包
-        if (stack.is(com.astrofactory.registry.ModItems.RESEARCH_PACK.get())) {
-            ItemStack inSlot = table.getInput().getStackInSlot(0);
+        // 投入研究包：初级包进槽 0，高级包进槽 1
+        boolean isBasic = stack.is(com.astrofactory.registry.ModItems.RESEARCH_PACK.get());
+        boolean isAdvanced = stack.is(com.astrofactory.registry.ModItems.ADVANCED_RESEARCH_PACK.get());
+        if (isBasic || isAdvanced) {
+            int slot = isAdvanced ? 1 : 0;
+            ItemStack inSlot = table.getInput().getStackInSlot(slot);
             if (inSlot.isEmpty()) {
-                table.getInput().setStackInSlot(0, stack.copyWithCount(1));
+                table.getInput().setStackInSlot(slot, stack.copyWithCount(1));
             } else if (ItemStack.isSameItemSameComponents(inSlot, stack)
                     && inSlot.getCount() < inSlot.getMaxStackSize()) {
                 inSlot.grow(1);
-                table.getInput().setStackInSlot(0, inSlot);
+                table.getInput().setStackInSlot(slot, inSlot);
             } else {
                 player.displayClientMessage(
                         Component.translatable("message.astrofactory.research.input_full")
@@ -133,7 +136,7 @@ public class ResearchTableBlock extends FactoryBlock {
             return ItemInteractionResult.SUCCESS;
         }
 
-        // 空手：显示进度，必要时自动选定下一个可研究项
+        // 空手：打开科技树界面（带研究台的两个输入槽），并在聊天栏提示当前进度
         TechTreeData tech = TechTreeData.get(serverLevel.getServer());
         boolean autoSelected = false;
         if (tech.getCurrentResearch() == null) {
@@ -163,6 +166,17 @@ public class ResearchTableBlock extends FactoryBlock {
                                     node.costPerLevel() - tech.getResearchProgress(),
                                     node.costPerLevel())
                             .withStyle(ChatFormatting.AQUA), false);
+        }
+
+        // 打开科技树 GUI：hasTable=true 时界面里会多出两个研究包输入槽，
+        // 玩家可以直接往槽里放包，不必每次手持右键投入。
+        // extraData 必须写 true，客户端靠它决定是否加槽位（否则两边索引错位）。
+        if (player instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
+            serverPlayer.openMenu(new net.minecraft.world.SimpleMenuProvider(
+                    (containerId, playerInv, p) -> new com.astrofactory.menu.TechTreeMenu(
+                            containerId, playerInv, true, table.getInput()),
+                    Component.translatable("screen.astrofactory.tech_tree")),
+                    buf -> buf.writeBoolean(true));
         }
         return ItemInteractionResult.SUCCESS;
     }

@@ -25,11 +25,18 @@ public final class ModNetwork {
 
     private ModNetwork() {}
 
-    /** 服务端 → 客户端：全量科技进度（等级表 + 在研项目 + 进度）。 */
-    public record TechSyncPayload(Map<String, Integer> levels, String current, int progress)
+    /**
+     * 服务端 → 客户端：全量科技进度（等级表 + 在研项目 + 进度 + 触发计数）。
+     *
+     * <p>v0.7.1：加入 {@code triggerCounts}，让 GUI 能显示「已做出 5/16 铁锭」这类
+     * 触发型科技的真实进度，而不是只显示阈值。</p>
+     */
+    public record TechSyncPayload(Map<String, Integer> levels, String current, int progress,
+                                  Map<String, Integer> triggerCounts)
             implements CustomPacketPayload {
 
-        public static final TechSyncPayload EMPTY = new TechSyncPayload(Map.of(), null, 0);
+        public static final TechSyncPayload EMPTY =
+                new TechSyncPayload(Map.of(), null, 0, Map.of());
 
         public static final CustomPacketPayload.Type<TechSyncPayload> TYPE =
                 new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(
@@ -43,8 +50,10 @@ public final class ModNetwork {
                         p -> p.current() == null ? "" : p.current(),
                         ByteBufCodecs.VAR_INT,
                         TechSyncPayload::progress,
-                        (levels, current, progress) -> new TechSyncPayload(levels,
-                                current.isEmpty() ? null : current, progress)
+                        ByteBufCodecs.map(HashMap::new, ByteBufCodecs.STRING_UTF8, ByteBufCodecs.VAR_INT),
+                        TechSyncPayload::triggerCounts,
+                        (levels, current, progress, triggerCounts) -> new TechSyncPayload(
+                                levels, current.isEmpty() ? null : current, progress, triggerCounts)
                 );
 
         @Override
@@ -77,12 +86,15 @@ public final class ModNetwork {
     public static final Map<String, Integer> CLIENT_LEVELS = new HashMap<>();
     public static volatile String CLIENT_CURRENT = null;
     public static volatile int CLIENT_PROGRESS = 0;
+    /** 触发型科技的累计物品数（物品 id → 已做出数量）。 */
+    public static final Map<String, Integer> CLIENT_TRIGGER_COUNTS = new HashMap<>();
 
     /** 把服务端进度打包成 payload。 */
     public static TechSyncPayload snapshot(TechTreeData data) {
         Map<String, Integer> levels = new HashMap<>();
         TechNodes.all().forEach((id, node) -> levels.put(id, data.getLevel(id)));
-        return new TechSyncPayload(levels, data.getCurrentResearch(), data.getResearchProgress());
+        return new TechSyncPayload(levels, data.getCurrentResearch(), data.getResearchProgress(),
+                new HashMap<>(data.triggerCountsView()));
     }
 
     /** 服务端：把进度广播给所有玩家。 */
@@ -102,6 +114,8 @@ public final class ModNetwork {
                     CLIENT_LEVELS.putAll(payload.levels());
                     CLIENT_CURRENT = payload.current();
                     CLIENT_PROGRESS = payload.progress();
+                    CLIENT_TRIGGER_COUNTS.clear();
+                    CLIENT_TRIGGER_COUNTS.putAll(payload.triggerCounts());
                 }));
         registrar.playToServer(SelectResearchPayload.TYPE, SelectResearchPayload.STREAM_CODEC,
                 (payload, context) -> context.enqueueWork(() -> {

@@ -195,6 +195,11 @@ public class TechTreeData extends SavedData {
         return this.triggerCounts.getOrDefault(itemId, 0);
     }
 
+    /** 全部触发计数（网络同步用，只读视图）。 */
+    public java.util.Map<String, Integer> triggerCountsView() {
+        return java.util.Collections.unmodifiableMap(this.triggerCounts);
+    }
+
     /**
      * 记录「做出了某物品」（合成 / 熔炼产出 / 机器产出都会调用）。
      * 累计数达到触发型科技阈值且前置满足时自动解锁，不消耗研究包。

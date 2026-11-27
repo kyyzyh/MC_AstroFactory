@@ -103,6 +103,14 @@ public abstract class PoweredBlockEntity extends FactoryBlockEntity {
             return received;
         }
 
+        /**
+         * 对外不放电（机器不是电源）。注意：这<b>不</b>意味着内部不能消耗——
+         * 内部消耗走 {@link #drain(int)}，绕过 {@code canExtract}。
+         *
+         * <p>历史 bug（US-103 修）：这里返回 false 时，基类 {@code extractEnergy}
+         * 会直接返回 0，导致机器<b>从不真正扣电</b>。之前自检只断言「电量 > 0」，
+         * 所以没暴露出来。</p>
+         */
         @Override
         public boolean canExtract() {
             return false;
@@ -111,6 +119,23 @@ public abstract class PoweredBlockEntity extends FactoryBlockEntity {
         @Override
         public boolean canReceive() {
             return owner.getPowerMode() == PowerMode.ELECTRIC;
+        }
+
+        /**
+         * 内部消耗：直接扣自己的 {@code energy}，不受 {@code maxExtract}/{@code canExtract} 限制。
+         *
+         * @return 实际扣掉的量
+         */
+        int drain(int amount) {
+            if (amount <= 0 || this.energy <= 0) {
+                return 0;
+            }
+            int taken = Math.min(this.energy, amount);
+            this.energy -= taken;
+            if (taken > 0) {
+                owner.setChanged();
+            }
+            return taken;
         }
     }
 
@@ -128,8 +153,8 @@ public abstract class PoweredBlockEntity extends FactoryBlockEntity {
         if (this.energy.getEnergyStored() < amount) {
             return false;
         }
-        this.energy.extractEnergy(amount, false);
-        return true;
+        // 必须走 drain：extractEnergy 会被 canExtract()=false 拦成 0（见 MachineEnergyStorage）
+        return this.energy.drain(amount) > 0;
     }
 
     protected boolean hasEnergy(int amount) {
@@ -246,6 +271,52 @@ public abstract class PoweredBlockEntity extends FactoryBlockEntity {
         if (this.powerMode == PowerMode.ELECTRIC) {
             consumeEnergy(energyCost);
         }
+    }
+
+    // ---------------------------------------------------------------- 每 tick 扣电（US-103）
+
+    /**
+     * 电力模式的「每 tick 扣电」统一入口（US-103）。
+     *
+     * <p>清单要求「复用 P0a 基类与预定机制，仅替换能源模块；禁止复制粘贴出第二套机器逻辑」。
+     * 采矿机、机械臂（以及后续所有电动设备）都走这一个方法，不各写一份。</p>
+     *
+     * <p>语义：<b>每 tick</b> 扣 {@code fePerTick}，而不是「做完一次活才扣」。这样断电时
+     * 电量立刻见底、设备随即停摆，符合「断电停当前状态、恢复继续」。燃料模式不扣电
+     * （由 {@link #tickFuel()} 按 tick 烧燃料），直接返回 true。</p>
+     *
+     * @param fePerTick 电力模式下每 tick 应扣的电量
+     * @return 是否还有电可以继续干活（燃料模式恒为 true）
+     */
+    protected boolean tickElectric(int fePerTick) {
+        if (this.powerMode != PowerMode.ELECTRIC) {
+            return true;
+        }
+        if (fePerTick <= 0) {
+            return true;
+        }
+        if (this.energy.getEnergyStored() < fePerTick) {
+            return false;
+        }
+        return this.energy.drain(fePerTick) > 0;
+    }
+
+    /** 当前模式是否处于「可运转」状态（供 GUI / 测试查询）。 */
+    public boolean isRunning() {
+        if (this.powerMode == PowerMode.ELECTRIC) {
+            return this.energy.getEnergyStored() > 0;
+        }
+        return this.burnTime > 0;
+    }
+
+    /** 内部储能上限（GUI / 测试显示用）。 */
+    public int getEnergyCapacity() {
+        return this.energy.getMaxEnergyStored();
+    }
+
+    /** 清空内部电量（断电模拟用，测试与调试）。 */
+    public void drainAllEnergy() {
+        this.energy.drain(this.energy.getEnergyStored());
     }
 
     /**

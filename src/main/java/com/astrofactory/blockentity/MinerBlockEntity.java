@@ -28,14 +28,27 @@ import java.util.Map;
  */
 public class MinerBlockEntity extends PoweredBlockEntity {
 
-    /** 每多少 tick 产出一个物品（20 tick = 1 秒）。 */
-    private static final int CYCLE_TICKS = 40;
-    /** 每次产出消耗的能量（FE）。 */
-    public static final int ENERGY_PER_ITEM = 200;
-    /** 内部储能上限（FE）。 */
-    public static final int ENERGY_CAPACITY = 20_000;
+    // ---- US-103：数值全部走配置（config/astrofactory-common.toml） ----
+
+    /** 电力模式每 tick 耗电（FE/t）。蓝图基准 20。 */
+    public static int fePerTick() {
+        return com.astrofactory.config.AstroFactoryConfig.MINER_FE_PER_TICK.get();
+    }
+
+    /** 电力模式产出一个物品所需 tick 数。蓝图基准 20（1 矿/秒，是热能版的 2 倍速）。 */
+    public static int cycleTicks() {
+        return com.astrofactory.config.AstroFactoryConfig.MINER_CYCLE_TICKS.get();
+    }
+
+    /** 内部储能上限（FE）。蓝图基准 10,000。 */
+    public static int energyCapacity() {
+        return com.astrofactory.config.AstroFactoryConfig.MINER_CAPACITY.get();
+    }
+
     /** 最大充能速度（FE/t）。 */
-    public static final int MAX_RECEIVE = 200;
+    public static int maxReceive() {
+        return com.astrofactory.config.AstroFactoryConfig.MINER_MAX_RECEIVE.get();
+    }
 
     /** 下方方块关键词 → 产出物品。v0.6：矿石产出原矿（对应异星工厂矿石→板链条）。 */
     private static final Map<String, ItemStack> ORE_PRODUCTS = Map.ofEntries(
@@ -52,7 +65,7 @@ public class MinerBlockEntity extends PoweredBlockEntity {
     private int progress = 0;
 
     public MinerBlockEntity(BlockPos pos, BlockState state) {
-        super(ModBlockEntities.MINER.get(), pos, state, ENERGY_CAPACITY, MAX_RECEIVE);
+        super(ModBlockEntities.MINER.get(), pos, state, energyCapacity(), maxReceive());
     }
 
     @Override
@@ -64,26 +77,27 @@ public class MinerBlockEntity extends PoweredBlockEntity {
         // 燃料模式：先推进燃烧
         if (getPowerMode() == PowerMode.FUEL) {
             tickFuel();
+            if (!isBurning()) {
+                return; // 无燃料停工，进度保留
+            }
+        } else {
+            // 电力模式（US-103）：每 tick 扣电；没电就暂停，进度不清零
+            if (!tickElectric(fePerTick())) {
+                return;
+            }
         }
 
-        // 无燃料 / 无电则停工
-        if (!canWork(ENERGY_PER_ITEM)) {
-            return;
-        }
-
-        this.progress++;
-        if (this.progress < techTicks(effectiveTicks(CYCLE_TICKS))) {
-            return;
-        }
-        this.progress = 0;
-
+        // 先算产物：下方没矿就不推进进度（避免空转白耗电）
         ItemStack product = rollProduct(serverLevel);
         if (product.isEmpty()) {
             return;
         }
 
-        // 真正产出时才扣能量（燃料模式不扣，已按 tick 燃烧）
-        consumeWorkCost(ENERGY_PER_ITEM);
+        this.progress++;
+        if (this.progress < techTicks(effectiveTicks(cycleTicks()))) {
+            return;
+        }
+        this.progress = 0;
 
         // v0.6 直连/互喂：产物是燃料且相邻机器缺燃料 → 优先补燃料槽
         if (tryFeedNeighborFuel(serverLevel, product)) {
@@ -180,6 +194,16 @@ public class MinerBlockEntity extends PoweredBlockEntity {
         }
         // 兜底：任何实心方块都产出圆石
         return new ItemStack(Items.COBBLESTONE);
+    }
+
+    /** 当前采矿进度（tick）。断电时应保持不变（US-103 验收断言用）。 */
+    public int getProgress() {
+        return this.progress;
+    }
+
+    /** 一个产出周期需要多少 tick（含科技加成）。 */
+    public int getCycleTicks() {
+        return techTicks(effectiveTicks(cycleTicks()));
     }
 
     @Override

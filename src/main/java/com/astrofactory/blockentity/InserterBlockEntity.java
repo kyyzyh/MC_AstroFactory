@@ -23,19 +23,32 @@ import net.minecraft.world.level.block.state.BlockState;
  */
 public class InserterBlockEntity extends PoweredBlockEntity {
 
-    /** 每多少 tick 完成一次搬运。 */
-    private static final int CYCLE_TICKS = 10;
-    /** 每次搬运消耗的能量（FE）。 */
-    public static final int ENERGY_PER_MOVE = 20;
-    /** 内部储能上限（FE）。 */
-    public static final int ENERGY_CAPACITY = 5_000;
+    // ---- US-103：数值全部走配置（config/astrofactory-common.toml） ----
+
+    /** 电力模式每 tick 耗电（FE/t）。蓝图基准 10。 */
+    public static int fePerTick() {
+        return com.astrofactory.config.AstroFactoryConfig.INSERTER_FE_PER_TICK.get();
+    }
+
+    /** 一次搬运所需 tick 数。蓝图基准 17（约 1.2 次/秒）。 */
+    public static int cycleTicks() {
+        return com.astrofactory.config.AstroFactoryConfig.INSERTER_CYCLE_TICKS.get();
+    }
+
+    /** 内部储能上限（FE）。蓝图基准 10,000。 */
+    public static int energyCapacity() {
+        return com.astrofactory.config.AstroFactoryConfig.INSERTER_CAPACITY.get();
+    }
+
     /** 最大充能速度（FE/t）。 */
-    public static final int MAX_RECEIVE = 100;
+    public static int maxReceive() {
+        return com.astrofactory.config.AstroFactoryConfig.INSERTER_MAX_RECEIVE.get();
+    }
 
     private int cooldown = 0;
 
     public InserterBlockEntity(BlockPos pos, BlockState state) {
-        super(ModBlockEntities.INSERTER.get(), pos, state, ENERGY_CAPACITY, MAX_RECEIVE);
+        super(ModBlockEntities.INSERTER.get(), pos, state, energyCapacity(), maxReceive());
     }
 
     @Override
@@ -44,16 +57,22 @@ public class InserterBlockEntity extends PoweredBlockEntity {
             return;
         }
 
-        if (this.cooldown > 0) {
-            this.cooldown--;
-            return;
-        }
-
-        // 燃料模式：推进燃烧；无燃料/无电则停工
+        // 能源门禁（US-103）：断电/断燃料时直接返回——冷却不倒数、不搬物品，
+        // 于是机械臂「停在原处」，手里不会有半截物品（物品是原子地进或出的）。
         if (getPowerMode() == PowerMode.FUEL) {
             tickFuel();
+            if (!isBurning()) {
+                return;
+            }
+        } else {
+            // 电力模式：每 tick 扣电，没电立刻停
+            if (!tickElectric(fePerTick())) {
+                return;
+            }
         }
-        if (!canWork(ENERGY_PER_MOVE)) {
+
+        if (this.cooldown > 0) {
+            this.cooldown--;
             return;
         }
 
@@ -84,8 +103,7 @@ public class InserterBlockEntity extends PoweredBlockEntity {
             }
         }
 
-        consumeWorkCost(ENERGY_PER_MOVE);
-        this.cooldown = effectiveTicks(CYCLE_TICKS);
+        this.cooldown = techTicks(effectiveTicks(cycleTicks()));
         serverLevel.playSound(null, this.worldPosition, SoundEvents.PISTON_EXTEND,
                 SoundSource.BLOCKS, 0.3F, 1.4F);
     }
@@ -158,6 +176,11 @@ public class InserterBlockEntity extends PoweredBlockEntity {
                 this.worldPosition.getZ() + 0.5D,
                 stack);
         level.addFreshEntity(entity);
+    }
+
+    /** 当前搬运冷却剩余（tick）。断电时应保持不变（US-103 验收断言用）。 */
+    public int getCooldown() {
+        return this.cooldown;
     }
 
     @Override

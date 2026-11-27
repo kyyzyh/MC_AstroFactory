@@ -46,6 +46,28 @@ public final class AstroFactoryConfig {
     /** 单张电网最多聚合多少根杆。 */
     public static final ModConfigSpec.IntValue POWER_POLE_MAX_POLES;
 
+    // ---------------------------------------------------------------- 电力采矿机（US-103）
+
+    /** 电力采矿机每 tick 耗电（蓝图：20 FE/t）。 */
+    public static final ModConfigSpec.IntValue MINER_FE_PER_TICK;
+    /** 电力采矿机产出一个物品所需 tick 数（蓝图：20 = 1 矿/秒）。 */
+    public static final ModConfigSpec.IntValue MINER_CYCLE_TICKS;
+    /** 电力采矿机内部电缓冲（蓝图：10,000 FE）。 */
+    public static final ModConfigSpec.IntValue MINER_CAPACITY;
+    /** 电力采矿机最大充能速度（FE/t）。 */
+    public static final ModConfigSpec.IntValue MINER_MAX_RECEIVE;
+
+    // ---------------------------------------------------------------- 电力机械臂（US-103）
+
+    /** 电力机械臂每 tick 耗电（蓝图：10 FE/t）。 */
+    public static final ModConfigSpec.IntValue INSERTER_FE_PER_TICK;
+    /** 电力机械臂一次搬运所需 tick 数（蓝图：17 ≈ 1.2 次/秒）。 */
+    public static final ModConfigSpec.IntValue INSERTER_CYCLE_TICKS;
+    /** 电力机械臂内部电缓冲（蓝图：10,000 FE）。 */
+    public static final ModConfigSpec.IntValue INSERTER_CAPACITY;
+    /** 电力机械臂最大充能速度（FE/t）。 */
+    public static final ModConfigSpec.IntValue INSERTER_MAX_RECEIVE;
+
     static {
         ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
 
@@ -92,6 +114,38 @@ public final class AstroFactoryConfig {
         POWER_POLE_MAX_POLES = builder
                 .comment("单张电网最多聚合多少根杆，防止跨度失控卡服")
                 .defineInRange("maxPoles", 256, 1, 4096);
+        builder.pop();
+
+        builder.comment("电力采矿机（Electric Miner）—— US-103：每 tick 扣电，断电暂停不清零进度")
+                .push("miner");
+        MINER_FE_PER_TICK = builder
+                .comment("每 tick 耗电（FE/t）。蓝图基准 20")
+                .defineInRange("fePerTick", 20, 0, 10_000);
+        MINER_CYCLE_TICKS = builder
+                .comment("产出一个物品所需 tick 数。蓝图基准 20（1 矿/秒），是热能版的 2 倍速")
+                .defineInRange("cycleTicks", 20, 1, 20_000);
+        MINER_CAPACITY = builder
+                .comment("内部电缓冲（FE）。蓝图基准 10,000")
+                .defineInRange("capacity", 10_000, 100, 10_000_000);
+        MINER_MAX_RECEIVE = builder
+                .comment("最大充能速度（FE/t），需 ≥ fePerTick 才能持续运转")
+                .defineInRange("maxReceive", 200, 1, 100_000);
+        builder.pop();
+
+        builder.comment("电力机械臂（Electric Inserter）—— US-103：每 tick 扣电，断电时停在原处不丢物品")
+                .push("inserter");
+        INSERTER_FE_PER_TICK = builder
+                .comment("每 tick 耗电（FE/t）。蓝图基准 10")
+                .defineInRange("fePerTick", 10, 0, 10_000);
+        INSERTER_CYCLE_TICKS = builder
+                .comment("一次搬运所需 tick 数。蓝图基准 17（约 1.2 次/秒）")
+                .defineInRange("cycleTicks", 17, 1, 20_000);
+        INSERTER_CAPACITY = builder
+                .comment("内部电缓冲（FE）。蓝图基准 10,000")
+                .defineInRange("capacity", 10_000, 100, 10_000_000);
+        INSERTER_MAX_RECEIVE = builder
+                .comment("最大充能速度（FE/t），需 ≥ fePerTick 才能持续运转")
+                .defineInRange("maxReceive", 200, 1, 100_000);
         builder.pop();
 
         SPEC = builder.build();

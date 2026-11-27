@@ -68,6 +68,10 @@ public final class SelfTest {
     /** US-102：拆杆前的熔炉电量快照。 */
     private static int poleEnergyBefore = 0;
 
+    /** US-103：电力采矿机搭建时的电量与断电时的进度快照。 */
+    private static int electricMinerEnergyAtSetup = 0;
+    private static int frozenMinerProgress = 0;
+
     /** 研究前记录的科技点，用于对比增量。 */
     private static int researchPointsBefore = 0;
 
@@ -918,8 +922,68 @@ public final class SelfTest {
             }
         }
 
+        // ---------------- US-103 电力采矿机 / 机械臂 ----------------
+        if (tick == 1255) {
+            // 场景：杆(56,0,3) / 发电机(56,0,6) / 电动采矿机(58,0,3) + 脚下铁矿
+            level.setBlock(at(58, -1, 3), Blocks.IRON_ORE.defaultBlockState(), 3);
+            level.setBlock(at(56, 0, 3), ModBlocks.POWER_POLE.get().defaultBlockState(), 3);
+            level.setBlock(at(56, 0, 6), ModBlocks.GENERATOR.get().defaultBlockState(), 3);
+            level.setBlock(at(58, 0, 3),
+                    ModBlocks.MINER.get().defaultBlockState()
+                            .setValue(MinerBlock.FACING, Direction.NORTH), 3);
+            level.setBlock(at(59, 0, 3), ModBlocks.WOOD_CRATE.get().defaultBlockState(), 3);
+
+            if (level.getBlockEntity(at(56, 0, 6)) instanceof GeneratorBlockEntity gen) {
+                gen.getFuelSlot().setStackInSlot(0, new ItemStack(Items.COAL, 16));
+            }
+            if (level.getBlockEntity(at(58, 0, 3)) instanceof com.astrofactory.blockentity.MinerBlockEntity miner) {
+                miner.setPowerMode(PoweredBlockEntity.PowerMode.ELECTRIC);
+                electricMinerEnergyAtSetup = miner.getEnergyStored();
+            }
+            AstroFactory.LOGGER.info("[SELFTEST] US-103 电力采矿机场景搭建完成");
+        }
+
+        if (tick == 1270) {
+            // ① 电力模式真的在耗电（这是修掉「canExtract=false 导致永不扣电」后的关键证据）
+            if (level.getBlockEntity(at(58, 0, 3)) instanceof com.astrofactory.blockentity.MinerBlockEntity miner) {
+                int now = miner.getEnergyStored();
+                int progress = miner.getProgress();
+                AstroFactory.LOGGER.info("[SELFTEST] 电力采矿机 电量={} 进度={}", now, progress);
+                if (progress > 0) {
+                    RESULTS.add("PASS 电力采矿机接入电网后运转（进度 " + progress + " tick）");
+                } else {
+                    RESULTS.add("FAIL 电力采矿机未推进进度");
+                }
+                if (now > 0) {
+                    RESULTS.add("PASS 电力采矿机从覆盖电网取电（" + now + " FE）");
+                } else {
+                    RESULTS.add("FAIL 电力采矿机未取到电");
+                }
+            }
+
+            // ② 断电暂停：抽干电量后进度必须冻结
+            if (level.getBlockEntity(at(58, 0, 3)) instanceof com.astrofactory.blockentity.MinerBlockEntity miner) {
+                miner.drainAllEnergy();
+                frozenMinerProgress = miner.getProgress();
+                // 拆掉杆，确保不会马上被灌回电
+                level.setBlock(at(56, 0, 3), Blocks.AIR.defaultBlockState(), 3);
+            }
+        }
+
+        if (tick == 1285) {
+            if (level.getBlockEntity(at(58, 0, 3)) instanceof com.astrofactory.blockentity.MinerBlockEntity miner) {
+                int now = miner.getProgress();
+                AstroFactory.LOGGER.info("[SELFTEST] 断电后采矿机进度={}（冻结于 {}）", now, frozenMinerProgress);
+                if (now == frozenMinerProgress) {
+                    RESULTS.add("PASS 断电后电力采矿机暂停且进度保留（" + now + " tick）");
+                } else {
+                    RESULTS.add("FAIL 断电后进度仍在变（" + frozenMinerProgress + " → " + now + "）");
+                }
+            }
+        }
+
         // ---------------- 汇总 ----------------
-        if (tick == 1260) {
+        if (tick == 1300) {
             finished = true;
             AstroFactory.LOGGER.info("========== SELFTEST 结果 ==========");
             int pass = 0;

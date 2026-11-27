@@ -152,5 +152,9 @@
   "gui.astrofactory.assembler.output_full": "Output full",
   "gui.astrofactory.assembler.change_recipe": "Switch recipe (extra input returned)",
   "gui.astrofactory.assembler.need": "Needs:",
-  "gui.astrofactory.assembler.none_unlocked": "No unlocked recipes"
+  "gui.astrofactory.assembler.none_unlocked": "No unlocked recipes",
+  "screen.astrofactory.jei.assembler": "Assembler",
+  "screen.astrofactory.jei.lab": "Lab Research",
+  "gui.astrofactory.jei.locked_by": "Requires researching \"%s\"",
+  "gui.astrofactory.jei.craft_time": "Craft time: %s s"
 }

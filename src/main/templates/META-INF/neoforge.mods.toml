@@ -92,6 +92,15 @@ Build a production line from miner to crate and watch it run by itself.
     ordering="NONE"
     side="BOTH"
 
+# US-107：JEI 配方查看器——可选依赖。没装 JEI 时本模组照常加载运行，
+# 集成代码编译期依赖 mezz.jei.api，运行时通过 ModList.isLoaded("jei") 检测后才会加载相应类。
+[[dependencies.${mod_id}]]
+    modId="jei"
+    type="optional"
+    # 可选依赖不给 versionRange，兼容 JEI 1.21.1 的所有 19.x 版本
+    ordering="NONE"
+    side="CLIENT"
+
 # Features are specific properties of the game environment, that you may want to declare you require. This example declares
 # that your mod requires GL version 3.2 or higher. Other features will be added. They are side aware so declaring this won't
 # stop your mod loading on the server for example.

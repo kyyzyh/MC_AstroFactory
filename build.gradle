@@ -29,6 +29,11 @@ sourceSets.main.resources {
 
 repositories {
     // Add here additional repositories if required by some of the dependencies below.
+    // JEI 官方 maven（US-107 可选依赖）
+    maven {
+        name = 'JEI'
+        url = 'https://maven.blamejared.com'
+    }
 }
 
 base {
@@ -121,12 +126,11 @@ configurations {
 }
 
 dependencies {
-    // Example optional mod dependency with JEI
-    // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime
-    // compileOnly "mezz.jei:jei-${mc_version}-common-api:${jei_version}"
-    // compileOnly "mezz.jei:jei-${mc_version}-neoforge-api:${jei_version}"
-    // We add the full version to localRuntime, not runtimeOnly, so that we do not publish a dependency on it
-    // localRuntime "mezz.jei:jei-${mc_version}-neoforge:${jei_version}"
+    // US-107：JEI 可选依赖（配方查看器集成）。
+    // - compileOnly 引 API 用于编译；集成类只依赖 mezz.jei.api，不随产物分发。
+    // - localRuntime 在开发环境运行时装入 JEI 本体；产物不声明强依赖（玩家想用需自装 JEI）。
+    compileOnly "mezz.jei:jei-${minecraft_version}-forge-api:${jei_version}"
+    localRuntime "mezz.jei:jei-${minecraft_version}-forge:${jei_version}"
 
     // Example mod dependency using a mod jar from ./libs with a flat dir repository
     // This maps to ./libs/coolmod-${mc_version}-${coolmod_version}.jar

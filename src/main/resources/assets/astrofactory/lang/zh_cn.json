@@ -152,5 +152,9 @@
   "gui.astrofactory.assembler.output_full": "输出已满",
   "gui.astrofactory.assembler.change_recipe": "切换配方（多余原料退回）",
   "gui.astrofactory.assembler.need": "需要：",
-  "gui.astrofactory.assembler.none_unlocked": "暂无已解锁配方"
+  "gui.astrofactory.assembler.none_unlocked": "暂无已解锁配方",
+  "screen.astrofactory.jei.assembler": "组装机",
+  "screen.astrofactory.jei.lab": "实验室研究",
+  "gui.astrofactory.jei.locked_by": "需研究科技「%s」解锁",
+  "gui.astrofactory.jei.craft_time": "组装时间：%s 秒"
 }

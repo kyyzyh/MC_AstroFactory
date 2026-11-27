@@ -27,5 +27,15 @@ public final class ClientSetup {
         event.register(ModMenus.ASSEMBLER.get(), AssemblerScreen::new);
         event.register(ModMenus.BOILER.get(), BoilerScreen::new);
         event.register(ModMenus.STEAM_ENGINE.get(), SteamEngineScreen::new);
+        event.register(ModMenus.POWER_POLE.get(), PowerPoleScreen::new);
+    }
+
+    /** 电线杆连线可视化（US-102）。 */
+    @SubscribeEvent
+    public static void registerRenderers(
+            net.neoforged.neoforge.client.event.EntityRenderersEvent.RegisterRenderers event) {
+        event.registerBlockEntityRenderer(
+                com.astrofactory.registry.ModBlockEntities.POWER_POLE.get(),
+                ctx -> new PowerPoleRenderer());
     }
 }

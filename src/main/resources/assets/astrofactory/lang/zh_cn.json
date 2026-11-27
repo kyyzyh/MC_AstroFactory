@@ -116,5 +116,15 @@
   "gui.astrofactory.steam.rate": "发电",
   "gui.astrofactory.steam.generated": "累计发电",
   "gui.astrofactory.steam.consumed": "累计耗汽",
-  "gui.astrofactory.steam.hint": "需紧贴锅炉 · 缓冲满自动停汽不浪费"
+  "gui.astrofactory.steam.hint": "需紧贴锅炉 · 缓冲满自动停汽不浪费",
+  "block.astrofactory.power_pole": "电线杆",
+  "gui.astrofactory.pole.flowing": "供电中",
+  "gui.astrofactory.pole.starved": "电力不足",
+  "gui.astrofactory.pole.idle": "未接设备",
+  "gui.astrofactory.pole.transfer": "传输：",
+  "gui.astrofactory.pole.poles": "网络杆数：",
+  "gui.astrofactory.pole.sources": "发电设备：",
+  "gui.astrofactory.pole.sinks": "耗电设备：",
+  "gui.astrofactory.pole.range": "半径/间距：",
+  "gui.astrofactory.pole.hint": "半径内机器自动得电，杆间距内自动组网"
 }

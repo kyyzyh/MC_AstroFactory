@@ -65,6 +65,9 @@ public final class SelfTest {
 
     private static double beltStartX, beltStartZ;
 
+    /** US-102：拆杆前的熔炉电量快照。 */
+    private static int poleEnergyBefore = 0;
+
     /** 研究前记录的科技点，用于对比增量。 */
     private static int researchPointsBefore = 0;
 
@@ -93,14 +96,14 @@ public final class SelfTest {
     }
 
     private static void buildScene() {
-        for (int cx = (X >> 4) - 1; cx <= (X + 44) >> 4; cx++) {
+        for (int cx = (X >> 4) - 1; cx <= (X + 60) >> 4; cx++) {
             for (int cz = (Z >> 4) - 1; cz <= (Z + 8) >> 4; cz++) {
                 level.setChunkForced(cx, cz, true);
             }
         }
         AstroFactory.LOGGER.info("[SELFTEST] 已强制加载测试区块");
 
-        for (int dx = -1; dx <= 44; dx++) {
+        for (int dx = -1; dx <= 60; dx++) {
             for (int dz = -2; dz <= 8; dz++) {
                 for (int dy = -1; dy <= 3; dy++) {
                     level.setBlock(at(dx, dy, dz), Blocks.AIR.defaultBlockState(), 2);
@@ -807,6 +810,72 @@ public final class SelfTest {
                 }
             } else {
                 RESULTS.add("FAIL 木箱方块实体未创建（掉落/存取测试无法进行）");
+            }
+        }
+
+        // ---------------- US-102 电线杆覆盖式电网 ----------------
+        if (tick == 1160) {
+            // 布局：杆(50,0,3) / 发电机(50,0,6) / 熔炉(54,0,3)
+            // 发电机与熔炉相距 5 格且不相邻，只能靠杆的覆盖范围供电。
+            level.setBlock(at(50, 0, 3), ModBlocks.POWER_POLE.get().defaultBlockState(), 3);
+            level.setBlock(at(50, 0, 6), ModBlocks.GENERATOR.get().defaultBlockState(), 3);
+            level.setBlock(at(54, 0, 3),
+                    ModBlocks.SMELTER.get().defaultBlockState()
+                            .setValue(SmelterBlock.FACING, Direction.SOUTH), 3);
+
+            if (level.getBlockEntity(at(50, 0, 6)) instanceof GeneratorBlockEntity gen) {
+                gen.getFuelSlot().setStackInSlot(0, new ItemStack(Items.COAL, 8));
+            } else {
+                RESULTS.add("FAIL 电线杆测试：发电机未创建");
+            }
+            if (level.getBlockEntity(at(54, 0, 3)) instanceof SmelterBlockEntity smelter) {
+                smelter.setPowerMode(PoweredBlockEntity.PowerMode.ELECTRIC);
+            } else {
+                RESULTS.add("FAIL 电线杆测试：熔炉未创建");
+            }
+            AstroFactory.LOGGER.info("[SELFTEST] US-102 电线杆场景搭建完成");
+        }
+
+        if (tick == 1230) {
+            // 1) 覆盖范围内机器自动得电（无线，无需电缆相连）
+            int smelterEnergy = energyOf(at(54, 0, 3));
+            if (smelterEnergy > 0) {
+                RESULTS.add("PASS 电线杆覆盖供电：半径内熔炉自动得电（" + smelterEnergy + " FE）");
+            } else {
+                RESULTS.add("FAIL 电线杆覆盖供电失败（熔炉电量 0）");
+            }
+
+            // 2) 杆识别到网络内的发电与耗电设备
+            if (level.getBlockEntity(at(50, 0, 3)) instanceof com.astrofactory.blockentity.PowerPoleBlockEntity pole) {
+                int src = pole.getSourceCount();
+                int sink = pole.getSinkCount();
+                int poles = pole.getPoleCount();
+                if (src > 0 && sink > 0 && poles == 1) {
+                    RESULTS.add("PASS 电线杆组网统计（杆 " + poles + " 发电 " + src + " 耗电 " + sink + "）");
+                } else {
+                    RESULTS.add("FAIL 电线杆组网统计异常（杆 " + poles + " 发电 " + src + " 耗电 " + sink + "）");
+                }
+            } else {
+                RESULTS.add("FAIL 电线杆方块实体未创建");
+            }
+        }
+
+        if (tick == 1240) {
+            // 3) 拆掉杆后，机器不再被灌电。
+            // 注意：机器能量缓冲 maxExtract=0，无法手动清零，所以改用
+            // 「拆杆后一段时间内电量不再增长」来判定（机器自身耗电只会让电量下降）。
+            poleEnergyBefore = energyOf(at(54, 0, 3));
+            level.setBlock(at(50, 0, 3), Blocks.AIR.defaultBlockState(), 3);
+            AstroFactory.LOGGER.info("[SELFTEST] 拆杆前熔炉电量={}", poleEnergyBefore);
+        }
+
+        if (tick == 1250) {
+            int after = energyOf(at(54, 0, 3));
+            AstroFactory.LOGGER.info("[SELFTEST] 拆杆后熔炉电量={}", after);
+            if (after <= poleEnergyBefore) {
+                RESULTS.add("PASS 拆除电线杆后覆盖供电中断（" + poleEnergyBefore + " → " + after + " FE，不再增长）");
+            } else {
+                RESULTS.add("FAIL 拆杆后仍在供电（" + poleEnergyBefore + " → " + after + " FE）");
             }
         }
 

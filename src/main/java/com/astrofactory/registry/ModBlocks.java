@@ -2,6 +2,7 @@ package com.astrofactory.registry;
 
 import com.astrofactory.AstroFactory;
 import com.astrofactory.block.CableBlock;
+import com.astrofactory.block.PowerPoleBlock;
 import com.astrofactory.block.ConveyorBlock;
 import com.astrofactory.block.GeneratorBlock;
 import com.astrofactory.block.CrateBlock;
@@ -81,6 +82,16 @@ public final class ModBlocks {
                     .strength(3.5F)
                     .sound(SoundType.METAL)
                     .lightLevel(state -> state.getValue(GeneratorBlock.LIT) ? 12 : 0)
+                    .noOcclusion());
+
+    /** 电线杆（US-102）：覆盖式供电锚点。 */
+    public static final DeferredBlock<PowerPoleBlock> POWER_POLE = BLOCKS.registerBlock(
+            "power_pole",
+            PowerPoleBlock::new,
+            BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.WOOD)
+                    .strength(1.5F)
+                    .sound(SoundType.WOOD)
                     .noOcclusion());
 
     /** 电缆。 */

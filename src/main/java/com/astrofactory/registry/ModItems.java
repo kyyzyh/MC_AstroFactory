@@ -79,6 +79,11 @@ public final class ModItems {
             ITEMS.register("cable", () -> new TechGatedBlockItem(
                     ModBlocks.CABLE.get(), new Item.Properties(), TechNodes.ELECTRIC_POWER));
 
+    /** 电线杆（US-102）。 */
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> POWER_POLE =
+            ITEMS.register("power_pole", () -> new TechGatedBlockItem(
+                    ModBlocks.POWER_POLE.get(), new Item.Properties(), TechNodes.ELECTRIC_POWER));
+
     public static final DeferredItem<net.minecraft.world.item.BlockItem> RESEARCH_TABLE =
             ITEMS.registerSimpleBlockItem("research_table", ModBlocks.RESEARCH_TABLE);
 

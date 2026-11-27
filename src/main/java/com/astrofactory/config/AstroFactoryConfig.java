@@ -35,6 +35,17 @@ public final class AstroFactoryConfig {
     /** 蒸汽机对外最大输出（FE/t），供电缆抽取。 */
     public static final ModConfigSpec.IntValue STEAM_ENGINE_MAX_EXTRACT;
 
+    // ---------------------------------------------------------------- 电线杆（US-102）
+
+    /** 供电半径（格，球形）。 */
+    public static final ModConfigSpec.IntValue POWER_POLE_RADIUS;
+    /** 杆与杆自动连线的最远距离（格）。 */
+    public static final ModConfigSpec.IntValue POWER_POLE_LINK_RANGE;
+    /** 单个电网每 tick 最大传输量（FE/t）。 */
+    public static final ModConfigSpec.IntValue POWER_POLE_MAX_TRANSFER;
+    /** 单张电网最多聚合多少根杆。 */
+    public static final ModConfigSpec.IntValue POWER_POLE_MAX_POLES;
+
     static {
         ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
 
@@ -65,6 +76,22 @@ public final class AstroFactoryConfig {
         STEAM_ENGINE_MAX_EXTRACT = builder
                 .comment("对外最大输出（FE/t），供电缆抽取")
                 .defineInRange("maxExtract", 200, 1, 100_000);
+        builder.pop();
+
+        builder.comment("电线杆（Power Pole）—— 覆盖式无线电网，US-102")
+                .push("powerPole");
+        POWER_POLE_RADIUS = builder
+                .comment("供电半径（格，球形）。蓝图基准 7")
+                .defineInRange("radius", 7, 1, 32);
+        POWER_POLE_LINK_RANGE = builder
+                .comment("杆与杆自动连线的最远距离（格）。蓝图基准 10")
+                .defineInRange("linkRange", 10, 1, 64);
+        POWER_POLE_MAX_TRANSFER = builder
+                .comment("单个电网每 tick 最大传输量（FE/t）")
+                .defineInRange("maxTransfer", 2000, 1, 1_000_000);
+        POWER_POLE_MAX_POLES = builder
+                .comment("单张电网最多聚合多少根杆，防止跨度失控卡服")
+                .defineInRange("maxPoles", 256, 1, 4096);
         builder.pop();
 
         SPEC = builder.build();

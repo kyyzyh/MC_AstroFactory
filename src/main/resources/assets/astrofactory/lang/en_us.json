@@ -116,5 +116,15 @@
   "gui.astrofactory.steam.rate": "Output",
   "gui.astrofactory.steam.generated": "Generated",
   "gui.astrofactory.steam.consumed": "Steam used",
-  "gui.astrofactory.steam.hint": "Must touch a boiler - stops at full buffer"
+  "gui.astrofactory.steam.hint": "Must touch a boiler - stops at full buffer",
+  "block.astrofactory.power_pole": "Power Pole",
+  "gui.astrofactory.pole.flowing": "Supplying",
+  "gui.astrofactory.pole.starved": "Underpowered",
+  "gui.astrofactory.pole.idle": "No Devices",
+  "gui.astrofactory.pole.transfer": "Transfer: ",
+  "gui.astrofactory.pole.poles": "Poles: ",
+  "gui.astrofactory.pole.sources": "Sources: ",
+  "gui.astrofactory.pole.sinks": "Sinks: ",
+  "gui.astrofactory.pole.range": "Radius/Link: ",
+  "gui.astrofactory.pole.hint": "Machines in radius auto-connect; poles link by distance"
 }

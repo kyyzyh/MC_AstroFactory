@@ -35,5 +35,10 @@ public final class ModMenus {
             MENUS.register("steam_engine", () -> IMenuTypeExtension.create(
                     com.astrofactory.menu.SteamEngineMenu::new));
 
+    /** 电线杆信息面板（US-102）。 */
+    public static final DeferredHolder<MenuType<?>, MenuType<com.astrofactory.menu.PowerPoleMenu>> POWER_POLE =
+            MENUS.register("power_pole", () -> IMenuTypeExtension.create(
+                    com.astrofactory.menu.PowerPoleMenu::new));
+
     private ModMenus() {}
 }

@@ -31,6 +31,7 @@ public final class ModCreativeTabs {
                         output.accept(ModBlocks.CRATE.get());
                         output.accept(ModBlocks.GENERATOR.get());
                         output.accept(ModBlocks.CABLE.get());
+                        output.accept(ModBlocks.POWER_POLE.get());
                         output.accept(ModBlocks.RESEARCH_TABLE.get());
                         output.accept(ModItems.WRENCH.get());
                         output.accept(ModItems.RESEARCH_PACK.get());

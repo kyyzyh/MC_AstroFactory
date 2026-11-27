@@ -1,0 +1,14 @@
+{
+  "type": "astrofactory:assembling",
+  "craft_ticks": 20,
+  "ingredients": [
+    {
+      "count": 1,
+      "item": "astrofactory:iron_gear"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "astrofactory:red_science_pack"
+  }
+}

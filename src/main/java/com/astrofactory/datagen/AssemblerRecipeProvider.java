@@ -57,6 +57,18 @@ public class AssemblerRecipeProvider extends RecipeProvider {
                         SizedIngredient.of(ModItems.COPPER_PLATE.get(), 1)),
                 new ItemStack(ModItems.RED_SCIENCE_PACK.get()),
                 100, null);
+
+        // ---- US-105 测试配方：专供「配方锁定」验证，不参与正常玩法 ----
+        // 锁定关系由数据驱动科技的 unlock_recipes 声明（不在配方里写 required_tech），
+        // 正好验证「新增科技只改数据不改代码」。
+        add(output, "assembling_test_part",
+                List.of(SizedIngredient.of(ModItems.IRON_PLATE.get(), 1)),
+                new ItemStack(ModItems.IRON_GEAR.get()),
+                20, null);
+        add(output, "assembling_test_pack",
+                List.of(SizedIngredient.of(ModItems.IRON_GEAR.get(), 1)),
+                new ItemStack(ModItems.RED_SCIENCE_PACK.get()),
+                20, null);
     }
 
     private static void add(RecipeOutput output, String name,

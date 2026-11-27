@@ -1,0 +1,11 @@
+{
+  "name": "tech.astrofactory.test_research",
+  "pack_count": 8,
+  "pack_item": "astrofactory:research_pack",
+  "parents": [
+    "astrofactory:test_assembly"
+  ],
+  "unlock_recipes": [
+    "astrofactory:assembling_test_pack"
+  ]
+}

@@ -39,6 +39,9 @@ public final class DataGenerators {
         generator.addProvider(event.includeServer(),
                 new AssemblerRecipeProvider(output, lookup));
 
+        // 服务端数据：数据驱动科技定义（US-105）
+        generator.addProvider(event.includeServer(), new TechDefProvider(output));
+
         // 服务端数据：物品 tag（配方引用的通用 tag）
         TagsProvider<Block> blockTags = new TagsProvider<>(
                 output, net.minecraft.core.registries.Registries.BLOCK, lookup,

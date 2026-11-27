@@ -23,6 +23,14 @@ public class TechTreeData extends SavedData {
 
     public static final String DATA_NAME = "astrofactory_tech";
 
+    /**
+     * 存档数据版本号（US-105）。
+     *
+     * <p>写进 NBT 的 {@code DataVersion}，以后改结构时据此做迁移；
+     * 老存档没有这个字段，读出来按 0 处理（= 迁移前格式）。</p>
+     */
+    public static final int SAVE_VERSION = 1;
+
     /** 已解锁的科技 id → 已研究等级。 */
     private final Map<String, Integer> levels = new LinkedHashMap<>();
 
@@ -44,6 +52,8 @@ public class TechTreeData extends SavedData {
 
     public static TechTreeData load(CompoundTag tag, HolderLookup.Provider registries) {
         TechTreeData data = new TechTreeData();
+        // US-105：读存档版本号（老存档没有该字段 → 0，视为迁移前格式，当前无需迁移）
+        data.saveVersion = tag.contains("DataVersion") ? tag.getInt("DataVersion") : 0;
         data.levels.clear();
         CompoundTag levelsTag = tag.getCompound("Levels");
         for (String key : levelsTag.getAllKeys()) {
@@ -56,11 +66,21 @@ public class TechTreeData extends SavedData {
         for (String key : triggersTag.getAllKeys()) {
             data.triggerCounts.put(key, triggersTag.getInt(key));
         }
+        // 读完之后统一标记为当前版本（下次保存就写新版本号）
+        data.saveVersion = SAVE_VERSION;
         return data;
+    }
+
+    /** 存档版本号（US-105，用于后续迁移判定）。 */
+    private int saveVersion = SAVE_VERSION;
+
+    public int getSaveVersion() {
+        return this.saveVersion;
     }
 
     @Override
     public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
+        tag.putInt("DataVersion", SAVE_VERSION);
         CompoundTag levelsTag = new CompoundTag();
         for (var entry : this.levels.entrySet()) {
             levelsTag.putInt(entry.getKey(), entry.getValue());
@@ -150,6 +170,11 @@ public class TechTreeData extends SavedData {
         if (this.currentResearch == null) {
             return 0;
         }
+        // US-105：数据驱动科技的成本来自它的 pack_count
+        TechDef def = TechRegistry.get(this.currentResearch);
+        if (def != null) {
+            return def.packCount();
+        }
         return TechNodes.costOf(this.currentResearch);
     }
 
@@ -181,7 +206,20 @@ public class TechTreeData extends SavedData {
 
     /** 设置研究目标。已满级的科技不能再研究。 */
     public boolean setResearch(String techId) {
-        if (techId == null || !TechNodes.exists(techId)) {
+        if (techId == null) {
+            return false;
+        }
+        // US-105：数据驱动科技走 TechRegistry 判定（前置 + 成本都来自数据）
+        if (TechRegistry.exists(techId)) {
+            if (!canResearchDataDriven(techId)) {
+                return false;
+            }
+            this.currentResearch = techId;
+            this.researchProgress = 0;
+            setDirty();
+            return true;
+        }
+        if (!TechNodes.exists(techId)) {
             return false;
         }
         if (!TechNodes.canResearch(techId, this)) {
@@ -191,6 +229,37 @@ public class TechTreeData extends SavedData {
         this.researchProgress = 0;
         setDirty();
         return true;
+    }
+
+    // ---------------------------------------------------------------- 数据驱动科技（US-105）
+
+    /** 数据驱动科技能否开始研究：前置满足且未解锁、非创造旁路。 */
+    public boolean canResearchDataDriven(String techId) {
+        if (this.creativeBypass) {
+            return false;
+        }
+        if (!TechRegistry.exists(techId)) {
+            return false;
+        }
+        if (getLevel(techId) >= 1) {
+            return false;
+        }
+        return TechRegistry.parentsSatisfied(techId, this);
+    }
+
+    /** 某数据驱动科技是否已解锁。 */
+    public boolean isDataDrivenUnlocked(String techId) {
+        return TechRegistry.exists(techId) && getLevel(techId) >= 1;
+    }
+
+    /** 直接解锁一项数据驱动科技（实验室完成研究时调用）。 */
+    public void unlockDataDriven(String techId) {
+        if (!TechRegistry.exists(techId)) {
+            return;
+        }
+        this.levels.put(techId, 1);
+        setDirty();
+        notifyUnlockChanged();
     }
 
     /**
@@ -211,6 +280,7 @@ public class TechTreeData extends SavedData {
             this.currentResearch = null;
             this.researchProgress = 0;
             setDirty();
+            notifyUnlockChanged();
             return Map.entry(done, newLevel);
         }
         setDirty();
@@ -223,6 +293,43 @@ public class TechTreeData extends SavedData {
         int max = node == null ? 1 : node.maxLevel();
         this.levels.put(techId, max);
         setDirty();
+        notifyUnlockChanged();
+    }
+
+    /** 清空当前研究目标与进度（测试复位、研究完成后由 addProgress 自行清理）。 */
+    public void clearResearch() {
+        this.currentResearch = null;
+        this.researchProgress = 0;
+        setDirty();
+    }
+
+    /** 测试用：直接设某科技等级（0 = 清空）。 */
+    public void setLevelForTest(String techId, int level) {
+        if (level <= 0) {
+            this.levels.remove(techId);
+        } else {
+            this.levels.put(techId, level);
+        }
+        setDirty();
+    }
+
+    /**
+     * 解锁状态变化后的回调（US-105）：让配方锁定立刻重算，不必等下次重载。
+     *
+     * <p>{@link TechTreeData} 是 SavedData，拿不到 server 引用，所以这里把
+     * 「重算配方」委托给注册进来的回调，避免数据层反向依赖服务端。</p>
+     */
+    private static volatile java.util.function.Consumer<TechTreeData> unlockListener;
+
+    public static void setUnlockListener(java.util.function.Consumer<TechTreeData> listener) {
+        unlockListener = listener;
+    }
+
+    private void notifyUnlockChanged() {
+        java.util.function.Consumer<TechTreeData> listener = unlockListener;
+        if (listener != null) {
+            listener.accept(this);
+        }
     }
 
     // ---------------------------------------------------------------- 触发型科技（v0.6）

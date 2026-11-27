@@ -44,6 +44,9 @@ public class AstroFactory {
         // v0.6 触发型科技：做出指定物品自动解锁（借鉴异星工厂 2.0）
         com.astrofactory.tech.TriggeredTechListener.install();
 
+        // US-105 科技框架：数据驱动科技 + 配方锁定
+        com.astrofactory.tech.TechFrameworkEvents.install();
+
         if (com.astrofactory.dev.SelfTest.enabled()) {
             com.astrofactory.dev.SelfTest.install();
         }

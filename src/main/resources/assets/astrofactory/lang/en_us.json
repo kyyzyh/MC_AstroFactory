@@ -42,6 +42,8 @@
   "tech.astrofactory.electric_power": "Electric Era",
   "tech.astrofactory.advanced_packs": "Advanced Research",
   "tech.astrofactory.automation": "Automation",
+  "tech.astrofactory.test_assembly": "Test Assembly",
+  "tech.astrofactory.test_research": "Test Research",
   "desc.astrofactory.basic_automation": "Unlocks conveyor belts, inserters and crates",
   "desc.astrofactory.mining": "Unlocks the auto miner",
   "desc.astrofactory.smelting": "Unlocks the auto smelter",

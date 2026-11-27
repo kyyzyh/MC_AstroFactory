@@ -38,4 +38,14 @@ public final class ClientSetup {
                 com.astrofactory.registry.ModBlockEntities.POWER_POLE.get(),
                 ctx -> new PowerPoleRenderer());
     }
+
+    /**
+     * US-105：客户端也要读科技 JSON——科技表驱动「哪些配方已解锁」的显示，
+     * 客户端没表就会把锁定配方当成可做。
+     */
+    @SubscribeEvent
+    public static void registerClientReloadListeners(
+            net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent event) {
+        event.registerReloadListener(new com.astrofactory.tech.TechRegistry.ReloadListener());
+    }
 }

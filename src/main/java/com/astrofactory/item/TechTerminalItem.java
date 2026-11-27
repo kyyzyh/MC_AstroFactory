@@ -29,10 +29,14 @@ public class TechTerminalItem extends Item {
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
         if (!level.isClientSide && player instanceof ServerPlayer serverPlayer) {
+            // 必须显式写 extraData：NeoForge 只有带了 extraData 才给客户端 buffer，
+            // 否则客户端 TechTreeMenu 收到 null buf（曾导致「网络协议错误」断连）。
+            // 科技终端不打开研究台槽位，写 false 与服务端 TechTreeMenu(hasTable=false) 对齐。
             serverPlayer.openMenu(new net.minecraft.world.SimpleMenuProvider(
                     (containerId, playerInv, p) -> new com.astrofactory.menu.TechTreeMenu(
                             containerId, playerInv, false, null),
-                    Component.translatable("screen.astrofactory.tech_tree")));
+                    Component.translatable("screen.astrofactory.tech_tree")),
+                    buf -> buf.writeBoolean(false));
         }
         return InteractionResultHolder.sidedSuccess(stack, level.isClientSide());
     }

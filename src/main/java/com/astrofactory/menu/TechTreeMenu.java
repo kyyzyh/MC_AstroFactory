@@ -37,7 +37,19 @@ public class TechTreeMenu extends AbstractContainerMenu {
                         net.minecraft.network.RegistryFriendlyByteBuf buf) {
         // extraData 里只有 1 个 boolean：是否由研究台打开（决定是否加 2 个输入槽）。
         // 客户端必须读同一个标志，否则两边槽位数量不一致，索引会整体错位。
-        this(containerId, playerInv, buf.readableBytes() > 0 && buf.readBoolean(), null);
+        this(containerId, playerInv, decodeHasTable(buf), null);
+    }
+
+    /**
+     * 从菜单 extraData 解出「是否由研究台打开」。
+     *
+     * <p><b>必须 null 安全</b>：NeoForge 只有在 {@code openMenu} 带了 extraData writer 时
+     * 才给客户端 buffer；若服务端用无 extraData 的 {@code openMenu(provider)}，
+     * 客户端拿到的是 {@code null}。旧代码直接 {@code buf.readableBytes()} 会 NPE，
+     * 表现为客户端「网络协议错误」断连（科技终端曾中招）。</p>
+     */
+    public static boolean decodeHasTable(net.minecraft.network.RegistryFriendlyByteBuf buf) {
+        return buf != null && buf.readableBytes() > 0 && buf.readBoolean();
     }
 
     /** 客户端构造（无额外数据）。 */

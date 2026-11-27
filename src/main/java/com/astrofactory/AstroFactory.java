@@ -26,6 +26,10 @@ public class AstroFactory {
     public static final Logger LOGGER = LogUtils.getLogger();
 
     public AstroFactory(IEventBus modEventBus, ModContainer modContainer) {
+        // P0b：把标 ⚙ 的配平数值收敛到 config/astrofactory-common.toml
+        modContainer.registerConfig(net.neoforged.fml.config.ModConfig.Type.COMMON,
+                com.astrofactory.config.AstroFactoryConfig.SPEC);
+
         modEventBus.addListener(this::commonSetup);
 
         ModRegistry.register(modEventBus);

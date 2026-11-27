@@ -16,24 +16,52 @@ import java.util.Map;
  *
  * <p>燃料表与发电机一致；水/蒸汽只走内部缓冲 + 相邻直连。</p>
  */
-public class BoilerBlockEntity extends FactoryBlockEntity {
+public class BoilerBlockEntity extends FactoryBlockEntity
+        implements net.minecraft.world.MenuProvider {
 
-    /** 水/蒸汽缓冲上限。 */
-    public static final int FLUID_CAPACITY = 100;
+    @Override
+    public net.minecraft.network.chat.Component getDisplayName() {
+        return net.minecraft.network.chat.Component.translatable("block.astrofactory.boiler");
+    }
+
+    @Override
+    public net.minecraft.world.inventory.AbstractContainerMenu createMenu(
+            int containerId, net.minecraft.world.entity.player.Inventory playerInv,
+            net.minecraft.world.entity.player.Player player) {
+        return new com.astrofactory.menu.BoilerMenu(containerId, playerInv, this);
+    }
+
+    /** 水/蒸汽缓冲上限（配置项 boiler.fluidCapacity）。 */
+    public static int fluidCapacity() {
+        return com.astrofactory.config.AstroFactoryConfig.BOILER_FLUID_CAPACITY.get();
+    }
+
     /**
-     * 每 tick 产汽量。v0.6 调整为 2：1 台锅炉恰好供 2 台蒸汽机
+     * 每 tick 产汽量（配置项 boiler.steamPerTick）。
+     * 默认 2：1 台锅炉恰好供 2 台蒸汽机
      * （对应异星工厂 1 锅炉 60 蒸汽/秒配 2 蒸汽机各 30 蒸汽/秒）。
      */
-    public static final int STEAM_PER_TICK = 2;
+    public static int steamPerTick() {
+        return com.astrofactory.config.AstroFactoryConfig.BOILER_STEAM_PER_TICK.get();
+    }
 
-    private static final Map<String, Integer> FUELS = Map.ofEntries(
-            Map.entry("minecraft:coal", 1600),
-            Map.entry("minecraft:charcoal", 1600),
-            Map.entry("minecraft:coal_block", 16000),
-            Map.entry("minecraft:oak_planks", 300),
-            Map.entry("minecraft:oak_log", 300),
-            Map.entry("minecraft:stick", 100)
-    );
+    /** 煤的燃烧时长（配置项 boiler.coalBurnTicks，默认 1600 = 80 秒）。 */
+    private static int coalBurnTicks() {
+        return com.astrofactory.config.AstroFactoryConfig.BOILER_COAL_BURN_TICKS.get();
+    }
+
+    /** 燃料表：煤/木炭/煤炭块走配置时长，其余按原比例。 */
+    private static Map<String, Integer> fuels() {
+        int coal = coalBurnTicks();
+        return Map.ofEntries(
+                Map.entry("minecraft:coal", coal),
+                Map.entry("minecraft:charcoal", coal),
+                Map.entry("minecraft:coal_block", coal * 10),
+                Map.entry("minecraft:oak_planks", 300),
+                Map.entry("minecraft:oak_log", 300),
+                Map.entry("minecraft:stick", 100)
+        );
+    }
 
     private final ItemStackHandler fuel = new ItemStackHandler(1) {
         @Override
@@ -57,7 +85,7 @@ public class BoilerBlockEntity extends FactoryBlockEntity {
 
     /** 抽水机注水，返回剩余水量（锅炉装不下的部分留在抽水机里）。 */
     public int receiveWater(int amount) {
-        int space = FLUID_CAPACITY - this.water;
+        int space = fluidCapacity() - this.water;
         int taken = Math.min(amount, space);
         if (taken > 0) {
             this.water += taken;
@@ -82,13 +110,23 @@ public class BoilerBlockEntity extends FactoryBlockEntity {
         return this.burnTime > 0;
     }
 
+    /** 当前燃料剩余燃烧 tick（GUI 显示）。 */
+    public int getBurnTime() {
+        return this.burnTime;
+    }
+
+    /** 当前燃料总燃烧 tick（GUI 进度条分母）。 */
+    public int getBurnTotal() {
+        return this.burnTotal;
+    }
+
     /** 手持燃料右键投料。 */
     public boolean tryInsertFuel(ItemStack held) {
         if (held.isEmpty()) {
             return false;
         }
         String id = held.getItem().builtInRegistryHolder().key().location().toString();
-        if (!FUELS.containsKey(id)) {
+        if (!fuels().containsKey(id)) {
             return false;
         }
         ItemStack inSlot = this.fuel.getStackInSlot(0);
@@ -121,10 +159,10 @@ public class BoilerBlockEntity extends FactoryBlockEntity {
         }
 
         // 2) 烧水成汽：有火且有水才产汽
-        if (this.burnTime > 0 && this.water > 0 && this.steam < FLUID_CAPACITY) {
-            int produced = Math.min(STEAM_PER_TICK, this.water);
+        if (this.burnTime > 0 && this.water > 0 && this.steam < fluidCapacity()) {
+            int produced = Math.min(steamPerTick(), this.water);
             this.water -= produced;
-            this.steam = Math.min(FLUID_CAPACITY, this.steam + produced);
+            this.steam = Math.min(fluidCapacity(), this.steam + produced);
         }
 
         // 3) 把蒸汽均摊给相邻蒸汽机（1 锅炉 : 2 蒸汽机时两台各得一半，对应异星工厂配比）
@@ -166,7 +204,7 @@ public class BoilerBlockEntity extends FactoryBlockEntity {
             return;
         }
         String id = stack.getItem().builtInRegistryHolder().key().location().toString();
-        Integer ticks = FUELS.get(id);
+        Integer ticks = fuels().get(id);
         if (ticks == null) {
             return;
         }

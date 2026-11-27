@@ -25,5 +25,7 @@ public final class ClientSetup {
     public static void registerScreens(RegisterMenuScreensEvent event) {
         event.register(ModMenus.TECH_TREE.get(), TechTreeScreen::new);
         event.register(ModMenus.ASSEMBLER.get(), AssemblerScreen::new);
+        event.register(ModMenus.BOILER.get(), BoilerScreen::new);
+        event.register(ModMenus.STEAM_ENGINE.get(), SteamEngineScreen::new);
     }
 }

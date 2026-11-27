@@ -25,5 +25,15 @@ public final class ModMenus {
             MENUS.register("assembler", () -> IMenuTypeExtension.create(
                     com.astrofactory.menu.AssemblerMenu::new));
 
+    /** 锅炉信息面板（US-101）：客户端构造从 extraData 读方块位置。 */
+    public static final DeferredHolder<MenuType<?>, MenuType<com.astrofactory.menu.BoilerMenu>> BOILER =
+            MENUS.register("boiler", () -> IMenuTypeExtension.create(
+                    com.astrofactory.menu.BoilerMenu::new));
+
+    /** 蒸汽机信息面板（US-101）。 */
+    public static final DeferredHolder<MenuType<?>, MenuType<com.astrofactory.menu.SteamEngineMenu>> STEAM_ENGINE =
+            MENUS.register("steam_engine", () -> IMenuTypeExtension.create(
+                    com.astrofactory.menu.SteamEngineMenu::new));
+
     private ModMenus() {}
 }

@@ -64,6 +64,19 @@ public class SteamEngineBlock extends FactoryBlock {
         return state.rotate(mirror.getRotation(state.getValue(FACING)));
     }
 
+    /** 空手右键打开蒸汽机信息面板（US-101）。 */
+    @Override
+    protected net.minecraft.world.InteractionResult useWithoutItem(
+            BlockState state, Level level, BlockPos pos,
+            net.minecraft.world.entity.player.Player player,
+            net.minecraft.world.phys.BlockHitResult hitResult) {
+        if (!level.isClientSide && player instanceof net.minecraft.server.level.ServerPlayer serverPlayer
+                && level.getBlockEntity(pos) instanceof com.astrofactory.blockentity.SteamEngineBlockEntity engine) {
+            serverPlayer.openMenu(engine, pos);
+        }
+        return net.minecraft.world.InteractionResult.sidedSuccess(level.isClientSide);
+    }
+
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new com.astrofactory.blockentity.SteamEngineBlockEntity(pos, state);

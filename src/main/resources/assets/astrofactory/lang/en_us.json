@@ -102,5 +102,19 @@
   "gui.astrofactory.assembler.working": "Running",
   "gui.astrofactory.assembler.idle": "Idle",
   "gui.astrofactory.creative_badge": "Creative · All Unlocked",
-  "message.astrofactory.creative_unlocked": "Creative mode: all tech unlocked, every machine usable"
+  "message.astrofactory.creative_unlocked": "Creative mode: all tech unlocked, every machine usable",
+  "gui.astrofactory.boiler.status.burning": "Burning",
+  "gui.astrofactory.boiler.status.idle": "Idle",
+  "gui.astrofactory.boiler.burn": "Fuel",
+  "gui.astrofactory.boiler.water": "Water",
+  "gui.astrofactory.boiler.steam": "Steam",
+  "gui.astrofactory.boiler.hint": "Right-click with coal to fuel - steam feeds adjacent engines",
+  "gui.astrofactory.steam.working": "Generating",
+  "gui.astrofactory.steam.idle": "No steam",
+  "gui.astrofactory.steam.full": "Buffer full",
+  "gui.astrofactory.steam.energy": "Energy",
+  "gui.astrofactory.steam.rate": "Output",
+  "gui.astrofactory.steam.generated": "Generated",
+  "gui.astrofactory.steam.consumed": "Steam used",
+  "gui.astrofactory.steam.hint": "Must touch a boiler - stops at full buffer"
 }

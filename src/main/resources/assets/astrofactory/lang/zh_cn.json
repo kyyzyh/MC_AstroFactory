@@ -102,5 +102,19 @@
   "gui.astrofactory.assembler.working": "运行中",
   "gui.astrofactory.assembler.idle": "待料",
   "gui.astrofactory.creative_badge": "创造模式 · 已全解锁",
-  "message.astrofactory.creative_unlocked": "创造模式：全部科技已解锁，所有机器可直接使用"
+  "message.astrofactory.creative_unlocked": "创造模式：全部科技已解锁，所有机器可直接使用",
+  "gui.astrofactory.boiler.status.burning": "燃烧中",
+  "gui.astrofactory.boiler.status.idle": "空闲",
+  "gui.astrofactory.boiler.burn": "燃料",
+  "gui.astrofactory.boiler.water": "水",
+  "gui.astrofactory.boiler.steam": "蒸汽",
+  "gui.astrofactory.boiler.hint": "手持煤右键投料 · 蒸汽只供相邻蒸汽机",
+  "gui.astrofactory.steam.working": "发电中",
+  "gui.astrofactory.steam.idle": "无蒸汽",
+  "gui.astrofactory.steam.full": "缓冲已满",
+  "gui.astrofactory.steam.energy": "储能",
+  "gui.astrofactory.steam.rate": "发电",
+  "gui.astrofactory.steam.generated": "累计发电",
+  "gui.astrofactory.steam.consumed": "累计耗汽",
+  "gui.astrofactory.steam.hint": "需紧贴锅炉 · 缓冲满自动停汽不浪费"
 }

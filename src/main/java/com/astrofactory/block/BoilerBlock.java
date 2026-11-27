@@ -101,6 +101,18 @@ public class BoilerBlock extends FactoryBlock {
         return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
     }
 
+    /** 空手右键打开锅炉信息面板（US-101）。手持燃料时仍走上面的投料逻辑。 */
+    @Override
+    protected net.minecraft.world.InteractionResult useWithoutItem(
+            BlockState state, Level level, BlockPos pos,
+            Player player, BlockHitResult hitResult) {
+        if (!level.isClientSide && player instanceof net.minecraft.server.level.ServerPlayer serverPlayer
+                && level.getBlockEntity(pos) instanceof com.astrofactory.blockentity.BoilerBlockEntity boiler) {
+            serverPlayer.openMenu(boiler, pos);
+        }
+        return net.minecraft.world.InteractionResult.sidedSuccess(level.isClientSide);
+    }
+
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new com.astrofactory.blockentity.BoilerBlockEntity(pos, state);

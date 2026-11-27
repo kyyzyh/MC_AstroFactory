@@ -28,6 +28,7 @@ public final class ClientSetup {
         event.register(ModMenus.BOILER.get(), BoilerScreen::new);
         event.register(ModMenus.STEAM_ENGINE.get(), SteamEngineScreen::new);
         event.register(ModMenus.POWER_POLE.get(), PowerPoleScreen::new);
+        event.register(ModMenus.LAB.get(), LabScreen::new);
     }
 
     /** 电线杆连线可视化（US-102）。 */

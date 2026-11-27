@@ -29,7 +29,7 @@ public class TechTreeData extends SavedData {
      * <p>写进 NBT 的 {@code DataVersion}，以后改结构时据此做迁移；
      * 老存档没有这个字段，读出来按 0 处理（= 迁移前格式）。</p>
      */
-    public static final int SAVE_VERSION = 1;
+    public static final int SAVE_VERSION = 2;
 
     /** 已解锁的科技 id → 已研究等级。 */
     private final Map<String, Integer> levels = new LinkedHashMap<>();
@@ -39,6 +39,9 @@ public class TechTreeData extends SavedData {
 
     /** 当前在研科技已累积的科技点。 */
     private int researchProgress = 0;
+
+    /** US-106 研究队列：按先进先出排队研究（队首完成自动开队首下一个）。 */
+    private final java.util.ArrayDeque<String> researchQueue = new java.util.ArrayDeque<>();
 
     /** v0.6 触发型科技：物品 id → 已累计获得数（跨会话持久）。 */
     private final Map<String, Integer> triggerCounts = new LinkedHashMap<>();
@@ -62,6 +65,12 @@ public class TechTreeData extends SavedData {
         // v0.5 贫瘠开局：空 levels 即真正的开局状态，不再回填基础自动化
         data.currentResearch = tag.contains("Current") ? tag.getString("Current") : null;
         data.researchProgress = tag.getInt("Progress");
+        // US-106 研究队列（列表存）
+        data.researchQueue.clear();
+        var queueTag = tag.getList("Queue", net.minecraft.nbt.Tag.TAG_STRING);
+        for (int i = 0; i < queueTag.size(); i++) {
+            data.researchQueue.add(queueTag.getString(i));
+        }
         CompoundTag triggersTag = tag.getCompound("Triggers");
         for (String key : triggersTag.getAllKeys()) {
             data.triggerCounts.put(key, triggersTag.getInt(key));
@@ -90,6 +99,12 @@ public class TechTreeData extends SavedData {
             tag.putString("Current", this.currentResearch);
         }
         tag.putInt("Progress", this.researchProgress);
+        // US-106 研究队列（字符串列表）
+        var queueTag = new net.minecraft.nbt.ListTag();
+        for (String id : this.researchQueue) {
+            queueTag.add(net.minecraft.nbt.StringTag.valueOf(id));
+        }
+        tag.put("Queue", queueTag);
         CompoundTag triggersTag = new CompoundTag();
         for (var entry : this.triggerCounts.entrySet()) {
             triggersTag.putInt(entry.getKey(), entry.getValue());
@@ -231,6 +246,74 @@ public class TechTreeData extends SavedData {
         return true;
     }
 
+    // ---------------------------------------------------------------- 研究队列（US-106）
+
+    /** 可研究状态（含数据驱动科技）。 */
+    private boolean canResearchAny(String techId) {
+        if (TechRegistry.exists(techId)) {
+            return canResearchDataDriven(techId);
+        }
+        TechNodes.Node node = TechNodes.get(techId);
+        return node != null && TechNodes.canResearch(techId, this);
+    }
+
+    /**
+     * 把一项科技加入研究队列。校验：科技存在、可研究、且不在当前研究与队列中。
+     *
+     * @return 是否加入成功
+     */
+    public boolean enqueueResearch(String techId) {
+        if (techId == null || !canResearchAny(techId)) {
+            return false;
+        }
+        if (techId.equals(this.currentResearch) || this.researchQueue.contains(techId)) {
+            return false;
+        }
+        this.researchQueue.addLast(techId);
+        setDirty();
+        return true;
+    }
+
+    /** 当前队列副本（只读，供 GUI / 网络同步）。 */
+    public java.util.List<String> researchQueueView() {
+        return java.util.List.copyOf(this.researchQueue);
+    }
+
+    /** 从队列移除指定科技（尚未开始排队研究时，即不在队首）。 */
+    public boolean removeFromQueue(String techId) {
+        if (techId == null) {
+            return false;
+        }
+        boolean removed = this.researchQueue.removeIf(id -> id.equals(techId));
+        if (removed) {
+            setDirty();
+        }
+        return removed;
+    }
+
+    /**
+     * 若当前无在研项目，从队首自动取出下一项开始研究。
+     *
+     * @return 本次是否因为队列而新开了研究
+     */
+    public boolean popNextFromQueue() {
+        if (this.currentResearch != null) {
+            return false;
+        }
+        while (!this.researchQueue.isEmpty()) {
+            String next = this.researchQueue.pollFirst();
+            // 可能已满级/前置变化导致不可研究，跳过
+            if (canResearchAny(next)) {
+                this.currentResearch = next;
+                this.researchProgress = 0;
+                setDirty();
+                return true;
+            }
+        }
+        setDirty();
+        return false;
+    }
+
     // ---------------------------------------------------------------- 数据驱动科技（US-105）
 
     /** 数据驱动科技能否开始研究：前置满足且未解锁、非创造旁路。 */
@@ -281,6 +364,8 @@ public class TechTreeData extends SavedData {
             this.researchProgress = 0;
             setDirty();
             notifyUnlockChanged();
+            // US-106：完成一项后自动开排队里的下一项
+            popNextFromQueue();
             return Map.entry(done, newLevel);
         }
         setDirty();

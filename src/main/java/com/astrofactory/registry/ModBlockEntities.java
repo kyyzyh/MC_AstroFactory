@@ -87,5 +87,10 @@ public final class ModBlockEntities {
                     .of(com.astrofactory.blockentity.PowerPoleBlockEntity::new, ModBlocks.POWER_POLE.get())
                     .build(null));
 
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<com.astrofactory.blockentity.LabBlockEntity>> LAB =
+            BLOCK_ENTITIES.register("lab", () -> BlockEntityType.Builder
+                    .of(com.astrofactory.blockentity.LabBlockEntity::new, ModBlocks.LAB.get())
+                    .build(null));
+
     private ModBlockEntities() {}
 }

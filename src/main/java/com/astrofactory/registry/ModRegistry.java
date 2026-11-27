@@ -76,6 +76,12 @@ public final class ModRegistry {
         event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, ModBlockEntities.ASSEMBLER.get(),
                 (be, side) -> be.getEnergyBuffer());
 
+        // US-106：实验室（能量 + 红瓶输入）
+        event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, ModBlockEntities.LAB.get(),
+                (be, side) -> be.getEnergyBuffer());
+        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.LAB.get(),
+                (be, side) -> be.getRedInput());
+
         // 组装机物品能力：网格输入 + 输出（朝向面为输出）
         event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.ASSEMBLER.get(),
                 (be, side) -> {

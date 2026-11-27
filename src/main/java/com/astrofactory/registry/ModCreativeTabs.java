@@ -47,6 +47,8 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.COPPER_WIRE.get());
                         output.accept(ModItems.RED_SCIENCE_PACK.get());
                         output.accept(ModBlocks.ASSEMBLER.get());
+                        // US-106：实验室
+                        output.accept(ModBlocks.LAB.get());
                         // v0.5 新增
                         output.accept(ModBlocks.WOOD_CRATE.get());
                         output.accept(ModBlocks.IRON_CRATE.get());

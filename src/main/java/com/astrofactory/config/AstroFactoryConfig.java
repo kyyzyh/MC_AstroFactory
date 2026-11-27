@@ -83,6 +83,12 @@ public final class AstroFactoryConfig {
     /** 电力机械臂最大充能速度（FE/t）。 */
     public static final ModConfigSpec.IntValue INSERTER_MAX_RECEIVE;
 
+    // ---- 实验室（Lab）US-106 ----
+    public static final ModConfigSpec.IntValue LAB_ENERGY_PER_TICK;
+    public static final ModConfigSpec.IntValue LAB_CYCLE_TICKS;
+    public static final ModConfigSpec.IntValue LAB_CAPACITY;
+    public static final ModConfigSpec.IntValue LAB_MAX_RECEIVE;
+
     static {
         ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
 
@@ -181,6 +187,22 @@ public final class AstroFactoryConfig {
                 .comment("内部电缓冲（FE）。蓝图基准 10,000")
                 .defineInRange("capacity", 10_000, 100, 10_000_000);
         INSERTER_MAX_RECEIVE = builder
+                .comment("最大充能速度（FE/t），需 ≥ fePerTick 才能持续运转")
+                .defineInRange("maxReceive", 200, 1, 100_000);
+        builder.pop();
+
+        builder.comment("实验室（Lab）—— US-106：耗电吃红瓶推进研究，多台并联线性加速")
+                .push("lab");
+        LAB_ENERGY_PER_TICK = builder
+                .comment("每 tick 耗电（FE/t）。蓝图基准 20")
+                .defineInRange("fePerTick", 20, 0, 10_000);
+        LAB_CYCLE_TICKS = builder
+                .comment("每消耗一个红瓶所需 tick 数。蓝图基准 60")
+                .defineInRange("cycleTicks", 60, 1, 20_000);
+        LAB_CAPACITY = builder
+                .comment("内部电缓冲（FE）。蓝图基准 10,000")
+                .defineInRange("capacity", 10_000, 100, 10_000_000);
+        LAB_MAX_RECEIVE = builder
                 .comment("最大充能速度（FE/t），需 ≥ fePerTick 才能持续运转")
                 .defineInRange("maxReceive", 200, 1, 100_000);
         builder.pop();

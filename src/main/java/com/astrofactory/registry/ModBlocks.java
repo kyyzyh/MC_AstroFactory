@@ -197,5 +197,16 @@ public final class ModBlocks {
                     .sound(SoundType.METAL)
                     .noOcclusion());
 
+    /** 实验室：耗电吃红瓶推进研究（US-106）。 */
+    public static final DeferredBlock<com.astrofactory.block.LabBlock> LAB = BLOCKS.registerBlock(
+            "lab",
+            com.astrofactory.block.LabBlock::new,
+            BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_PURPLE)
+                    .strength(3.0F)
+                    .sound(SoundType.METAL)
+                    .lightLevel(state -> state.getValue(com.astrofactory.block.LabBlock.LIT) ? 9 : 0)
+                    .noOcclusion());
+
     private ModBlocks() {}
 }

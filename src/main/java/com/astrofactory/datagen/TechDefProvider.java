@@ -44,7 +44,7 @@ public class TechDefProvider implements DataProvider {
         return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new));
     }
 
-    /** 两个测试科技：A 无前置，B 依赖 A。 */
+    /** 测试科技：A 无前置，B 依赖 A，lab_cost 为 US-106 实验室速率量测用。 */
     private static List<TechDef> buildTechs() {
         return List.of(
                 // 测试科技 A：解锁测试配方 assembling_test_part（默认锁定）
@@ -64,6 +64,16 @@ public class TechDefProvider implements DataProvider {
                         AstroFactory.MODID + ":research_pack",
                         8,
                         List.of(AstroFactory.MODID + ":assembling_test_pack")
+                ),
+                // US-106 实验室速率量测科技：高成本，测试周期内不可能研究完成，
+                // 只用于量测「消耗红瓶 → 投进度」的线性叠加速率，不参与配方解锁。
+                new TechDef(
+                        AstroFactory.MODID + ":test_lab_cost",
+                        "tech.astrofactory.test_lab_cost",
+                        List.of(),
+                        AstroFactory.MODID + ":red_science_pack",
+                        100000,
+                        List.of()
                 )
         );
     }

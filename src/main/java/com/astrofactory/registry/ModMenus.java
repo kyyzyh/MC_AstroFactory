@@ -40,5 +40,10 @@ public final class ModMenus {
             MENUS.register("power_pole", () -> IMenuTypeExtension.create(
                     com.astrofactory.menu.PowerPoleMenu::new));
 
+    /** 实验室研究界面（US-106）。 */
+    public static final DeferredHolder<MenuType<?>, MenuType<com.astrofactory.menu.LabMenu>> LAB =
+            MENUS.register("lab", () -> IMenuTypeExtension.create(
+                    com.astrofactory.menu.LabMenu::new));
+
     private ModMenus() {}
 }

@@ -1,0 +1,12 @@
+{
+  "variants": {
+    "facing=north,lit=false": { "model": "astrofactory:block/lab" },
+    "facing=east,lit=false": { "model": "astrofactory:block/lab", "y": 90 },
+    "facing=south,lit=false": { "model": "astrofactory:block/lab", "y": 180 },
+    "facing=west,lit=false": { "model": "astrofactory:block/lab", "y": 270 },
+    "facing=north,lit=true": { "model": "astrofactory:block/lab_on" },
+    "facing=east,lit=true": { "model": "astrofactory:block/lab_on", "y": 90 },
+    "facing=south,lit=true": { "model": "astrofactory:block/lab_on", "y": 180 },
+    "facing=west,lit=true": { "model": "astrofactory:block/lab_on", "y": 270 }
+  }
+}

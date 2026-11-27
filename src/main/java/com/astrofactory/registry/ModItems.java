@@ -124,6 +124,11 @@ public final class ModItems {
             ITEMS.register("assembler", () -> new TechGatedBlockItem(
                     ModBlocks.ASSEMBLER.get(), new Item.Properties(), TechNodes.AUTOMATION));
 
+    /** 实验室 BlockItem（US-106，科技锁：电力时代——实验室是电力研究机器）。 */
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> LAB =
+            ITEMS.register("lab", () -> new TechGatedBlockItem(
+                    ModBlocks.LAB.get(), new Item.Properties(), TechNodes.ELECTRIC_POWER));
+
     // -------- US-104 产物链：铁板 / 铜板 / 铁齿轮 / 铜线材 / 红瓶 --------
     // 组装机三个初始配方（铁齿轮 / 铜线材 / 红瓶）的输入输出物。
 

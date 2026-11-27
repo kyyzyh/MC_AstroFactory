@@ -731,11 +731,14 @@ public final class SelfTest {
                 level.setBlock(at(x, 1, 0), ModBlocks.CABLE.get().defaultBlockState(), 3);
             }
             if (level.getBlockEntity(at(20, 0, 0)) instanceof com.astrofactory.blockentity.AssemblerBlockEntity assembler) {
-                assembler.getSlots().setStackInSlot(0, new ItemStack(Items.OAK_PLANKS, 4));
-                assembler.getSlots().setStackInSlot(1, new ItemStack(Items.OAK_PLANKS, 4));
-                assembler.getSlots().setStackInSlot(3, new ItemStack(Items.OAK_PLANKS, 4));
-                assembler.getSlots().setStackInSlot(4, new ItemStack(Items.OAK_PLANKS, 4));
-                RESULTS.add("PASS 组装机方块实体创建并投入原料");
+                // US-104：组装机改为「选定配方」模式，先选铁齿轮配方再投 2 个铁板
+                boolean picked = assembler.setSelectedRecipe("astrofactory:assembling_iron_gear");
+                assembler.getSlots().setStackInSlot(0, new ItemStack(ModItems.IRON_PLATE.get(), 8));
+                if (picked) {
+                    RESULTS.add("PASS 组装机方块实体创建、选定铁齿轮配方并投入铁板");
+                } else {
+                    RESULTS.add("FAIL 组装机无法选定铁齿轮配方（配方未加载？）");
+                }
             } else {
                 RESULTS.add("FAIL 组装机方块实体未创建");
             }
@@ -745,15 +748,14 @@ public final class SelfTest {
             if (level.getBlockEntity(at(20, 0, 0)) instanceof com.astrofactory.blockentity.AssemblerBlockEntity assembler) {
                 ItemStack out = assembler.getSlots().getStackInSlot(9);
                 int energy = assembler.getEnergyStored();
-                if (!out.isEmpty() && out.is(Items.CRAFTING_TABLE)) {
-                    RESULTS.add("PASS 组装机自动合成（输出 " + out.getCount() + " 个工作台）");
+                int gears = out.is(ModItems.IRON_GEAR.get()) ? out.getCount() : 0;
+                int crate = countItems(at(20, 0, 1), Direction.NORTH);
+                if (gears > 0 || crate > 0) {
+                    RESULTS.add("PASS 组装机按选定配方产出铁齿轮（输出槽 " + gears + " / 木箱 " + crate + "）");
                 } else {
-                    int crate = countItems(at(20, 0, 1), Direction.NORTH);
-                    if (crate > 0) {
-                        RESULTS.add("PASS 组装机自动合成并输出到木箱（" + crate + " 个）");
-                    } else {
-                        RESULTS.add("FAIL 组装机未产出（输出槽=" + out + " 箱子=0 电量=" + energy + "）");
-                    }
+                    RESULTS.add("FAIL 组装机未产出齿轮（输出槽=" + out + " 箱子=" + crate
+                            + " 电量=" + energy + " 进度=" + assembler.getCraftProgress()
+                            + " 缺料=" + assembler.isMissingInput() + "）");
                 }
                 if (energy > 0) {
                     RESULTS.add("PASS 组装机从电缆取电并耗电（" + energy + " FE）");

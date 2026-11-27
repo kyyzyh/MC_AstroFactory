@@ -124,5 +124,28 @@ public final class ModItems {
             ITEMS.register("assembler", () -> new TechGatedBlockItem(
                     ModBlocks.ASSEMBLER.get(), new Item.Properties(), TechNodes.AUTOMATION));
 
+    // -------- US-104 产物链：铁板 / 铜板 / 铁齿轮 / 铜线材 / 红瓶 --------
+    // 组装机三个初始配方（铁齿轮 / 铜线材 / 红瓶）的输入输出物。
+
+    /** 铁板（iron plate）：组装机基础原料。 */
+    public static final DeferredItem<Item> IRON_PLATE =
+            ITEMS.register("iron_plate", () -> new Item(new Item.Properties()));
+
+    /** 铜板（copper plate）：组装机基础原料。 */
+    public static final DeferredItem<Item> COPPER_PLATE =
+            ITEMS.register("copper_plate", () -> new Item(new Item.Properties()));
+
+    /** 铁齿轮（iron gear wheel）：2 铁板组装而成。 */
+    public static final DeferredItem<Item> IRON_GEAR =
+            ITEMS.register("iron_gear", () -> new Item(new Item.Properties()));
+
+    /** 铜线材（copper wire）：1 铜板 → 2 线。 */
+    public static final DeferredItem<Item> COPPER_WIRE =
+            ITEMS.register("copper_wire", () -> new Item(new Item.Properties()));
+
+    /** 红瓶（红色科技瓶）：齿轮 + 铜板组装，供实验室消费（US-106）。 */
+    public static final DeferredItem<Item> RED_SCIENCE_PACK =
+            ITEMS.register("red_science_pack", () -> new Item(new Item.Properties()));
+
     private ModItems() {}
 }

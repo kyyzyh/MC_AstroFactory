@@ -19,6 +19,8 @@ public final class ModRegistry {
         ModBlockEntities.BLOCK_ENTITIES.register(modBus);
         ModCreativeTabs.TABS.register(modBus);
         ModMenus.MENUS.register(modBus);
+        // US-104：组装机自定义配方类型
+        ModRecipes.register(modBus);
 
         modBus.addListener(ModRegistry::registerCapabilities);
         modBus.addListener(ModRegistry::registerPayloads);

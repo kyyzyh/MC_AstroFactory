@@ -40,6 +40,12 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.STEEL_PLATE.get());
                         output.accept(ModItems.COPPER_CABLE.get());
                         output.accept(ModItems.CIRCUIT.get());
+                        // US-104：组装机产物链
+                        output.accept(ModItems.IRON_PLATE.get());
+                        output.accept(ModItems.COPPER_PLATE.get());
+                        output.accept(ModItems.IRON_GEAR.get());
+                        output.accept(ModItems.COPPER_WIRE.get());
+                        output.accept(ModItems.RED_SCIENCE_PACK.get());
                         output.accept(ModBlocks.ASSEMBLER.get());
                         // v0.5 新增
                         output.accept(ModBlocks.WOOD_CRATE.get());

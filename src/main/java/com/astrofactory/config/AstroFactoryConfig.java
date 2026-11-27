@@ -35,6 +35,21 @@ public final class AstroFactoryConfig {
     /** 蒸汽机对外最大输出（FE/t），供电缆抽取。 */
     public static final ModConfigSpec.IntValue STEAM_ENGINE_MAX_EXTRACT;
 
+    // ---------------------------------------------------------------- 组装机（US-104）
+
+    /** 组装机每 tick 耗电（FE/t）。蓝图基准 30。 */
+    public static final ModConfigSpec.IntValue ASSEMBLER_ENERGY_PER_TICK;
+    /** 组装速度乘数（1.0 = 配方标称速度；>1 更快）。蓝图基准 1.0。 */
+    public static final ModConfigSpec.DoubleValue ASSEMBLER_SPEED_MULTIPLIER;
+    /** 组装机内部储能上限（FE）。 */
+    public static final ModConfigSpec.IntValue ASSEMBLER_CAPACITY;
+    /** 组装机最大充能速度（FE/t）。 */
+    public static final ModConfigSpec.IntValue ASSEMBLER_MAX_RECEIVE;
+    /** 换配方时，新配方用不上的已投入原料是否退回（推出到朝向容器/掉落）。 */
+    public static final ModConfigSpec.BooleanValue ASSEMBLER_RETURN_EXTRA_ON_RECIPE_CHANGE;
+    /** 缺料等待时是否仍耗电（false = 不耗电，符合「缺料等待不耗电」）。 */
+    public static final ModConfigSpec.BooleanValue ASSEMBLER_IDLE_DRAINS_ENERGY;
+
     // ---------------------------------------------------------------- 电线杆（US-102）
 
     /** 供电半径（格，球形）。 */
@@ -98,6 +113,28 @@ public final class AstroFactoryConfig {
         STEAM_ENGINE_MAX_EXTRACT = builder
                 .comment("对外最大输出（FE/t），供电缆抽取")
                 .defineInRange("maxExtract", 200, 1, 100_000);
+        builder.pop();
+
+        builder.comment("组装机（Assembler）—— 选定配方自动组装，US-104")
+                .push("assembler");
+        ASSEMBLER_ENERGY_PER_TICK = builder
+                .comment("每 tick 耗电（FE/t）。蓝图基准 30")
+                .defineInRange("energyPerTick", 30, 0, 100_000);
+        ASSEMBLER_SPEED_MULTIPLIER = builder
+                .comment("组装速度乘数（1.0 = 配方标称速度）。蓝图基准 1.0")
+                .defineInRange("speedMultiplier", 1.0D, 0.05D, 100.0D);
+        ASSEMBLER_CAPACITY = builder
+                .comment("内部储能上限（FE）")
+                .defineInRange("capacity", 20_000, 1_000, 100_000_000);
+        ASSEMBLER_MAX_RECEIVE = builder
+                .comment("最大充能速度（FE/t）")
+                .defineInRange("maxReceive", 500, 1, 1_000_000);
+        ASSEMBLER_RETURN_EXTRA_ON_RECIPE_CHANGE = builder
+                .comment("换配方时把新配方用不上的已投入原料退回（推出到朝向容器，推不动则掉在机器上方）")
+                .define("returnExtraOnRecipeChange", true);
+        ASSEMBLER_IDLE_DRAINS_ENERGY = builder
+                .comment("缺料等待时是否仍按 tick 耗电。false（默认）= 不耗电，符合「缺料等待不耗电」")
+                .define("idleDrainsEnergy", false);
         builder.pop();
 
         builder.comment("电线杆（Power Pole）—— 覆盖式无线电网，US-102")

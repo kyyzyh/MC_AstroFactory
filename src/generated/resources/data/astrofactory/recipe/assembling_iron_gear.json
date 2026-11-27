@@ -1,0 +1,13 @@
+{
+  "type": "astrofactory:assembling",
+  "ingredients": [
+    {
+      "count": 2,
+      "item": "astrofactory:iron_plate"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "astrofactory:iron_gear"
+  }
+}

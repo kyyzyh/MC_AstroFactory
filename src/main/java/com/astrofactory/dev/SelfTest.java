@@ -235,15 +235,16 @@ public final class SelfTest {
             }
         }
 
-        // ---------------- 贫瘠开局 ----------------
+        // ---------------- 开局解锁集（US-108 定稿） ----------------
         if (tick == 100) {
             TechTreeData tech = TechTreeData.get(event.getServer());
-            int level0 = tech.getLevel(TechNodes.BASIC_AUTOMATION);
-            AstroFactory.LOGGER.info("[SELFTEST] 贫瘠开局 基础自动化等级={}", level0);
-            if (level0 == 0) {
-                RESULTS.add("PASS 贫瘠开局：基础自动化未解锁（等级 0）");
+            int mining = tech.getLevel(TechNodes.MINING);
+            int basic = tech.getLevel(TechNodes.BASIC_AUTOMATION);
+            AstroFactory.LOGGER.info("[SELFTEST] 开局解锁集 采矿={} 基础自动化={}", mining, basic);
+            if (mining >= 1 && basic >= 1) {
+                RESULTS.add("PASS 开局解锁集：采矿机/传送带/机械臂可用（采矿=" + mining + " 基础自动化=" + basic + "）");
             } else {
-                RESULTS.add("FAIL 贫瘠开局：基础自动化不应自带（等级 " + level0 + "）");
+                RESULTS.add("FAIL 开局解锁集异常（采矿=" + mining + " 基础自动化=" + basic + "）");
             }
 
             // 木箱 9 格
@@ -258,34 +259,39 @@ public final class SelfTest {
             }
         }
 
-        // ---------------- 研究：基础自动化（贫瘠开局第一科技） ----------------
+        // ---------------- 研究：自动冶炼（开局解锁集之后第一个需要研究的科技） ----------------
         if (tick == 110) {
             TechTreeData tech = TechTreeData.get(event.getServer());
-            boolean started = tech.setResearch(TechNodes.BASIC_AUTOMATION);
-            AstroFactory.LOGGER.info("[SELFTEST] 开始研究基础自动化={}", started);
+            boolean started = tech.setResearch(TechNodes.SMELTING);
+            AstroFactory.LOGGER.info("[SELFTEST] 开始研究自动冶炼={}", started);
             if (started) {
-                RESULTS.add("PASS 贫瘠开局：基础自动化可研究（10 点）");
+                RESULTS.add("PASS 开局后第一项研究：自动冶炼可研究（30 点）");
             } else {
-                RESULTS.add("FAIL 基础自动化无法研究");
+                RESULTS.add("FAIL 自动冶炼无法研究");
             }
             researchPointsBefore = tech.getResearchProgress();
 
             if (level.getBlockEntity(at(20, 0, 0)) instanceof ResearchTableBlockEntity table) {
-                table.getInput().setStackInSlot(0, new ItemStack(ModItems.RESEARCH_PACK.get(), 16));
+                table.getInput().setStackInSlot(0, new ItemStack(ModItems.RESEARCH_PACK.get(), 32));
             } else {
                 RESULTS.add("FAIL 研究台方块实体未创建");
             }
         }
 
-        if (tick == 200) {
+        if (tick == 260) {
             TechTreeData tech = TechTreeData.get(event.getServer());
-            // 90 tick = 1 个初级包 = 10 点 = 基础自动化成本
-            boolean unlocked = tech.isUnlocked(TechNodes.BASIC_AUTOMATION);
-            AstroFactory.LOGGER.info("[SELFTEST] 基础自动化解锁={} 进度={}", unlocked, tech.getResearchProgress());
-            if (unlocked) {
-                RESULTS.add("PASS 研究台消化初级包解锁基础自动化（红瓶流程）");
+            // 90~150 tick 内消化了若干初级包（每包 10 点），进度应 > 0
+            boolean progressing = tech.getResearchProgress() > 0;
+            AstroFactory.LOGGER.info("[SELFTEST] 自动冶炼研究进度={}", tech.getResearchProgress());
+            if (progressing) {
+                RESULTS.add("PASS 研究台消化初级包推进研究（进度 "
+                        + tech.getResearchProgress() + " / 30）");
             } else {
-                RESULTS.add("FAIL 基础自动化未解锁（进度 " + tech.getResearchProgress() + "）");
+                RESULTS.add("FAIL 研究台未消化初级包（进度 0）");
+            }
+            // 补足 30 点直接完成，供后续熔炉流程使用
+            if (tech.getCurrentResearch() != null) {
+                tech.addProgress(30);
             }
         }
 

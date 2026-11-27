@@ -51,6 +51,18 @@ public class InserterBlockEntity extends PoweredBlockEntity {
         super(ModBlockEntities.INSERTER.get(), pos, state, energyCapacity(), maxReceive());
     }
 
+    /** 科技速度加成：机械动力 I 时电力机械臂提速（US-108，仅电力模式生效）。 */
+    @Override
+    protected double techSpeedMultiplier() {
+        if (getPowerMode() != PowerMode.ELECTRIC) {
+            return 1.0;
+        }
+        if (this.level == null || this.level.getServer() == null) {
+            return 1.0;
+        }
+        return com.astrofactory.tech.TechTreeData.get(this.level.getServer()).inserterSpeedMultiplier();
+    }
+
     @Override
     public void serverTick() {
         if (!(this.level instanceof ServerLevel serverLevel)) {

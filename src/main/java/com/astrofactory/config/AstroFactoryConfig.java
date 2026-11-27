@@ -89,6 +89,11 @@ public final class AstroFactoryConfig {
     public static final ModConfigSpec.IntValue LAB_CAPACITY;
     public static final ModConfigSpec.IntValue LAB_MAX_RECEIVE;
 
+    // ---------------------------------------------------------------- 科技效果（US-108）
+
+    /** 机械动力 I：电力机械臂提速加成（0.2 = +20%）。 */
+    public static final ModConfigSpec.DoubleValue MECHANICAL_POWER_INSERTER_BONUS;
+
     static {
         ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
 
@@ -205,6 +210,13 @@ public final class AstroFactoryConfig {
         LAB_MAX_RECEIVE = builder
                 .comment("最大充能速度（FE/t），需 ≥ fePerTick 才能持续运转")
                 .defineInRange("maxReceive", 200, 1, 100_000);
+        builder.pop();
+
+        builder.comment("科技效果（US-108）—— 机械动力 I 的数值")
+                .push("tech");
+        MECHANICAL_POWER_INSERTER_BONUS = builder
+                .comment("电力机械臂提速加成倍率（0.2 = +20%）。蓝图基准 20%")
+                .defineInRange("inserterSpeedBonus", 0.2D, 0.0D, 10.0D);
         builder.pop();
 
         SPEC = builder.build();

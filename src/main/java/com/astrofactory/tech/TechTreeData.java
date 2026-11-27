@@ -24,12 +24,26 @@ public class TechTreeData extends SavedData {
     public static final String DATA_NAME = "astrofactory_tech";
 
     /**
-     * 存档数据版本号（US-105）。
+     * 存档数据版本号（US-105 / US-108）。
      *
      * <p>写进 NBT 的 {@code DataVersion}，以后改结构时据此做迁移；
      * 老存档没有这个字段，读出来按 0 处理（= 迁移前格式）。</p>
+     *
+     * <p>v3（US-108）：开局解锁集定稿——新世界 / 老档 < v3 一律预置
+     * {@link #STARTING_UNLOCKED}，保证 P0a 玩法不被科技倒锁。</p>
      */
-    public static final int SAVE_VERSION = 2;
+    public static final int SAVE_VERSION = 3;
+
+    /**
+     * 开局默认已解锁的科技（US-108 定稿）。
+     *
+     * <p>预置「自动采矿」+「基础自动化」：开局即可放置采矿机、传送带、机械臂、
+     * 储物箱，保证 P0a 玩法（燃料时代产线）不被科技倒锁。</p>
+     */
+    public static final String[] STARTING_UNLOCKED = {
+            TechNodes.MINING,
+            TechNodes.BASIC_AUTOMATION
+    };
 
     /** 已解锁的科技 id → 已研究等级。 */
     private final Map<String, Integer> levels = new LinkedHashMap<>();
@@ -47,22 +61,38 @@ public class TechTreeData extends SavedData {
     private final Map<String, Integer> triggerCounts = new LinkedHashMap<>();
 
     public TechTreeData() {
-        // v0.5 贫瘠开局：不自带任何科技，对应异星工厂「徒手伐木」起点。
-        // 开局可用：研究台、研究包、扳手、木箱（这些方块不加科技锁）。
+        // US-108 开局解锁集定稿：预置「自动采矿」与「基础自动化」，
+        // 保证开局即可放置采矿机、传送带、机械臂、储物箱（P0a 玩法不被倒锁）。
+        // 对应异星工厂「开局就有红矿物流」的体验，第一项研究从此起步。
+        for (String id : STARTING_UNLOCKED) {
+            int max = TechNodes.get(id) == null ? 1 : TechNodes.get(id).maxLevel();
+            this.levels.put(id, max);
+        }
     }
 
     // ---------------------------------------------------------------- 读取
 
     public static TechTreeData load(CompoundTag tag, HolderLookup.Provider registries) {
+        // 先读版本号（老存档没有该字段 → 0）
+        int oldVersion = tag.contains("DataVersion") ? tag.getInt("DataVersion") : 0;
         TechTreeData data = new TechTreeData();
-        // US-105：读存档版本号（老存档没有该字段 → 0，视为迁移前格式，当前无需迁移）
-        data.saveVersion = tag.contains("DataVersion") ? tag.getInt("DataVersion") : 0;
+        data.saveVersion = oldVersion;
         data.levels.clear();
         CompoundTag levelsTag = tag.getCompound("Levels");
         for (String key : levelsTag.getAllKeys()) {
             data.levels.put(key, levelsTag.getInt(key));
         }
-        // v0.5 贫瘠开局：空 levels 即真正的开局状态，不再回填基础自动化
+        // US-108 迁移：v3 起开局默认已解锁 MINING + BASIC_AUTOMATION。
+        // 老存档（< 3）也回填——只补缺失、不覆盖已有进度，避免 P0a 玩法被倒锁。
+        if (oldVersion < 3) {
+            for (String id : STARTING_UNLOCKED) {
+                if (!data.levels.containsKey(id)) {
+                    int max = TechNodes.get(id) == null ? 1 : TechNodes.get(id).maxLevel();
+                    data.levels.put(id, max);
+                }
+            }
+        }
+        // v0.5 贫瘠开局：空 levels 即真正的开局状态（上面已按新开局集补齐）
         data.currentResearch = tag.contains("Current") ? tag.getString("Current") : null;
         data.researchProgress = tag.getInt("Progress");
         // US-106 研究队列（列表存）
@@ -215,6 +245,13 @@ public class TechTreeData extends SavedData {
     /** 传送带速度加成：物流优化 +50%。 */
     public double conveyorSpeedMultiplier() {
         return isUnlocked(TechNodes.LOGISTICS) ? 1.5 : 1.0;
+    }
+
+    /** 电力机械臂提速（US-108）：机械动力 I 提速 20% ⚙（数值进配置）。 */
+    public double inserterSpeedMultiplier() {
+        double bonus = isUnlocked(TechNodes.MECHANICAL_POWER)
+                ? com.astrofactory.config.AstroFactoryConfig.MECHANICAL_POWER_INSERTER_BONUS.get() : 0.0;
+        return 1.0 + bonus;
     }
 
     // ---------------------------------------------------------------- 写入

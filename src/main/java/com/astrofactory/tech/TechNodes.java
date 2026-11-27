@@ -64,6 +64,9 @@ public final class TechNodes {
     /** 自动组装：解锁组装机（电力自动合成）。 */
     public static final String AUTOMATION = "automation";
 
+    /** 机械动力 I（US-108）：电力机械臂提速 20% ⚙（首个加成科技）。 */
+    public static final String MECHANICAL_POWER = "mechanical_power";
+
     // ---------------------------------------------------------------- 定义
 
     /** 研究包等级：对应异星工厂的红瓶 / 绿瓶。 */
@@ -129,6 +132,9 @@ public final class TechNodes {
                 "tech.astrofactory.advanced_packs", Era.ELECTRIC, PackTier.BASIC, 1, null, 0));
         register(new Node(AUTOMATION, 150, new String[]{ELECTRIC_POWER},
                 "tech.astrofactory.automation", Era.ELECTRIC, PackTier.ADVANCED, 1, null, 0));
+        // US-108 机械动力 I：电力机械臂提速 20%（数值进 config），依赖电力时代
+        register(new Node(MECHANICAL_POWER, 50, new String[]{ELECTRIC_POWER},
+                "tech.astrofactory.mechanical_power", Era.ELECTRIC, PackTier.BASIC, 1, null, 0));
     }
 
     private static void register(Node node) {

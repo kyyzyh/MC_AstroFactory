@@ -57,8 +57,11 @@ public final class ModCreativeTabs {
                         output.accept(ModBlocks.WATER_PUMP.get());
                         output.accept(ModBlocks.BOILER.get());
                         output.accept(ModBlocks.STEAM_ENGINE.get());
-                        // 矿区（世界生成资源，创世者铺矿脉用）
-                        output.accept(ModBlocks.ORE_FIELD.get());
+                        // 四种矿脉（世界生成资源，异星工厂风格）
+                        output.accept(ModBlocks.ORE_FIELD_STONE.get());
+                        output.accept(ModBlocks.ORE_FIELD_COPPER.get());
+                        output.accept(ModBlocks.ORE_FIELD_IRON.get());
+                        output.accept(ModBlocks.ORE_FIELD_COAL.get());
                     })
                     .build());
 

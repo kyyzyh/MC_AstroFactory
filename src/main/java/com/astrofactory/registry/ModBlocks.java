@@ -208,10 +208,22 @@ public final class ModBlocks {
                     .lightLevel(state -> state.getValue(com.astrofactory.block.LabBlock.LIT) ? 9 : 0)
                     .noOcclusion());
 
-    /** 矿区：世界生成产物，采矿机只能放在它（或原版矿石）上。 */
-    public static final DeferredBlock<com.astrofactory.block.OreFieldBlock> ORE_FIELD = BLOCKS.registerBlock(
-            "ore_field",
-            com.astrofactory.block.OreFieldBlock::new,
+    /** 矿脉（世界生成产物，v0.8.9 起分矿种；异星工厂风格）。 */
+    public static final DeferredBlock<com.astrofactory.block.OreFieldBlock> ORE_FIELD_STONE = BLOCKS.registerBlock(
+            "ore_field_stone",
+            com.astrofactory.block.StoneField::new,
+            com.astrofactory.block.OreFieldBlock.oreFieldProperties());
+    public static final DeferredBlock<com.astrofactory.block.OreFieldBlock> ORE_FIELD_COPPER = BLOCKS.registerBlock(
+            "ore_field_copper",
+            com.astrofactory.block.CopperField::new,
+            com.astrofactory.block.OreFieldBlock.oreFieldProperties());
+    public static final DeferredBlock<com.astrofactory.block.OreFieldBlock> ORE_FIELD_IRON = BLOCKS.registerBlock(
+            "ore_field_iron",
+            com.astrofactory.block.IronField::new,
+            com.astrofactory.block.OreFieldBlock.oreFieldProperties());
+    public static final DeferredBlock<com.astrofactory.block.OreFieldBlock> ORE_FIELD_COAL = BLOCKS.registerBlock(
+            "ore_field_coal",
+            com.astrofactory.block.CoalField::new,
             com.astrofactory.block.OreFieldBlock.oreFieldProperties());
 
     private ModBlocks() {}

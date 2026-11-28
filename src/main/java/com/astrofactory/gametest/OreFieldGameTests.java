@@ -9,39 +9,44 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 /**
- * v0.8.9 GameTest：矿区生成 + 采矿机放置限制 + 信息面板接口。
+ * v0.8.9 GameTest：四种矿脉（石/铜/铁/煤）+ 采矿机放置限制 + 按矿种产出。
  *
  * <p>覆盖验收项：</p>
  * <ol>
- *   <li>采矿机只能放在矿场 / 原版矿石上（泥土不行，isMineableGround 判定）；</li>
- *   <li>采矿机放在矿区上能采出原矿（IMachineInfo.infoStatusKey=working、infoExtra 非空）；</li>
- *   <li>通用信息面板接口返回正确的能量/进度/状态（IMachineInfo）。</li>
+ *   <li>四种矿脉（石矿脉/铜矿脉/铁矿脉/煤矿脉）都被判定为可采支撑，泥土/石头/草不行；</li>
+ *   <li>采矿机放在铁矿脉上 → 进度推进、状态 working、产出为铁原矿；</li>
+ *   <li>四种矿脉各自产出对应物品（石矿脉→石头，铜→铜原矿，铁→铁原矿，煤→煤）；</li>
+ *   <li>信息面板在泥土上显示 no_ore。</li>
  * </ol>
  *
- * <p>模板 {@code pole_flat} 是 21x6x21 石头平台。注意：setBlock 直接放矿机不会触发
- * {@code canSurvive} 拦截（那是放置交互路径），故这里直接断言静态支撑判定
- * {@link MinerBlock#isMineableGround}，并单独验证放置在有效支撑上的开采逻辑。</p>
+ * <p>模板 {@code pole_flat} 是 21x6x21 石头平台。setBlock 直接放矿机不触发
+ * {@code canSurvive}（那是放置交互路径），故直接断言 {@link MinerBlock#isMineableGround}
+ * 与各矿脉的 {@code FieldType#product()}。</p>
  */
 @GameTestHolder(AstroFactory.MODID)
 @PrefixGameTestTemplate(false)
 public class OreFieldGameTests {
 
-    /** 放置支撑判定：矿场与各类原版矿石必须认可，泥土/石头必须拒绝。 */
+    /** 四种矿脉都被认可为可采支撑；原版矿石可采；泥土/石头/草不可采。 */
     @GameTest(template = "pole_flat", timeoutTicks = 100)
     public static void mineableGroundDetection(GameTestHelper helper) {
-        helper.assertTrue(MinerBlock.isMineableGround(ModBlocks.ORE_FIELD.get().defaultBlockState()),
-                "矿区方块应被判定为可采支撑");
+        helper.assertTrue(MinerBlock.isMineableGround(ModBlocks.ORE_FIELD_STONE.get().defaultBlockState()),
+                "石矿脉应被判定为可采支撑");
+        helper.assertTrue(MinerBlock.isMineableGround(ModBlocks.ORE_FIELD_COPPER.get().defaultBlockState()),
+                "铜矿脉应被判定为可采支撑");
+        helper.assertTrue(MinerBlock.isMineableGround(ModBlocks.ORE_FIELD_IRON.get().defaultBlockState()),
+                "铁矿脉应被判定为可采支撑");
+        helper.assertTrue(MinerBlock.isMineableGround(ModBlocks.ORE_FIELD_COAL.get().defaultBlockState()),
+                "煤矿脉应被判定为可采支撑");
         helper.assertTrue(MinerBlock.isMineableGround(Blocks.IRON_ORE.defaultBlockState()),
-                "铁矿应被判定为可采支撑");
-        helper.assertTrue(MinerBlock.isMineableGround(Blocks.COAL_ORE.defaultBlockState()),
-                "煤矿应被判定为可采支撑");
+                "原版铁矿应被判定为可采支撑");
         helper.assertTrue(MinerBlock.isMineableGround(Blocks.DEEPSLATE_GOLD_ORE.defaultBlockState()),
                 "深层金矿应被判定为可采支撑");
         helper.assertFalse(MinerBlock.isMineableGround(Blocks.DIRT.defaultBlockState()),
@@ -53,12 +58,30 @@ public class OreFieldGameTests {
         helper.succeed();
     }
 
-    /** 采矿机放在矿区上（电力+供电）：应能推进进度，信息面板显示 working 且有产出。 */
+    /** 每种矿脉产出对应物品（异星工厂风格：矿脉类型决定采出物）。 */
+    @GameTest(template = "pole_flat", timeoutTicks = 100)
+    public static void eachFieldTypeProducesCorrectOre(GameTestHelper helper) {
+        assertProduct(helper, ModBlocks.ORE_FIELD_STONE, Items.STONE);
+        assertProduct(helper, ModBlocks.ORE_FIELD_COPPER, Items.RAW_COPPER);
+        assertProduct(helper, ModBlocks.ORE_FIELD_IRON, Items.RAW_IRON);
+        assertProduct(helper, ModBlocks.ORE_FIELD_COAL, Items.COAL);
+        helper.succeed();
+    }
+
+    private static void assertProduct(GameTestHelper helper,
+                                      net.neoforged.neoforge.registries.DeferredBlock<com.astrofactory.block.OreFieldBlock> field,
+                                      net.minecraft.world.item.Item expect) {
+        com.astrofactory.block.OreFieldBlock of = field.get();
+        ItemStack product = of.product();
+        helper.assertTrue(product.is(expect),
+                "矿脉产出应为 " + expect + "，实际 " + product);
+    }
+
+    /** 采矿机放在铁矿脉上（电力+供电）：进度推进、状态 working、产出铁原矿。 */
     @GameTest(template = "pole_flat", timeoutTicks = 400)
-    public static void minerOnOreFieldProduces(GameTestHelper helper) {
+    public static void minerOnIronFieldProduces(GameTestHelper helper) {
         BlockPos minerPos = new BlockPos(12, 1, 10);
-        // 下方放矿区，保证有可采支撑（模拟世界生成出来的矿脉）
-        helper.setBlock(minerPos.below(), ModBlocks.ORE_FIELD.get());
+        helper.setBlock(minerPos.below(), ModBlocks.ORE_FIELD_IRON.get());
         helper.setBlock(minerPos, ModBlocks.MINER.get()
                 .defaultBlockState().setValue(com.astrofactory.block.MinerBlock.FACING, Direction.NORTH));
 
@@ -69,20 +92,23 @@ public class OreFieldGameTests {
         // 采样时刻选在周期中段（37 tick，周期 20），避免刚好撞上进度归零
         helper.runAfterDelay(37, () -> {
             helper.assertTrue(miner.getProgress() > 0,
-                    "矿区上采矿机进度未推进（" + miner.getProgress() + "）");
+                    "铁矿脉上采矿机进度未推进（" + miner.getProgress() + "）");
 
-            // 信息面板接口：工作状态
             String status = miner.infoStatusKey();
             helper.assertTrue("working".equals(status),
-                    "矿区上采矿机状态应为 working，实际 " + status);
+                    "铁矿脉上采矿机状态应为 working，实际 " + status);
 
-            // 信息面板能源/进度
             helper.assertTrue(miner.infoEnergy() > 0,
                     "信息面板应显示能量 > 0，实际 " + miner.infoEnergy());
             helper.assertTrue(miner.infoMaxProgress() > 0,
                     "信息面板应显示进度上限 > 0，实际 " + miner.infoMaxProgress());
             helper.assertTrue(miner.infoExtra() != null,
-                    "矿区上采矿机信息面板应有产出名称");
+                    "铁矿脉上采矿机信息面板应有产出名称（铁原矿）");
+            // infoExtra 应含铁原矿名
+            helper.assertTrue(miner.infoExtra().contains(
+                            net.minecraft.network.chat.Component.translatable(
+                                    Items.RAW_IRON.getDescriptionId()).getString()),
+                    "infoExtra 应显示铁原矿，实际 " + miner.infoExtra());
             helper.succeed();
         });
     }
@@ -91,7 +117,6 @@ public class OreFieldGameTests {
     @GameTest(template = "pole_flat", timeoutTicks = 300)
     public static void minerStatusNoOreOnDirt(GameTestHelper helper) {
         BlockPos minerPos = new BlockPos(12, 1, 10);
-        // 故意放下方为泥土（虽不合规，但直接 setBlock 不会触发 canSurvive；用于验证状态判定）
         helper.setBlock(minerPos.below(), Blocks.DIRT);
         helper.setBlock(minerPos, ModBlocks.MINER.get()
                 .defaultBlockState().setValue(com.astrofactory.block.MinerBlock.FACING, Direction.NORTH));
@@ -101,7 +126,6 @@ public class OreFieldGameTests {
         fillEnergy(helper, miner);
 
         helper.runAfterDelay(60, () -> {
-            // 泥土不是矿石 → 状态为 no_ore（无有效矿脉可采）
             helper.assertTrue("no_ore".equals(miner.infoStatusKey()),
                     "下方泥土时状态应为 no_ore，实际 " + miner.infoStatusKey());
             helper.succeed();

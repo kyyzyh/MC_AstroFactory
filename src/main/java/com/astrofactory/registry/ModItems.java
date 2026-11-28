@@ -124,9 +124,15 @@ public final class ModItems {
             ITEMS.register("assembler", () -> new TechGatedBlockItem(
                     ModBlocks.ASSEMBLER.get(), new Item.Properties(), TechNodes.AUTOMATION));
 
-    /** 矿区 BlockItem（无科技锁——它是世界生成资源，创世者可自由取出铺矿脉）。 */
-    public static final DeferredItem<net.minecraft.world.item.BlockItem> ORE_FIELD =
-            ITEMS.registerSimpleBlockItem("ore_field", ModBlocks.ORE_FIELD);
+    /** 四种矿脉 BlockItem（无科技锁——世界生成资源，创世者可自由取出铺矿脉）。 */
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> ORE_FIELD_STONE =
+            ITEMS.registerSimpleBlockItem("ore_field_stone", ModBlocks.ORE_FIELD_STONE);
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> ORE_FIELD_COPPER =
+            ITEMS.registerSimpleBlockItem("ore_field_copper", ModBlocks.ORE_FIELD_COPPER);
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> ORE_FIELD_IRON =
+            ITEMS.registerSimpleBlockItem("ore_field_iron", ModBlocks.ORE_FIELD_IRON);
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> ORE_FIELD_COAL =
+            ITEMS.registerSimpleBlockItem("ore_field_coal", ModBlocks.ORE_FIELD_COAL);
 
     /** 实验室 BlockItem（US-106，科技锁：电力时代——实验室是电力研究机器）。 */
     public static final DeferredItem<net.minecraft.world.item.BlockItem> LAB =

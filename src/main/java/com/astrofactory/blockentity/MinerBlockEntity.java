@@ -170,9 +170,9 @@ public class MinerBlockEntity extends PoweredBlockEntity implements IMachineInfo
         String id = belowState.getBlock().builtInRegistryHolder().key().location().toString();
         String shortName = id.substring(id.indexOf(':') + 1);
 
-        // v0.8.9：矿区（世界生成的 ore_field）→ 随机原矿（代表混合矿脉）
-        if (belowState.getBlock() instanceof com.astrofactory.block.OreFieldBlock) {
-            return rollOreFieldProduct(level);
+        // v0.8.9：矿脉（世界生成）按矿种定产——石矿/铜矿/铁矿/煤矿各自产出对应物
+        if (belowState.getBlock() instanceof com.astrofactory.block.OreFieldBlock field) {
+            return field.product();
         }
 
         // v0.6：矿石 → 原矿（含深板岩变体，如 deepslate_iron_ore 含 iron_ore 子串）
@@ -204,26 +204,6 @@ public class MinerBlockEntity extends PoweredBlockEntity implements IMachineInfo
         }
         // 兜底：任何实心方块都产出圆石
         return new ItemStack(Items.COBBLESTONE);
-    }
-
-    /** 矿区产出：随机一种原矿/矿物（按异星工厂矿脉混合物的思路，权重偏铁/铜）。 */
-    private ItemStack rollOreFieldProduct(ServerLevel level) {
-        float r = level.random.nextFloat();
-        if (r < 0.35f) {
-            return new ItemStack(Items.RAW_IRON);
-        } else if (r < 0.60f) {
-            return new ItemStack(Items.RAW_COPPER);
-        } else if (r < 0.70f) {
-            return new ItemStack(Items.COAL);
-        } else if (r < 0.82f) {
-            return new ItemStack(Items.RAW_GOLD);
-        } else if (r < 0.92f) {
-            return new ItemStack(Items.REDSTONE);
-        } else if (r < 0.97f) {
-            return new ItemStack(Items.LAPIS_LAZULI);
-        } else {
-            return new ItemStack(Items.DIAMOND);
-        }
     }
 
     /** 当前采矿进度（tick）。断电时应保持不变（US-103 验收断言用）。 */

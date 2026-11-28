@@ -45,5 +45,10 @@ public final class ModMenus {
             MENUS.register("lab", () -> IMenuTypeExtension.create(
                     com.astrofactory.menu.LabMenu::new));
 
+    /** 通用机器信息面板（v0.8.9）：采矿机/熔炉/机械臂/抽水机/发电机的只读信息面板。 */
+    public static final DeferredHolder<MenuType<?>, MenuType<com.astrofactory.menu.InfoPanelMenu>> INFO_PANEL =
+            MENUS.register("info_panel", () -> IMenuTypeExtension.create(
+                    com.astrofactory.menu.InfoPanelMenu::new));
+
     private ModMenus() {}
 }

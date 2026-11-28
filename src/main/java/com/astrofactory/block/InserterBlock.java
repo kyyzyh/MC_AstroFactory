@@ -65,6 +65,21 @@ public class InserterBlock extends FactoryBlock {
         return state.setValue(FACING, rotation.rotate(state.getValue(FACING)));
     }
 
+    /** 空手右键打开信息面板（v0.8.9：通用信息面板）。 */
+    @Override
+    protected net.minecraft.world.InteractionResult useWithoutItem(
+            BlockState state, Level level, BlockPos pos,
+            net.minecraft.world.entity.player.Player player,
+            net.minecraft.world.phys.BlockHitResult hitResult) {
+        if (!level.isClientSide && player instanceof net.minecraft.server.level.ServerPlayer serverPlayer
+                && level.getBlockEntity(pos) instanceof com.astrofactory.blockentity.IMachineInfo info) {
+            serverPlayer.openMenu(new net.minecraft.world.SimpleMenuProvider(
+                    (id, inv, p) -> new com.astrofactory.menu.InfoPanelMenu(id, inv, info),
+                    net.minecraft.network.chat.Component.literal(info.infoTitle())), pos);
+        }
+        return net.minecraft.world.InteractionResult.sidedSuccess(level.isClientSide);
+    }
+
     @Override
     protected BlockState mirror(BlockState state, Mirror mirror) {
         return state.rotate(mirror.getRotation(state.getValue(FACING)));

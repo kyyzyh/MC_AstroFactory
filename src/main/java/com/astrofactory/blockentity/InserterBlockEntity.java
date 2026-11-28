@@ -21,7 +21,7 @@ import net.minecraft.world.level.block.state.BlockState;
  * <p>这是产线的接缝：采矿机 → 传送带 → 机械臂 → 熔炉 → 传送带 → 箱子。
  * 相比 Create 的机械臂，这里保持最简：只有一进一出，无过滤配置。</p>
  */
-public class InserterBlockEntity extends PoweredBlockEntity {
+public class InserterBlockEntity extends PoweredBlockEntity implements IMachineInfo {
 
     // ---- US-103：数值全部走配置（config/astrofactory-common.toml） ----
 
@@ -208,6 +208,55 @@ public class InserterBlockEntity extends PoweredBlockEntity {
     /** 当前搬运冷却剩余（tick）。断电时应保持不变（US-103 验收断言用）。 */
     public int getCooldown() {
         return this.cooldown;
+    }
+
+    // ------------------------------------------------------------ IMachineInfo 信息面板
+
+    @Override
+    public String infoTitle() {
+        return com.astrofactory.registry.ModBlocks.INSERTER.get().getName().getString();
+    }
+
+    @Override
+    public String infoStatusKey() {
+        if (this.level == null) {
+            return "idle";
+        }
+        if (getPowerMode() == PowerMode.FUEL) {
+            if (!isBurning()) {
+                return "no_fuel";
+            }
+        } else if (!hasEnergy(fePerTick())) {
+            return "no_power";
+        }
+        return this.cooldown > 0 ? "working" : "idle";
+    }
+
+    @Override
+    public int infoEnergy() {
+        return getEnergyStored();
+    }
+
+    @Override
+    public int infoEnergyCapacity() {
+        return energyCapacity();
+    }
+
+    @Override
+    public int infoProgress() {
+        return this.cooldown;
+    }
+
+    @Override
+    public int infoMaxProgress() {
+        return Math.max(1, cycleTicks());
+    }
+
+    @Override
+    public String infoExtra() {
+        // 展示搬运方向
+        return getBlockState().getValue(HorizontalDirectionalBlock.FACING).getOpposite().getName()
+                + " → " + getBlockState().getValue(HorizontalDirectionalBlock.FACING).getName();
     }
 
     @Override

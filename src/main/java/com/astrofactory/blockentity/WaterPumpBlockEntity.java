@@ -5,6 +5,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
@@ -14,7 +15,7 @@ import net.minecraft.world.level.block.state.BlockState;
  * <p>水不作为流体方块存在，只走内部缓冲 + 相邻直连，
  * 保持「可见物理」风格：抽水机必须贴着水放，锅炉必须贴着抽水机放。</p>
  */
-public class WaterPumpBlockEntity extends FactoryBlockEntity {
+public class WaterPumpBlockEntity extends FactoryBlockEntity implements IMachineInfo {
 
     /** 水缓冲上限。 */
     public static final int WATER_CAPACITY = 100;
@@ -32,6 +33,27 @@ public class WaterPumpBlockEntity extends FactoryBlockEntity {
 
     public int getWater() {
         return this.water;
+    }
+
+    // ------------------------------------------------------------ IMachineInfo 信息面板
+
+    @Override
+    public String infoTitle() {
+        return com.astrofactory.registry.ModBlocks.WATER_PUMP.get().getName().getString();
+    }
+
+    @Override
+    public String infoStatusKey() {
+        if (this.level == null) {
+            return "idle";
+        }
+        return nearWater() ? "working" : "no_water";
+    }
+
+    @Override
+    public String infoExtra() {
+        return Component.translatable("gui.astrofactory.info.water",
+                this.water, WATER_CAPACITY).getString();
     }
 
     /** 是否紧邻水源（水平四向或正下方）。 */

@@ -4,6 +4,7 @@ import com.astrofactory.registry.ModBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.state.BlockState;
@@ -18,7 +19,7 @@ import java.util.Map;
  * <p>燃料表内置而非查询原版燃烧时间——避免 1.21.1 燃烧时间 API 的版本差异，
  * 同时让数值可精确平衡。</p>
  */
-public class GeneratorBlockEntity extends FactoryBlockEntity {
+public class GeneratorBlockEntity extends FactoryBlockEntity implements IMachineInfo {
 
     /** 内部储能上限（FE）。 */
     public static final int CAPACITY = 100_000;
@@ -100,6 +101,49 @@ public class GeneratorBlockEntity extends FactoryBlockEntity {
 
     public ItemStackHandler getFuelSlot() {
         return fuel;
+    }
+
+    // ------------------------------------------------------------ IMachineInfo 信息面板
+
+    @Override
+    public String infoTitle() {
+        return com.astrofactory.registry.ModBlocks.GENERATOR.get().getName().getString();
+    }
+
+    @Override
+    public String infoStatusKey() {
+        return isBurning() ? "working" : "no_fuel";
+    }
+
+    @Override
+    public int infoEnergy() {
+        return energy.getEnergyStored();
+    }
+
+    @Override
+    public int infoEnergyCapacity() {
+        return CAPACITY;
+    }
+
+    @Override
+    public int infoProgress() {
+        return this.burnTime;
+    }
+
+    @Override
+    public int infoMaxProgress() {
+        return this.burnTotal;
+    }
+
+    @Override
+    public ItemStackHandler infoInput() {
+        return fuel;
+    }
+
+    @Override
+    public String infoExtra() {
+        return Component.translatable("gui.astrofactory.info.burn_time",
+                this.burnTime).getString();
     }
 
     public boolean isBurning() {

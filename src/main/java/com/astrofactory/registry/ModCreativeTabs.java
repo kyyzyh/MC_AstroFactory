@@ -57,6 +57,8 @@ public final class ModCreativeTabs {
                         output.accept(ModBlocks.WATER_PUMP.get());
                         output.accept(ModBlocks.BOILER.get());
                         output.accept(ModBlocks.STEAM_ENGINE.get());
+                        // 矿区（世界生成资源，创世者铺矿脉用）
+                        output.accept(ModBlocks.ORE_FIELD.get());
                     })
                     .build());
 

@@ -208,5 +208,11 @@ public final class ModBlocks {
                     .lightLevel(state -> state.getValue(com.astrofactory.block.LabBlock.LIT) ? 9 : 0)
                     .noOcclusion());
 
+    /** 矿区：世界生成产物，采矿机只能放在它（或原版矿石）上。 */
+    public static final DeferredBlock<com.astrofactory.block.OreFieldBlock> ORE_FIELD = BLOCKS.registerBlock(
+            "ore_field",
+            com.astrofactory.block.OreFieldBlock::new,
+            com.astrofactory.block.OreFieldBlock.oreFieldProperties());
+
     private ModBlocks() {}
 }

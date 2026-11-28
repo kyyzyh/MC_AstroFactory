@@ -21,7 +21,7 @@ import java.util.Map;
  * <p>内置映射表而非走配方系统，好处是不依赖 RecipeManager 的版本差异，
  * 且行为完全可预测。覆盖原版主要矿石。</p>
  */
-public class SmelterBlockEntity extends PoweredBlockEntity {
+public class SmelterBlockEntity extends PoweredBlockEntity implements IMachineInfo {
 
     private static final int SMELT_TICKS = 100;
     /** 每次烧炼消耗的能量（FE）。 */
@@ -89,6 +89,61 @@ public class SmelterBlockEntity extends PoweredBlockEntity {
     }
 
     public ItemStackHandler getOutput() {
+        return output;
+    }
+
+    // ------------------------------------------------------------ IMachineInfo 信息面板
+
+    @Override
+    public String infoTitle() {
+        return com.astrofactory.registry.ModBlocks.SMELTER.get().getName().getString();
+    }
+
+    @Override
+    public String infoStatusKey() {
+        if (this.level == null) {
+            return "idle";
+        }
+        if (getPowerMode() == PowerMode.FUEL) {
+            if (!isBurning()) {
+                return "no_fuel";
+            }
+        } else if (!hasEnergy(ENERGY_PER_SMELT)) {
+            return "no_power";
+        }
+        if (input.getStackInSlot(0).isEmpty()) {
+            return "idle";
+        }
+        return "working";
+    }
+
+    @Override
+    public int infoEnergy() {
+        return getEnergyStored();
+    }
+
+    @Override
+    public int infoEnergyCapacity() {
+        return ENERGY_CAPACITY;
+    }
+
+    @Override
+    public int infoProgress() {
+        return this.progress;
+    }
+
+    @Override
+    public int infoMaxProgress() {
+        return techTicks(effectiveTicks(SMELT_TICKS));
+    }
+
+    @Override
+    public ItemStackHandler infoInput() {
+        return input;
+    }
+
+    @Override
+    public ItemStackHandler infoOutput() {
         return output;
     }
 

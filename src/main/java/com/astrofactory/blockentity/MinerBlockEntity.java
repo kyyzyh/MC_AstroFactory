@@ -26,7 +26,7 @@ import java.util.Map;
  *       产物是矿石且相邻是熔炉时直接投入熔炉（省传送带与机械臂）。</li>
  * </ul>
  */
-public class MinerBlockEntity extends PoweredBlockEntity {
+public class MinerBlockEntity extends PoweredBlockEntity implements IMachineInfo {
 
     // ---- US-103：数值全部走配置（config/astrofactory-common.toml） ----
 
@@ -163,12 +163,17 @@ public class MinerBlockEntity extends PoweredBlockEntity {
         return com.astrofactory.tech.TechTreeData.get(this.level.getServer()).miningSpeedMultiplier();
     }
 
-    /** 根据下方方块决定产出。v0.6：矿石方块产出对应原矿。 */
+    /** 根据下方方块决定产出。v0.6：矿石方块产出对应原矿；v0.8.9：矿区产出随机原矿。 */
     private ItemStack rollProduct(ServerLevel level) {
         BlockPos below = this.worldPosition.below();
         BlockState belowState = level.getBlockState(below);
         String id = belowState.getBlock().builtInRegistryHolder().key().location().toString();
         String shortName = id.substring(id.indexOf(':') + 1);
+
+        // v0.8.9：矿区（世界生成的 ore_field）→ 随机原矿（代表混合矿脉）
+        if (belowState.getBlock() instanceof com.astrofactory.block.OreFieldBlock) {
+            return rollOreFieldProduct(level);
+        }
 
         // v0.6：矿石 → 原矿（含深板岩变体，如 deepslate_iron_ore 含 iron_ore 子串）
         for (var entry : ORE_PRODUCTS.entrySet()) {
@@ -201,6 +206,26 @@ public class MinerBlockEntity extends PoweredBlockEntity {
         return new ItemStack(Items.COBBLESTONE);
     }
 
+    /** 矿区产出：随机一种原矿/矿物（按异星工厂矿脉混合物的思路，权重偏铁/铜）。 */
+    private ItemStack rollOreFieldProduct(ServerLevel level) {
+        float r = level.random.nextFloat();
+        if (r < 0.35f) {
+            return new ItemStack(Items.RAW_IRON);
+        } else if (r < 0.60f) {
+            return new ItemStack(Items.RAW_COPPER);
+        } else if (r < 0.70f) {
+            return new ItemStack(Items.COAL);
+        } else if (r < 0.82f) {
+            return new ItemStack(Items.RAW_GOLD);
+        } else if (r < 0.92f) {
+            return new ItemStack(Items.REDSTONE);
+        } else if (r < 0.97f) {
+            return new ItemStack(Items.LAPIS_LAZULI);
+        } else {
+            return new ItemStack(Items.DIAMOND);
+        }
+    }
+
     /** 当前采矿进度（tick）。断电时应保持不变（US-103 验收断言用）。 */
     public int getProgress() {
         return this.progress;
@@ -219,6 +244,65 @@ public class MinerBlockEntity extends PoweredBlockEntity {
     /** 一个产出周期需要多少 tick（含科技加成）。 */
     public int getCycleTicks() {
         return techTicks(effectiveTicks(cycleTicks()));
+    }
+
+    // ------------------------------------------------------------ IMachineInfo 信息面板
+
+    @Override
+    public String infoTitle() {
+        return com.astrofactory.registry.ModBlocks.MINER.get().getName().getString();
+    }
+
+    @Override
+    public String infoStatusKey() {
+        if (this.level == null) {
+            return "idle";
+        }
+        boolean hasOre = com.astrofactory.block.MinerBlock.isMineableGround(
+                this.level.getBlockState(this.worldPosition.below()));
+        if (getPowerMode() == PowerMode.FUEL) {
+            if (!isBurning()) {
+                return "no_fuel";
+            }
+        } else if (!hasEnergy(fePerTick())) {
+            return "no_power";
+        }
+        if (!hasOre) {
+            return "no_ore";
+        }
+        return "working";
+    }
+
+    @Override
+    public int infoEnergy() {
+        return getEnergyStored();
+    }
+
+    @Override
+    public int infoEnergyCapacity() {
+        return energyCapacity();
+    }
+
+    @Override
+    public int infoProgress() {
+        return this.progress;
+    }
+
+    @Override
+    public int infoMaxProgress() {
+        return getCycleTicks();
+    }
+
+    @Override
+    public String infoExtra() {
+        // 展示「当前正在采什么」
+        if (this.level instanceof ServerLevel sl) {
+            ItemStack product = rollProduct(sl);
+            if (!product.isEmpty()) {
+                return product.getHoverName().getString();
+            }
+        }
+        return null;
     }
 
     @Override

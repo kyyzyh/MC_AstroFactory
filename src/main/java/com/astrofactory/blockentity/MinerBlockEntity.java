@@ -1,5 +1,7 @@
 package com.astrofactory.blockentity;
 
+import com.astrofactory.block.OreFieldBlock;
+import com.astrofactory.config.AstroFactoryConfig;
 import com.astrofactory.registry.ModBlockEntities;
 import com.astrofactory.util.ItemTransferUtil;
 import net.minecraft.core.BlockPos;
@@ -11,44 +13,73 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.state.BlockState;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 /**
- * 采矿机：向下「挖矿」——依据机器下方方块决定产出，定期把矿产物塞进相邻容器/传送带。
+ * 采矿机：向下「挖矿」——区域采集一片矿脉，定期把矿产物塞进相邻容器/传送带。
+ *
+ * <p>v0.8.9 改为区域采集（像戴森球矿机）：以机器脚下为中心覆盖一片方形区域
+ * （一型 3x3、二型 4x4），每次从区域内随机挑一个有储量的矿脉格采出一个物品，
+ * 并扣该格储量 BE。扣空的非支撑格会塌陷为空气（矿洞）。</p>
  *
  * <p>v0.6 借鉴异星工厂前期流程的两处改进：</p>
  * <ul>
- *   <li><b>矿石识别</b>：下方是铁矿/铜矿/金矿/煤矿时产出对应原矿
+ *   <li>矿石识别：下方是铁矿/铜矿/金矿/煤矿时产出对应原矿
  *       （对应异星工厂热能采矿机采出矿石，再由石炉炼成板）；</li>
- *   <li><b>直连与互喂</b>：产物是燃料（如煤）且相邻机器缺燃料时，优先补其燃料槽
- *       ——两台面对面的采矿机放在煤矿上即可互相补煤（燃料自给），
- *       产物是矿石且相邻是熔炉时直接投入熔炉（省传送带与机械臂）。</li>
+ *   <li>直连与互喂：产物是燃料且相邻机器缺燃料时，优先补其燃料槽。</li>
  * </ul>
+ *
+ * <p>二型采矿机（miner_mk2）继承本类，仅覆盖面积/数值/实体类型。</p>
  */
 public class MinerBlockEntity extends PoweredBlockEntity implements IMachineInfo {
 
-    // ---- US-103：数值全部走配置（config/astrofactory-common.toml） ----
+    // ---- 区域采集参数（可被子类覆盖：二型 4x4 / 更大）----
 
-    /** 电力模式每 tick 耗电（FE/t）。蓝图基准 20。 */
-    public static int fePerTick() {
-        return com.astrofactory.config.AstroFactoryConfig.MINER_FE_PER_TICK.get();
+    /** 区域采集边长（格）。一型 3，二型 4。以机器脚下为中心。 */
+    protected int areaSize() {
+        return AstroFactoryConfig.MINER_AREA.get();
     }
 
-    /** 电力模式产出一个物品所需 tick 数。蓝图基准 20（1 矿/秒，是热能版的 2 倍速）。 */
-    public static int cycleTicks() {
-        return com.astrofactory.config.AstroFactoryConfig.MINER_CYCLE_TICKS.get();
+    /** 电力模式每 tick 耗电（FE/t）。 */
+    protected int fePerTick() {
+        return AstroFactoryConfig.MINER_FE_PER_TICK.get();
     }
 
-    /** 内部储能上限（FE）。蓝图基准 10,000。 */
-    public static int energyCapacity() {
-        return com.astrofactory.config.AstroFactoryConfig.MINER_CAPACITY.get();
+    /** 电力模式产出一个物品所需 tick 数。 */
+    protected int cycleTicksBase() {
+        return AstroFactoryConfig.MINER_CYCLE_TICKS.get();
+    }
+
+    /** 内部储能上限（FE）。 */
+    protected int energyCapacity() {
+        return AstroFactoryConfig.MINER_CAPACITY.get();
     }
 
     /** 最大充能速度（FE/t）。 */
-    public static int maxReceive() {
-        return com.astrofactory.config.AstroFactoryConfig.MINER_MAX_RECEIVE.get();
+    protected int maxReceive() {
+        return AstroFactoryConfig.MINER_MAX_RECEIVE.get();
     }
+
+    // ---- 公开配置访问（供 GameTest/面板读取）----
+
+    /** 一型每 tick 耗电（配置）。 */
+    public static int configFePerTick() {
+        return AstroFactoryConfig.MINER_FE_PER_TICK.get();
+    }
+
+    /** 一型内部储能上限（配置）。 */
+    public static int configEnergyCapacity() {
+        return AstroFactoryConfig.MINER_CAPACITY.get();
+    }
+
+    /** 一型最大充能速度（配置）。 */
+    public static int configMaxReceive() {
+        return AstroFactoryConfig.MINER_MAX_RECEIVE.get();
+    }
+
+    // ---- 矿石识别表（v0.6）----
 
     /** 下方方块关键词 → 产出物品。v0.6：矿石产出原矿（对应异星工厂矿石→板链条）。 */
     private static final Map<String, ItemStack> ORE_PRODUCTS = Map.ofEntries(
@@ -65,7 +96,15 @@ public class MinerBlockEntity extends PoweredBlockEntity implements IMachineInfo
     private int progress = 0;
 
     public MinerBlockEntity(BlockPos pos, BlockState state) {
-        super(ModBlockEntities.MINER.get(), pos, state, energyCapacity(), maxReceive());
+        super(ModBlockEntities.MINER.get(), pos, state,
+                AstroFactoryConfig.MINER_CAPACITY.get(),
+                AstroFactoryConfig.MINER_MAX_RECEIVE.get());
+    }
+
+    /** 二型构造：传入二型的方块实体类型与数值（由子类在 super 中指定）。 */
+    protected MinerBlockEntity(net.minecraft.world.level.block.entity.BlockEntityType<?> type,
+                               BlockPos pos, BlockState state, int capacity, int maxReceive) {
+        super(type, pos, state, capacity, maxReceive);
     }
 
     @Override
@@ -89,17 +128,17 @@ public class MinerBlockEntity extends PoweredBlockEntity implements IMachineInfo
             }
         }
 
-        // 先算产物：下方没矿就不推进进度（避免空转白耗电）
+        // 先算产物：区域内没矿就不推进进度（避免空转白耗电）
         ItemStack product = rollProduct(serverLevel);
         if (product.isEmpty()) {
-            setLit(false); // 下方无矿可采
+            setLit(false); // 区域无矿可采
             return;
         }
 
-        // 通电/有燃料且下方有矿 → 正在下钻
+        // 通电/有燃料且区域有矿 → 正在下钻
         setLit(true);
         this.progress++;
-        if (this.progress < techTicks(effectiveTicks(cycleTicks()))) {
+        if (this.progress < techTicks(effectiveTicks(cycleTicksBase()))) {
             return;
         }
         this.progress = 0;
@@ -112,22 +151,17 @@ public class MinerBlockEntity extends PoweredBlockEntity implements IMachineInfo
         // 朝四个水平方向依次尝试输出
         for (Direction dir : Direction.Plane.HORIZONTAL) {
             BlockPos target = this.worldPosition.relative(dir);
-            // insertIntoInputSide 会自动跳过熔炉/组装机的输出面，
-            // 避免把原料塞进成品槽污染产物
             ItemStack remaining = ItemTransferUtil.insertIntoInputSide(
                     serverLevel, target, dir.getOpposite(), product);
             if (remaining.isEmpty()) {
                 return;
             }
         }
-        // 全部塞不进去就丢弃（避免无限堆积在机器内部）
     }
 
     /**
      * v0.6 互喂：产物是燃料（煤/木板等）且相邻的燃料机器（采矿机/熔炉/机械臂/锅炉）
      * 燃料槽不满时，直接补 1 个进去。两台采矿机对放在煤矿上即可互相补煤。
-     *
-     * @return 是否喂掉了本次产物
      */
     private boolean tryFeedNeighborFuel(ServerLevel level, ItemStack product) {
         if (!isFuel(product)) {
@@ -135,7 +169,6 @@ public class MinerBlockEntity extends PoweredBlockEntity implements IMachineInfo
         }
         for (Direction dir : Direction.Plane.HORIZONTAL) {
             BlockPos target = this.worldPosition.relative(dir);
-            // 1) PoweredBlockEntity 系机器（采矿机/熔炉/机械臂）
             if (level.getBlockEntity(target) instanceof PoweredBlockEntity machine
                     && machine.getPowerMode() == PowerMode.FUEL
                     && machine.getFuelSlot().getStackInSlot(0).getCount() < 8) {
@@ -143,7 +176,6 @@ public class MinerBlockEntity extends PoweredBlockEntity implements IMachineInfo
                     return true;
                 }
             }
-            // 2) 锅炉（独立燃料表）
             if (level.getBlockEntity(target) instanceof BoilerBlockEntity boiler
                     && boiler.getFuelSlot().getStackInSlot(0).getCount() < 8) {
                 if (boiler.tryInsertFuel(product)) {
@@ -163,19 +195,64 @@ public class MinerBlockEntity extends PoweredBlockEntity implements IMachineInfo
         return com.astrofactory.tech.TechTreeData.get(this.level.getServer()).miningSpeedMultiplier();
     }
 
-    /** 根据下方方块决定产出。v0.6：矿石方块产出对应原矿；v0.8.9：矿区产出随机原矿。 */
+    /**
+     * v0.8.9 区域采集：从覆盖区域内随机选一个有储量的矿脉格，产出该矿脉对应的矿，
+     * 并扣该格储量。
+     */
     private ItemStack rollProduct(ServerLevel level) {
+        int size = areaSize();
+        int from = -(size / 2);
+        int to = size - (size / 2) - 1;
+        List<BlockPos> withReserve = new ArrayList<>();
+        for (int dx = from; dx <= to; dx++) {
+            for (int dz = from; dz <= to; dz++) {
+                BlockPos cell = this.worldPosition.offset(dx, -1, dz);
+                BlockState cellState = level.getBlockState(cell);
+                if (cellState.getBlock() instanceof OreFieldBlock && hasReserve(level, cell)) {
+                    withReserve.add(cell);
+                }
+            }
+        }
+        if (!withReserve.isEmpty()) {
+            BlockPos pick = withReserve.get(level.getRandom().nextInt(withReserve.size()));
+            return consumeReserve(level, pick);
+        }
+        return rollProductBelow(level);
+    }
+
+    /** 该矿脉格是否仍有储量（无 BE 的旧方块视为恒可采，避免旧档案卡死）。 */
+    private boolean hasReserve(ServerLevel level, BlockPos cell) {
+        if (level.getBlockEntity(cell) instanceof OreFieldBlockEntity field) {
+            return field.getReserve() > 0;
+        }
+        return true;
+    }
+
+    /** 从该矿脉格扣 1 储量并返回其产品；扣空则塌陷为空气（矿洞）。支撑格不塌陷。 */
+    private ItemStack consumeReserve(ServerLevel level, BlockPos cell) {
+        BlockState state = level.getBlockState(cell);
+        ItemStack product = state.getBlock() instanceof OreFieldBlock field
+                ? field.product() : ItemStack.EMPTY;
+        if (level.getBlockEntity(cell) instanceof OreFieldBlockEntity field) {
+            boolean exhausted = field.tryConsume(1);
+            if (exhausted && !cell.equals(this.worldPosition.below())) {
+                level.setBlock(cell, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 3);
+            }
+        }
+        return product;
+    }
+
+    /** v0.6 单格兜底：依据机器下方方块决定产出（不耗储量）。 */
+    private ItemStack rollProductBelow(ServerLevel level) {
         BlockPos below = this.worldPosition.below();
         BlockState belowState = level.getBlockState(below);
         String id = belowState.getBlock().builtInRegistryHolder().key().location().toString();
         String shortName = id.substring(id.indexOf(':') + 1);
 
-        // v0.8.9：矿脉（世界生成）按矿种定产——石矿/铜矿/铁矿/煤矿各自产出对应物
-        if (belowState.getBlock() instanceof com.astrofactory.block.OreFieldBlock field) {
+        if (belowState.getBlock() instanceof OreFieldBlock field) {
             return field.product();
         }
 
-        // v0.6：矿石 → 原矿（含深板岩变体，如 deepslate_iron_ore 含 iron_ore 子串）
         for (var entry : ORE_PRODUCTS.entrySet()) {
             if (shortName.contains(entry.getKey())) {
                 return entry.getValue().copy();
@@ -202,7 +279,6 @@ public class MinerBlockEntity extends PoweredBlockEntity implements IMachineInfo
         if (belowState.isAir()) {
             return ItemStack.EMPTY;
         }
-        // 兜底：任何实心方块都产出圆石
         return new ItemStack(Items.COBBLESTONE);
     }
 
@@ -212,7 +288,7 @@ public class MinerBlockEntity extends PoweredBlockEntity implements IMachineInfo
     }
 
     /** 更新方块 LIT 状态（驱动下钻动画的开关）。 */
-    private void setLit(boolean lit) {
+    protected void setLit(boolean lit) {
         BlockState state = getBlockState();
         if (state.hasProperty(com.astrofactory.block.MinerBlock.LIT)
                 && state.getValue(com.astrofactory.block.MinerBlock.LIT) != lit) {
@@ -223,14 +299,14 @@ public class MinerBlockEntity extends PoweredBlockEntity implements IMachineInfo
 
     /** 一个产出周期需要多少 tick（含科技加成）。 */
     public int getCycleTicks() {
-        return techTicks(effectiveTicks(cycleTicks()));
+        return techTicks(effectiveTicks(cycleTicksBase()));
     }
 
     // ------------------------------------------------------------ IMachineInfo 信息面板
 
     @Override
     public String infoTitle() {
-        return com.astrofactory.registry.ModBlocks.MINER.get().getName().getString();
+        return getBlockState().getBlock().getName().getString();
     }
 
     @Override
@@ -238,8 +314,7 @@ public class MinerBlockEntity extends PoweredBlockEntity implements IMachineInfo
         if (this.level == null) {
             return "idle";
         }
-        boolean hasOre = com.astrofactory.block.MinerBlock.isMineableGround(
-                this.level.getBlockState(this.worldPosition.below()));
+        boolean hasOre = hasWorkableCell((ServerLevel) this.level);
         if (getPowerMode() == PowerMode.FUEL) {
             if (!isBurning()) {
                 return "no_fuel";
@@ -251,6 +326,24 @@ public class MinerBlockEntity extends PoweredBlockEntity implements IMachineInfo
             return "no_ore";
         }
         return "working";
+    }
+
+    /** 区域内是否还有可采的矿脉（有储量）。纯原版矿石场景看脚下方块。 */
+    private boolean hasWorkableCell(ServerLevel level) {
+        int size = areaSize();
+        int from = -(size / 2);
+        int to = size - (size / 2) - 1;
+        for (int dx = from; dx <= to; dx++) {
+            for (int dz = from; dz <= to; dz++) {
+                BlockPos cell = this.worldPosition.offset(dx, -1, dz);
+                if (level.getBlockState(cell).getBlock() instanceof OreFieldBlock
+                        && hasReserve(level, cell)) {
+                    return true;
+                }
+            }
+        }
+        return com.astrofactory.block.MinerBlock.isMineableGround(
+                this.level.getBlockState(this.worldPosition.below()));
     }
 
     @Override
@@ -275,7 +368,6 @@ public class MinerBlockEntity extends PoweredBlockEntity implements IMachineInfo
 
     @Override
     public String infoExtra() {
-        // 展示「当前正在采什么」
         if (this.level instanceof ServerLevel sl) {
             ItemStack product = rollProduct(sl);
             if (!product.isEmpty()) {

@@ -1,18 +1,13 @@
 {
-  "type": "minecraft:ore",
+  "type": "astrofactory:iceberg_ore",
   "config": {
-    "discard_chance_on_air_exposure": 0.2,
-    "size": 8,
-    "targets": [
-      {
-        "target": {
-          "predicate_type": "minecraft:tag_match",
-          "tag": "minecraft:stone_ore_replaceables"
-        },
-        "state": {
-          "Name": "astrofactory:ore_field_copper"
-        }
-      }
-    ]
+    "target": {
+      "Name": "minecraft:stone"
+    },
+    "ore": {
+      "Name": "astrofactory:ore_field_copper"
+    },
+    "radius": 4,
+    "depth": 20
   }
 }

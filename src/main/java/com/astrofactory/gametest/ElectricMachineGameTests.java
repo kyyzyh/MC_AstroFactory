@@ -95,13 +95,13 @@ public class ElectricMachineGameTests {
         MinerBlockEntity miner = helper.getBlockEntity(minerPos);
         miner.setPowerMode(PoweredBlockEntity.PowerMode.ELECTRIC);
         // 只给不够一个 tick 的电
-        miner.getEnergyBuffer().receiveEnergy(Math.max(0, MinerBlockEntity.fePerTick() - 1), false);
+        miner.getEnergyBuffer().receiveEnergy(Math.max(0, MinerBlockEntity.configFePerTick() - 1), false);
 
         helper.runAfterDelay(80, () -> {
             helper.assertTrue(miner.getProgress() == 0,
                     "电量不足时不应推进进度（" + miner.getProgress() + "）");
             helper.assertTrue(miner.getEnergyBuffer().getEnergyStored()
-                            < MinerBlockEntity.fePerTick(),
+                            < MinerBlockEntity.configFePerTick(),
                     "电量不足时不应被扣电");
             helper.succeed();
         });

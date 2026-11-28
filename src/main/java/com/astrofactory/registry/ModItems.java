@@ -29,6 +29,11 @@ public final class ModItems {
             ITEMS.register("miner", () -> new TechGatedBlockItem(
                     ModBlocks.MINER.get(), new Item.Properties(), TechNodes.MINING));
 
+    /** 二型采矿机（v0.8.9）：4×4 区域采集，需「二型采矿机」科技。 */
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> MINER_MK2 =
+            ITEMS.register("miner_mk2", () -> new TechGatedBlockItem(
+                    ModBlocks.MINER_MK2.get(), new Item.Properties(), TechNodes.MINER_MK2));
+
     public static final DeferredItem<net.minecraft.world.item.BlockItem> SMELTER =
             ITEMS.register("smelter", () -> new TechGatedBlockItem(
                     ModBlocks.SMELTER.get(), new Item.Properties(), TechNodes.SMELTING));
@@ -161,6 +166,12 @@ public final class ModItems {
     /** 红瓶（红色科技瓶）：齿轮 + 铜板组装，供实验室消费（US-106）。 */
     public static final DeferredItem<Item> RED_SCIENCE_PACK =
             ITEMS.register("red_science_pack", () -> new Item(new Item.Properties()));
+
+    // -------- v0.8.9 石矿：不可放置，采石矿脉获得，熔炉加工成石头 --------
+
+    /** 石矿：从石矿脉采得，不能作为方块放置；熔炉烧成 {@code minecraft:stone} 供产线用（异星工厂石头矿石→石料）。 */
+    public static final DeferredItem<Item> RAW_STONE =
+            ITEMS.register("raw_stone", () -> new Item(new Item.Properties()));
 
     private ModItems() {}
 }

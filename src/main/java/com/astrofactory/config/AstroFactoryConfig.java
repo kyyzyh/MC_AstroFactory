@@ -71,6 +71,26 @@ public final class AstroFactoryConfig {
     public static final ModConfigSpec.IntValue MINER_CAPACITY;
     /** 电力采矿机最大充能速度（FE/t）。 */
     public static final ModConfigSpec.IntValue MINER_MAX_RECEIVE;
+    /** 一型采矿机（miner，3×3）区域采集边长。 */
+    public static final ModConfigSpec.IntValue MINER_AREA;
+
+    // ---------------------------------------------------------------- 二型采矿机（v0.8.9 miner_mk2，4×4）
+
+    /** 二型采矿机区域采集边长（4×4）。 */
+    public static final ModConfigSpec.IntValue MINER_MK2_AREA;
+    /** 二型采矿机每 tick 耗电（FE/t）。 */
+    public static final ModConfigSpec.IntValue MINER_MK2_FE_PER_TICK;
+    /** 二型采矿机产出一个物品所需 tick 数。 */
+    public static final ModConfigSpec.IntValue MINER_MK2_CYCLE_TICKS;
+    /** 二型采矿机内部电缓冲（FE）。 */
+    public static final ModConfigSpec.IntValue MINER_MK2_CAPACITY;
+    /** 二型采矿机最大充能速度（FE/t）。 */
+    public static final ModConfigSpec.IntValue MINER_MK2_MAX_RECEIVE;
+
+    // ---------------------------------------------------------------- 矿脉储量（v0.8.9 矿体）
+
+    /** 每个矿脉方块格的初始储量（单位：可采物品数）。 */
+    public static final ModConfigSpec.IntValue ORE_FIELD_RESERVE;
 
     // ---------------------------------------------------------------- 电力机械臂（US-103）
 
@@ -178,6 +198,35 @@ public final class AstroFactoryConfig {
         MINER_MAX_RECEIVE = builder
                 .comment("最大充能速度（FE/t），需 ≥ fePerTick 才能持续运转")
                 .defineInRange("maxReceive", 200, 1, 100_000);
+        MINER_AREA = builder
+                .comment("一型采矿机区域采集边长（格）。3 = 3×3 区域。蓝图基准 3")
+                .defineInRange("area", 3, 1, 9);
+        builder.pop();
+
+        builder.comment("二型采矿机（Miner Mk2）—— v0.8.9：4×4 区域采集，需「二型采矿机」科技")
+                .push("miner_mk2");
+        MINER_MK2_AREA = builder
+                .comment("区域采集边长（格）。4 = 4×4 区域。蓝图基准 4")
+                .defineInRange("area", 4, 1, 9);
+        MINER_MK2_FE_PER_TICK = builder
+                .comment("每 tick 耗电（FE/t）。蓝图基准 40（一型的 2 倍）")
+                .defineInRange("fePerTick", 40, 0, 10_000);
+        MINER_MK2_CYCLE_TICKS = builder
+                .comment("产出一个物品所需 tick 数。蓝图基准 15（快于一型）")
+                .defineInRange("cycleTicks", 15, 1, 20_000);
+        MINER_MK2_CAPACITY = builder
+                .comment("内部电缓冲（FE）。蓝图基准 20,000")
+                .defineInRange("capacity", 20_000, 100, 10_000_000);
+        MINER_MK2_MAX_RECEIVE = builder
+                .comment("最大充能速度（FE/t）。蓝图基准 400")
+                .defineInRange("maxReceive", 400, 1, 100_000);
+        builder.pop();
+
+        builder.comment("矿脉储量（Ore Field）—— v0.8.9 矿体：每个矿脉方块格的初始储量（可采物品数）")
+                .push("oreField");
+        ORE_FIELD_RESERVE = builder
+                .comment("每个矿脉方块格的初始储量（单位：可采物品数）。采空后该格塌陷为空气（矿洞）。蓝图基准 256")
+                .defineInRange("reserve", 256, 1, 1_000_000);
         builder.pop();
 
         builder.comment("电力机械臂（Electric Inserter）—— US-103：每 tick 扣电，断电时停在原处不丢物品")

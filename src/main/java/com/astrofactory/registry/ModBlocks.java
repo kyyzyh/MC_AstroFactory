@@ -53,6 +53,16 @@ public final class ModBlocks {
                     .sound(SoundType.METAL)
                     .noOcclusion());
 
+    /** 二型采矿机（v0.8.9）：4×4 区域采集。 */
+    public static final DeferredBlock<com.astrofactory.block.MinerMk2Block> MINER_MK2 = BLOCKS.registerBlock(
+            "miner_mk2",
+            com.astrofactory.block.MinerMk2Block::new,
+            BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.METAL)
+                    .strength(3.5F)
+                    .sound(SoundType.METAL)
+                    .noOcclusion());
+
     /** 自动熔炉。 */
     public static final DeferredBlock<SmelterBlock> SMELTER = BLOCKS.registerBlock(
             "smelter",

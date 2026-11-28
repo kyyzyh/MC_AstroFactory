@@ -55,7 +55,9 @@ public class SmelterBlockEntity extends PoweredBlockEntity implements IMachineIn
             Map.entry("minecraft:mutton", new ItemStack(Items.COOKED_MUTTON)),
             Map.entry("minecraft:cod", new ItemStack(Items.COOKED_COD)),
             Map.entry("minecraft:salmon", new ItemStack(Items.COOKED_SALMON)),
-            Map.entry("minecraft:kelp", new ItemStack(Items.DRIED_KELP))
+            Map.entry("minecraft:kelp", new ItemStack(Items.DRIED_KELP)),
+            // v0.8.9 石矿：采自石矿脉，熔炉烧成石头供产线用（异星工厂石头→石料）
+            Map.entry("astrofactory:raw_stone", new ItemStack(Items.STONE))
     );
 
     /**

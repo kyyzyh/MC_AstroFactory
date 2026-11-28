@@ -34,6 +34,9 @@ public final class TechNodes {
     /** 自动采矿：燃料采矿机。 */
     public static final String MINING = "mining";
 
+    /** 二型采矿机（v0.8.9）：4×4 区域采集，更高效。依赖自动采矿。 */
+    public static final String MINER_MK2 = "miner_mk2";
+
     /** 自动冶炼：燃料熔炉。 */
     public static final String SMELTING = "smelting";
 
@@ -111,6 +114,9 @@ public final class TechNodes {
                 "tech.astrofactory.basic_automation", Era.MANUAL, PackTier.BASIC, 1, null, 0));
         register(new Node(MINING, 20, new String[]{BASIC_AUTOMATION},
                 "tech.astrofactory.mining", Era.FUEL, PackTier.BASIC, 1, null, 0));
+        // v0.8.9：二型采矿机（4×4 区域采集）
+        register(new Node(MINER_MK2, 60, new String[]{MINING},
+                "tech.astrofactory.miner_mk2", Era.FUEL, PackTier.BASIC, 1, null, 0));
         register(new Node(SMELTING, 30, new String[]{MINING},
                 "tech.astrofactory.smelting", Era.FUEL, PackTier.BASIC, 1, null, 0));
         // v0.6 触发型：做出 16 个铁锭自动解锁（对应异星工厂「50 铁板触发蒸汽动力」）

@@ -21,6 +21,8 @@ public final class ModRegistry {
         ModMenus.MENUS.register(modBus);
         // US-104：组装机自定义配方类型
         ModRecipes.register(modBus);
+        // v0.8.9：冰山矿体 Feature
+        ModFeatures.FEATURES.register(modBus);
 
         modBus.addListener(ModRegistry::registerCapabilities);
         modBus.addListener(ModRegistry::registerPayloads);

@@ -3,12 +3,14 @@ package com.astrofactory.gametest;
 import com.astrofactory.AstroFactory;
 import com.astrofactory.block.MinerBlock;
 import com.astrofactory.blockentity.MinerBlockEntity;
+import com.astrofactory.blockentity.OreFieldBlockEntity;
 import com.astrofactory.blockentity.PoweredBlockEntity;
 import com.astrofactory.registry.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
@@ -61,7 +63,7 @@ public class OreFieldGameTests {
     /** 每种矿脉产出对应物品（异星工厂风格：矿脉类型决定采出物）。 */
     @GameTest(template = "pole_flat", timeoutTicks = 100)
     public static void eachFieldTypeProducesCorrectOre(GameTestHelper helper) {
-        assertProduct(helper, ModBlocks.ORE_FIELD_STONE, Items.STONE);
+        assertProduct(helper, ModBlocks.ORE_FIELD_STONE, com.astrofactory.registry.ModItems.RAW_STONE.get());
         assertProduct(helper, ModBlocks.ORE_FIELD_COPPER, Items.RAW_COPPER);
         assertProduct(helper, ModBlocks.ORE_FIELD_IRON, Items.RAW_IRON);
         assertProduct(helper, ModBlocks.ORE_FIELD_COAL, Items.COAL);
@@ -132,12 +134,52 @@ public class OreFieldGameTests {
         });
     }
 
+    /** 矿脉格储量扣空后，非支撑格塌陷为空气（矿洞）。 */
+    @GameTest(template = "pole_flat", timeoutTicks = 300)
+    public static void fieldCollapsesWhenReserveDepleted(GameTestHelper helper) {
+        BlockPos cellPos = new BlockPos(12, 1, 12);
+        helper.setBlock(cellPos, ModBlocks.ORE_FIELD_IRON.get());
+        OreFieldBlockEntity field = helper.getBlockEntity(cellPos);
+        field.setReserve(2); // 小储量便于测试
+
+        // 手动扣空并触发 serverTick 塌陷
+        field.tryConsume(2);
+        helper.runAfterDelay(40, () -> {
+            helper.assertTrue(helper.getBlockState(cellPos).isAir(),
+                    "储量扣空的矿脉格应塌陷为空气，实际 "
+                            + helper.getBlockState(cellPos).getBlock());
+            helper.succeed();
+        });
+    }
+
+    /** 区块中一个矿脉格被采空塌陷，不影响相邻格。 */
+    @GameTest(template = "pole_flat", timeoutTicks = 300)
+    public static void collapseOnlyAffectsExhaustedCell(GameTestHelper helper) {
+        BlockPos cellA = new BlockPos(12, 1, 11);
+        BlockPos cellB = new BlockPos(12, 1, 13);
+        helper.setBlock(cellA, ModBlocks.ORE_FIELD_IRON.get());
+        helper.setBlock(cellB, ModBlocks.ORE_FIELD_IRON.get());
+        OreFieldBlockEntity a = helper.getBlockEntity(cellA);
+        OreFieldBlockEntity b = helper.getBlockEntity(cellB);
+        a.setReserve(1);
+        b.setReserve(10);
+        a.tryConsume(1);
+
+        helper.runAfterDelay(40, () -> {
+            helper.assertTrue(helper.getBlockState(cellA).isAir(),
+                    "耗尽的矿脉格应塌陷");
+            helper.assertFalse(helper.getBlockState(cellB).isAir(),
+                    "未耗尽的矿脉格不应塌陷");
+            helper.succeed();
+        });
+    }
+
     /** 多次注入直到能量缓冲接近满（受 maxReceive 单次上限逐次累加）。 */
     private static void fillEnergy(GameTestHelper helper, MinerBlockEntity miner) {
-        int goal = MinerBlockEntity.energyCapacity();
+        int goal = MinerBlockEntity.configEnergyCapacity();
         for (int i = 0; i < 200 && miner.getEnergyBuffer().getEnergyStored() < goal; i++) {
             miner.getEnergyBuffer().receiveEnergy(
-                    MinerBlockEntity.energyCapacity(), false);
+                    MinerBlockEntity.configEnergyCapacity(), false);
         }
     }
 

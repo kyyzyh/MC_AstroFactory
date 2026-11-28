@@ -27,6 +27,7 @@ public final class ModCreativeTabs {
                         output.accept(ModBlocks.CONVEYOR.get());
                         output.accept(ModBlocks.INSERTER.get());
                         output.accept(ModBlocks.MINER.get());
+                        output.accept(ModBlocks.MINER_MK2.get());
                         output.accept(ModBlocks.SMELTER.get());
                         output.accept(ModBlocks.CRATE.get());
                         output.accept(ModBlocks.GENERATOR.get());
@@ -46,6 +47,7 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.IRON_GEAR.get());
                         output.accept(ModItems.COPPER_WIRE.get());
                         output.accept(ModItems.RED_SCIENCE_PACK.get());
+                        output.accept(ModItems.RAW_STONE.get());
                         output.accept(ModBlocks.ASSEMBLER.get());
                         // US-106：实验室
                         output.accept(ModBlocks.LAB.get());

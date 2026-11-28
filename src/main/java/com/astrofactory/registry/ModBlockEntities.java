@@ -25,6 +25,12 @@ public final class ModBlockEntities {
                     .of(MinerBlockEntity::new, ModBlocks.MINER.get())
                     .build(null));
 
+    // v0.8.9：二型采矿机（4×4 区域采集，独立 BE 类型）
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<com.astrofactory.blockentity.MinerMk2BlockEntity>> MINER_MK2 =
+            BLOCK_ENTITIES.register("miner_mk2", () -> BlockEntityType.Builder
+                    .of(com.astrofactory.blockentity.MinerMk2BlockEntity::new, ModBlocks.MINER_MK2.get())
+                    .build(null));
+
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<InserterBlockEntity>> INSERTER =
             BLOCK_ENTITIES.register("inserter", () -> BlockEntityType.Builder
                     .of(InserterBlockEntity::new, ModBlocks.INSERTER.get())
@@ -90,6 +96,17 @@ public final class ModBlockEntities {
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<com.astrofactory.blockentity.LabBlockEntity>> LAB =
             BLOCK_ENTITIES.register("lab", () -> BlockEntityType.Builder
                     .of(com.astrofactory.blockentity.LabBlockEntity::new, ModBlocks.LAB.get())
+                    .build(null));
+
+    // ------------------------------------------------------------ v0.8.9 矿体：矿脉储量 BE（四种矿脉共用）
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<com.astrofactory.blockentity.OreFieldBlockEntity>> ORE_FIELD =
+            BLOCK_ENTITIES.register("ore_field", () -> BlockEntityType.Builder
+                    .of(com.astrofactory.blockentity.OreFieldBlockEntity::new,
+                            ModBlocks.ORE_FIELD_STONE.get(),
+                            ModBlocks.ORE_FIELD_COPPER.get(),
+                            ModBlocks.ORE_FIELD_IRON.get(),
+                            ModBlocks.ORE_FIELD_COAL.get())
                     .build(null));
 
     private ModBlockEntities() {}

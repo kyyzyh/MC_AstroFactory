@@ -3,15 +3,39 @@
   "textures": {
     "particle": "astrofactory:block/steam_engine_side",
     "side": "astrofactory:block/steam_engine_side",
-    "top": "astrofactory:block/steam_engine_top"
+    "top": "astrofactory:block/steam_engine_top",
+    "metal": "minecraft:block/iron_block"
   },
   "elements": [
     {
       "from": [0, 0, 0],
-      "to": [16, 12, 16],
+      "to": [16, 4, 16],
       "faces": {
         "up": { "texture": "#top" },
         "down": { "texture": "#side" },
+        "north": { "texture": "#side" },
+        "south": { "texture": "#side" },
+        "west": { "texture": "#side" },
+        "east": { "texture": "#side" }
+      }
+    },
+    {
+      "from": [1, 4, 1],
+      "to": [15, 12, 15],
+      "faces": {
+        "up": { "texture": "#top" },
+        "north": { "texture": "#side" },
+        "south": { "texture": "#side" },
+        "west": { "texture": "#side" },
+        "east": { "texture": "#side" }
+      }
+    },
+    {
+      "from": [0, 12, 0],
+      "to": [16, 13, 16],
+      "faces": {
+        "up": { "texture": "#metal" },
+        "down": { "texture": "#top" },
         "north": { "texture": "#side" },
         "south": { "texture": "#side" },
         "west": { "texture": "#side" },

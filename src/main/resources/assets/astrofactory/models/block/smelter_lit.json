@@ -4,39 +4,53 @@
     "particle": "astrofactory:block/smelter_side",
     "side": "astrofactory:block/smelter_side",
     "top": "astrofactory:block/smelter_top",
-    "front": "astrofactory:block/smelter_front_lit"
+    "front": "astrofactory:block/smelter_front_lit",
+    "glow": "minecraft:block/redstone_lamp_on"
   },
   "elements": [
     {
-      "from": [
-        0,
-        0,
-        0
-      ],
-      "to": [
-        16,
-        16,
-        16
-      ],
+      "from": [0, 0, 0],
+      "to": [16, 3, 16],
       "faces": {
-        "up": {
-          "texture": "#top"
-        },
-        "down": {
-          "texture": "#side"
-        },
-        "north": {
-          "texture": "#front"
-        },
-        "south": {
-          "texture": "#side"
-        },
-        "west": {
-          "texture": "#side"
-        },
-        "east": {
-          "texture": "#side"
-        }
+        "up": { "texture": "#top" },
+        "down": { "texture": "#side" },
+        "north": { "texture": "#front" },
+        "south": { "texture": "#side" },
+        "west": { "texture": "#side" },
+        "east": { "texture": "#side" }
+      }
+    },
+    {
+      "from": [0, 3, 0],
+      "to": [16, 15, 16],
+      "faces": {
+        "up": { "texture": "#top" },
+        "north": { "texture": "#front" },
+        "south": { "texture": "#side" },
+        "west": { "texture": "#side" },
+        "east": { "texture": "#side" }
+      }
+    },
+    {
+      "from": [6, 15, 6],
+      "to": [10, 18, 10],
+      "faces": {
+        "up": { "texture": "#top" },
+        "north": { "texture": "#side" },
+        "south": { "texture": "#side" },
+        "west": { "texture": "#side" },
+        "east": { "texture": "#side" }
+      }
+    },
+    {
+      "from": [7, 5, 7],
+      "to": [9, 13, 9],
+      "faces": {
+        "up": { "texture": "#glow" },
+        "north": { "texture": "#glow" },
+        "south": { "texture": "#glow" },
+        "west": { "texture": "#glow" },
+        "east": { "texture": "#glow" }
       }
     }
   ]

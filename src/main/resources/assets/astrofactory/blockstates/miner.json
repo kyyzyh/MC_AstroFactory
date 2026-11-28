@@ -1,20 +1,12 @@
 {
   "variants": {
-    "facing=north": {
-      "model": "astrofactory:block/miner",
-      "y": 0
-    },
-    "facing=east": {
-      "model": "astrofactory:block/miner",
-      "y": 90
-    },
-    "facing=south": {
-      "model": "astrofactory:block/miner",
-      "y": 180
-    },
-    "facing=west": {
-      "model": "astrofactory:block/miner",
-      "y": 270
-    }
+    "facing=north,lit=false": { "model": "astrofactory:block/miner", "y": 0 },
+    "facing=north,lit=true":  { "model": "astrofactory:block/miner_lit", "y": 0 },
+    "facing=east,lit=false":  { "model": "astrofactory:block/miner", "y": 90 },
+    "facing=east,lit=true":   { "model": "astrofactory:block/miner_lit", "y": 90 },
+    "facing=south,lit=false": { "model": "astrofactory:block/miner", "y": 180 },
+    "facing=south,lit=true":  { "model": "astrofactory:block/miner_lit", "y": 180 },
+    "facing=west,lit=false":  { "model": "astrofactory:block/miner", "y": 270 },
+    "facing=west,lit=true":   { "model": "astrofactory:block/miner_lit", "y": 270 }
   }
 }

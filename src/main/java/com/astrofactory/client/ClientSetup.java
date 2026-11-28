@@ -38,6 +38,34 @@ public final class ClientSetup {
         event.registerBlockEntityRenderer(
                 com.astrofactory.registry.ModBlockEntities.POWER_POLE.get(),
                 ctx -> new PowerPoleRenderer());
+        // 全机器工作动效（活动部件动画）——统一渲染器
+        event.registerBlockEntityRenderer(
+                com.astrofactory.registry.ModBlockEntities.MINER.get(),
+                ctx -> new MachineAnimationRenderer<com.astrofactory.blockentity.MinerBlockEntity>());
+        event.registerBlockEntityRenderer(
+                com.astrofactory.registry.ModBlockEntities.INSERTER.get(),
+                ctx -> new MachineAnimationRenderer<com.astrofactory.blockentity.InserterBlockEntity>());
+        event.registerBlockEntityRenderer(
+                com.astrofactory.registry.ModBlockEntities.SMELTER.get(),
+                ctx -> new MachineAnimationRenderer<com.astrofactory.blockentity.SmelterBlockEntity>());
+        event.registerBlockEntityRenderer(
+                com.astrofactory.registry.ModBlockEntities.GENERATOR.get(),
+                ctx -> new MachineAnimationRenderer<com.astrofactory.blockentity.GeneratorBlockEntity>());
+        event.registerBlockEntityRenderer(
+                com.astrofactory.registry.ModBlockEntities.BOILER.get(),
+                ctx -> new MachineAnimationRenderer<com.astrofactory.blockentity.BoilerBlockEntity>());
+        event.registerBlockEntityRenderer(
+                com.astrofactory.registry.ModBlockEntities.STEAM_ENGINE.get(),
+                ctx -> new MachineAnimationRenderer<com.astrofactory.blockentity.SteamEngineBlockEntity>());
+        event.registerBlockEntityRenderer(
+                com.astrofactory.registry.ModBlockEntities.WATER_PUMP.get(),
+                ctx -> new MachineAnimationRenderer<com.astrofactory.blockentity.WaterPumpBlockEntity>());
+        event.registerBlockEntityRenderer(
+                com.astrofactory.registry.ModBlockEntities.ASSEMBLER.get(),
+                ctx -> new MachineAnimationRenderer<com.astrofactory.blockentity.AssemblerBlockEntity>());
+        event.registerBlockEntityRenderer(
+                com.astrofactory.registry.ModBlockEntities.LAB.get(),
+                ctx -> new MachineAnimationRenderer<com.astrofactory.blockentity.LabBlockEntity>());
     }
 
     /**

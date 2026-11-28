@@ -78,11 +78,13 @@ public class MinerBlockEntity extends PoweredBlockEntity {
         if (getPowerMode() == PowerMode.FUEL) {
             tickFuel();
             if (!isBurning()) {
-                return; // 无燃料停工，进度保留
+                setLit(false); // 无燃料停工
+                return;
             }
         } else {
             // 电力模式（US-103）：每 tick 扣电；没电就暂停，进度不清零
             if (!tickElectric(fePerTick())) {
+                setLit(false); // 断电停工
                 return;
             }
         }
@@ -90,9 +92,12 @@ public class MinerBlockEntity extends PoweredBlockEntity {
         // 先算产物：下方没矿就不推进进度（避免空转白耗电）
         ItemStack product = rollProduct(serverLevel);
         if (product.isEmpty()) {
+            setLit(false); // 下方无矿可采
             return;
         }
 
+        // 通电/有燃料且下方有矿 → 正在下钻
+        setLit(true);
         this.progress++;
         if (this.progress < techTicks(effectiveTicks(cycleTicks()))) {
             return;
@@ -199,6 +204,16 @@ public class MinerBlockEntity extends PoweredBlockEntity {
     /** 当前采矿进度（tick）。断电时应保持不变（US-103 验收断言用）。 */
     public int getProgress() {
         return this.progress;
+    }
+
+    /** 更新方块 LIT 状态（驱动下钻动画的开关）。 */
+    private void setLit(boolean lit) {
+        BlockState state = getBlockState();
+        if (state.hasProperty(com.astrofactory.block.MinerBlock.LIT)
+                && state.getValue(com.astrofactory.block.MinerBlock.LIT) != lit) {
+            this.level.setBlock(this.worldPosition,
+                    state.setValue(com.astrofactory.block.MinerBlock.LIT, lit), 3);
+        }
     }
 
     /** 一个产出周期需要多少 tick（含科技加成）。 */

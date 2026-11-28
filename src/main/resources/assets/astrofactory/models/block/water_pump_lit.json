@@ -1,0 +1,58 @@
+{
+  "parent": "block/block",
+  "textures": {
+    "particle": "astrofactory:block/water_pump_side",
+    "side": "astrofactory:block/water_pump_side",
+    "top": "astrofactory:block/water_pump_top",
+    "metal": "minecraft:block/iron_block",
+    "lamp": "minecraft:block/redstone_lamp_on"
+  },
+  "elements": [
+    {
+      "from": [2, 0, 2],
+      "to": [14, 1, 14],
+      "faces": {
+        "up": { "texture": "#top" },
+        "down": { "texture": "#side" },
+        "north": { "texture": "#side" },
+        "south": { "texture": "#side" },
+        "west": { "texture": "#side" },
+        "east": { "texture": "#side" }
+      }
+    },
+    {
+      "from": [5, 1, 5],
+      "to": [11, 10, 11],
+      "faces": {
+        "up": { "texture": "#top" },
+        "north": { "texture": "#side" },
+        "south": { "texture": "#side" },
+        "west": { "texture": "#side" },
+        "east": { "texture": "#side" }
+      }
+    },
+    {
+      "from": [2, 1, 2],
+      "to": [14, 2, 14],
+      "faces": {
+        "up": { "texture": "#metal" },
+        "down": { "texture": "#top" },
+        "north": { "texture": "#side" },
+        "south": { "texture": "#side" },
+        "west": { "texture": "#side" },
+        "east": { "texture": "#side" }
+      }
+    },
+    {
+      "from": [2, 6, 2],
+      "to": [3, 7, 3],
+      "faces": {
+        "up": { "texture": "#lamp" },
+        "north": { "texture": "#lamp" },
+        "south": { "texture": "#lamp" },
+        "east": { "texture": "#lamp" },
+        "west": { "texture": "#lamp" }
+      }
+    }
+  ]
+}

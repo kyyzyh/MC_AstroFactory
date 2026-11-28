@@ -51,9 +51,14 @@ public class WaterPumpBlockEntity extends FactoryBlockEntity {
 
     @Override
     public void serverTick() {
+        boolean hadWater = this.water > 0;
+
         // 1) 邻水则产水
         if (this.water < WATER_CAPACITY && nearWater()) {
+            setLit(true); // 邻水抽水 → 活塞上下抽动
             this.water = Math.min(WATER_CAPACITY, this.water + WATER_PER_TICK);
+        } else if (!hadWater) {
+            setLit(false); // 不邻水且无存水 → 停转
         }
 
         // 2) 推送给相邻锅炉
@@ -67,6 +72,19 @@ public class WaterPumpBlockEntity extends FactoryBlockEntity {
                     this.water = boiler.receiveWater(this.water);
                 }
             }
+        }
+    }
+
+    /** 更新方块 LIT 状态（驱动抽水活塞动画的开关）。 */
+    private void setLit(boolean lit) {
+        if (this.level == null) {
+            return;
+        }
+        BlockState state = this.level.getBlockState(this.worldPosition);
+        if (state.hasProperty(com.astrofactory.block.WaterPumpBlock.LIT)
+                && state.getValue(com.astrofactory.block.WaterPumpBlock.LIT) != lit) {
+            this.level.setBlock(this.worldPosition,
+                    state.setValue(com.astrofactory.block.WaterPumpBlock.LIT, lit), 3);
         }
     }
 

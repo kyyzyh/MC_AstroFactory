@@ -4,12 +4,14 @@
     "particle": "astrofactory:block/boiler_side",
     "side": "astrofactory:block/boiler_side",
     "top": "astrofactory:block/boiler_top",
-    "front": "astrofactory:block/boiler_front_lit"
+    "front": "astrofactory:block/boiler_front_lit",
+    "metal": "minecraft:block/iron_block",
+    "lamp": "minecraft:block/redstone_lamp_on"
   },
   "elements": [
     {
       "from": [0, 0, 0],
-      "to": [16, 16, 16],
+      "to": [16, 2, 16],
       "faces": {
         "up": { "texture": "#top" },
         "down": { "texture": "#side" },
@@ -17,6 +19,49 @@
         "south": { "texture": "#side" },
         "west": { "texture": "#side" },
         "east": { "texture": "#side" }
+      }
+    },
+    {
+      "from": [1, 2, 1],
+      "to": [15, 15, 15],
+      "faces": {
+        "up": { "texture": "#metal" },
+        "north": { "texture": "#front" },
+        "south": { "texture": "#side" },
+        "west": { "texture": "#side" },
+        "east": { "texture": "#side" }
+      }
+    },
+    {
+      "from": [2, 15, 2],
+      "to": [14, 18, 14],
+      "faces": {
+        "up": { "texture": "#metal" },
+        "north": { "texture": "#side" },
+        "south": { "texture": "#side" },
+        "west": { "texture": "#side" },
+        "east": { "texture": "#side" }
+      }
+    },
+    {
+      "from": [0, 2, 15],
+      "to": [16, 4, 16],
+      "faces": {
+        "north": { "texture": "#front" },
+        "south": { "texture": "#side" },
+        "east": { "texture": "#side" },
+        "west": { "texture": "#side" }
+      }
+    },
+    {
+      "from": [6, 10, 6],
+      "to": [10, 13, 10],
+      "faces": {
+        "up": { "texture": "#lamp" },
+        "north": { "texture": "#lamp" },
+        "south": { "texture": "#lamp" },
+        "east": { "texture": "#lamp" },
+        "west": { "texture": "#lamp" }
       }
     }
   ]

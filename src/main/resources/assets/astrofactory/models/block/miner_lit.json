@@ -1,0 +1,97 @@
+{
+  "parent": "block/block",
+  "textures": {
+    "particle": "astrofactory:block/miner_side",
+    "side": "astrofactory:block/miner_side",
+    "top": "astrofactory:block/miner_top",
+    "front": "astrofactory:block/miner_front",
+    "lamp": "minecraft:block/redstone_lamp_on"
+  },
+  "elements": [
+    {
+      "from": [0, 0, 0],
+      "to": [16, 2, 16],
+      "faces": {
+        "up": { "texture": "#top" },
+        "down": { "texture": "#side" },
+        "north": { "texture": "#front" },
+        "south": { "texture": "#side" },
+        "west": { "texture": "#side" },
+        "east": { "texture": "#side" }
+      }
+    },
+    {
+      "from": [0, 10, 0],
+      "to": [16, 12, 16],
+      "faces": {
+        "up": { "texture": "#top" },
+        "down": { "texture": "#side" },
+        "north": { "texture": "#front" },
+        "south": { "texture": "#side" },
+        "west": { "texture": "#side" },
+        "east": { "texture": "#side" }
+      }
+    },
+    {
+      "from": [0, 2, 13],
+      "to": [16, 10, 16],
+      "faces": {
+        "north": { "texture": "#side" },
+        "south": { "texture": "#side" },
+        "east": { "texture": "#side" },
+        "west": { "texture": "#side" }
+      }
+    },
+    {
+      "from": [0, 2, 0],
+      "to": [3, 10, 13],
+      "faces": {
+        "north": { "texture": "#front" },
+        "south": { "texture": "#side" },
+        "east": { "texture": "#side" },
+        "west": { "texture": "#side" }
+      }
+    },
+    {
+      "from": [13, 2, 0],
+      "to": [16, 10, 13],
+      "faces": {
+        "north": { "texture": "#front" },
+        "south": { "texture": "#side" },
+        "east": { "texture": "#side" },
+        "west": { "texture": "#side" }
+      }
+    },
+    {
+      "from": [4, 12, 4],
+      "to": [12, 15, 12],
+      "faces": {
+        "up": { "texture": "#top" },
+        "north": { "texture": "#side" },
+        "south": { "texture": "#side" },
+        "east": { "texture": "#side" },
+        "west": { "texture": "#side" }
+      }
+    },
+    {
+      "from": [3, 2, 0],
+      "to": [13, 4, 2],
+      "faces": {
+        "up": { "texture": "#top" },
+        "north": { "texture": "#front" },
+        "south": { "texture": "#side" }
+      }
+    },
+    {
+      "from": [6, 9, 6],
+      "to": [10, 12, 10],
+      "faces": {
+        "up": { "texture": "#lamp" },
+        "north": { "texture": "#lamp" },
+        "south": { "texture": "#lamp" },
+        "east": { "texture": "#lamp" },
+        "west": { "texture": "#lamp" }
+      }
+    }
+  ]
+}

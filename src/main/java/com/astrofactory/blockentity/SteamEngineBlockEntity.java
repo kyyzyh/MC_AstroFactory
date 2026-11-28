@@ -115,7 +115,18 @@ public class SteamEngineBlockEntity extends FactoryBlockEntity
     @Override
     public void serverTick() {
         // 蒸汽机本身不主动发电：能量在 receiveSteam 时已转化。
-        // 这里留空保持 tick 调度结构一致（电缆按需抽取）。
+        // 有储能 = 收到过蒸汽正在运转 → 驱动飞轮/活塞动画。
+        setLit(getEnergyStored() > 0);
+    }
+
+    /** 更新方块 LIT 状态（驱动飞轮/活塞动画的开关）。 */
+    private void setLit(boolean lit) {
+        BlockState state = getBlockState();
+        if (state.hasProperty(com.astrofactory.block.SteamEngineBlock.LIT)
+                && state.getValue(com.astrofactory.block.SteamEngineBlock.LIT) != lit) {
+            this.level.setBlock(this.worldPosition,
+                    state.setValue(com.astrofactory.block.SteamEngineBlock.LIT, lit), 3);
+        }
     }
 
     /** 只出不进的储能：蒸汽机不接收外部能量，但允许蒸汽转化写入。 */

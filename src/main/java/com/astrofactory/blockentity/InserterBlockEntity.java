@@ -74,17 +74,20 @@ public class InserterBlockEntity extends PoweredBlockEntity {
         if (getPowerMode() == PowerMode.FUEL) {
             tickFuel();
             if (!isBurning()) {
+                setLit(false); // 无燃料停工
                 return;
             }
         } else {
             // 电力模式：每 tick 扣电，没电立刻停
             if (!tickElectric(fePerTick())) {
+                setLit(false); // 断电停工
                 return;
             }
         }
 
         if (this.cooldown > 0) {
             this.cooldown--;
+            setLit(true); // 冷却推进中可视作「正在摆臂」
             return;
         }
 
@@ -99,6 +102,7 @@ public class InserterBlockEntity extends PoweredBlockEntity {
             picked = pickupFromConveyor(serverLevel, sourcePos);
         }
         if (picked.isEmpty()) {
+            setLit(false); // 无料可取
             return;
         }
 
@@ -116,6 +120,7 @@ public class InserterBlockEntity extends PoweredBlockEntity {
         }
 
         this.cooldown = techTicks(effectiveTicks(cycleTicks()));
+        setLit(true); // 完成一次搬运，进入摆臂冷却
         serverLevel.playSound(null, this.worldPosition, SoundEvents.PISTON_EXTEND,
                 SoundSource.BLOCKS, 0.3F, 1.4F);
     }
@@ -188,6 +193,16 @@ public class InserterBlockEntity extends PoweredBlockEntity {
                 this.worldPosition.getZ() + 0.5D,
                 stack);
         level.addFreshEntity(entity);
+    }
+
+    /** 更新方块 LIT 状态（驱动摆臂动画的开关）。 */
+    private void setLit(boolean lit) {
+        BlockState state = getBlockState();
+        if (state.hasProperty(com.astrofactory.block.InserterBlock.LIT)
+                && state.getValue(com.astrofactory.block.InserterBlock.LIT) != lit) {
+            this.level.setBlock(this.worldPosition,
+                    state.setValue(com.astrofactory.block.InserterBlock.LIT, lit), 3);
+        }
     }
 
     /** 当前搬运冷却剩余（tick）。断电时应保持不变（US-103 验收断言用）。 */

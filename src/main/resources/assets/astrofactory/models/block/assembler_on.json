@@ -4,12 +4,13 @@
     "particle": "astrofactory:block/assembler_side",
     "side": "astrofactory:block/assembler_side",
     "top": "astrofactory:block/assembler_top",
-    "front": "astrofactory:block/assembler_front_lit"
+    "front": "astrofactory:block/assembler_front_lit",
+    "glow": "minecraft:block/redstone_lamp_on"
   },
   "elements": [
     {
       "from": [0, 0, 0],
-      "to": [16, 16, 16],
+      "to": [16, 2, 16],
       "faces": {
         "up": { "texture": "#top" },
         "down": { "texture": "#side" },
@@ -17,6 +18,39 @@
         "south": { "texture": "#side" },
         "west": { "texture": "#side" },
         "east": { "texture": "#side" }
+      }
+    },
+    {
+      "from": [1, 2, 1],
+      "to": [15, 14, 15],
+      "faces": {
+        "up": { "texture": "#top" },
+        "north": { "texture": "#front" },
+        "south": { "texture": "#side" },
+        "west": { "texture": "#side" },
+        "east": { "texture": "#side" }
+      }
+    },
+    {
+      "from": [3, 14, 3],
+      "to": [13, 16, 13],
+      "faces": {
+        "up": { "texture": "#top" },
+        "north": { "texture": "#side" },
+        "south": { "texture": "#side" },
+        "west": { "texture": "#side" },
+        "east": { "texture": "#side" }
+      }
+    },
+    {
+      "from": [6, 10, 6],
+      "to": [10, 13, 10],
+      "faces": {
+        "up": { "texture": "#glow" },
+        "north": { "texture": "#glow" },
+        "south": { "texture": "#glow" },
+        "west": { "texture": "#glow" },
+        "east": { "texture": "#glow" }
       }
     }
   ]
